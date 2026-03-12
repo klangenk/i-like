@@ -1,0 +1,105 @@
+{
+  "@@locale": "de",
+  "appTitle": "I Like",
+
+  "homeTitle": "I Like",
+  "searchTitle": "Suche",
+  "settingsTitle": "Einstellungen",
+  "detailsTitle": "Details",
+  "addRatingTitle": "Bewertung hinzufügen",
+  "scanBarcodeTitle": "Barcode scannen",
+
+  "homeTab": "Start",
+  "searchTab": "Suche",
+
+  "noRatingsYet": "Noch keine Bewertungen",
+  "tapToRate": "Tippe auf + um etwas zu bewerten!",
+  "noResults": "Keine Ergebnisse",
+  "tryDifferentSearch": "Versuche einen anderen Suchbegriff",
+
+  "stars": "Sterne",
+  "rating": "Bewertung",
+  "tags": "Tags",
+  "notes": "Notizen",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "add": "Hinzufügen",
+
+  "titleRequired": "Titel *",
+  "titleHint": "Was möchtest du bewerten?",
+  "notesHint": "Deine Gedanken...",
+  "addTagHint": "Tag hinzufügen...",
+  "searchHint": "Bewertungen durchsuchen...",
+  "searchEllipsis": "Suchen...",
+
+  "pleaseEnterTitle": "Bitte gib einen Titel ein",
+  "pleaseGiveRating": "Bitte vergib eine Bewertung",
+
+  "quickAdd": "Schnell hinzufügen (Scan, URL, ...)",
+  "howToAdd": "Wie möchtest du hinzufügen?",
+
+  "scanBarcode": "Barcode scannen",
+  "scanBarcodeSubtitle": "Produkt- oder Buch-Barcode scannen",
+  "fromUrl": "Von URL",
+  "fromUrlSubtitle": "Link einfügen für automatische Details",
+  "searchMovieSeries": "Film / Serie suchen",
+  "searchMovieSeriesSubtitle": "TMDB nach Filmen & Serien durchsuchen",
+  "searchPlace": "Ort suchen",
+  "searchPlaceSubtitle": "Einen Ort über OpenStreetMap finden",
+  "searchBook": "Buch suchen",
+  "searchBookSubtitle": "Open Library nach Büchern durchsuchen",
+  "manualEntry": "Manuell eingeben",
+  "manualEntrySubtitle": "Alle Details selbst eingeben",
+
+  "enterUrl": "URL eingeben",
+  "pointCameraAtBarcode": "Kamera auf einen Barcode richten",
+
+  "deleteRating": "Bewertung löschen",
+  "deleteConfirm": "Möchtest du diese Bewertung wirklich löschen?",
+  "deleteItemConfirm": "\u201E{title}\u201C löschen?",
+
+  "saveChanges": "Änderungen speichern",
+  "scoreDisplay": "{score} / 5",
+
+  "barcode": "Barcode: {code}",
+  "created": "Erstellt: {date}",
+  "updated": "Aktualisiert: {date}",
+
+  "statistics": "Statistiken",
+  "totalRatings": "Bewertungen gesamt",
+  "averageScore": "Durchschnitt",
+
+  "searchMoviesAndSeries": "Filme & Serien suchen",
+  "searchPlaces": "Orte suchen",
+  "searchBooks": "Bücher suchen",
+
+  "tmdbTitle": "TMDB (Filme & Serien)",
+  "tmdbDescription": "Um nach Filmen und Serien zu suchen, benötigst du einen kostenlosen TMDB-API-Schlüssel. Registriere dich auf themoviedb.org und erstelle einen API-Schlüssel in deinen Kontoeinstellungen.",
+  "apiKeyConfigured": "API-Schlüssel konfiguriert",
+  "removeKey": "Entfernen",
+  "enterTmdbApiKey": "TMDB-API-Schlüssel eingeben",
+  "tmdbApiKeySaved": "TMDB-API-Schlüssel gespeichert",
+
+  "placesTitle": "Orte (Nominatim)",
+  "placesDescription": "Die Ortssuche nutzt den Nominatim-Dienst von OpenStreetMap. Kein API-Schlüssel erforderlich.",
+  "readyToUse": "Einsatzbereit",
+
+  "errorPrefix": "Fehler: {error}",
+
+  "movie": "Film",
+  "series": "Serie",
+
+  "tagProduct": "Produkt",
+  "tagBook": "Buch",
+  "tagMovie": "Film",
+  "tagSeries": "Serie",
+  "tagPlace": "Ort",
+  "tagUrl": "URL",
+  "tagFood": "Essen",
+  "tagMusic": "Musik",
+  "tagGame": "Spiel",
+  "tagApp": "App",
+  "tagMagazine": "Zeitschrift",
+  "tagOther": "Sonstiges"
+}
