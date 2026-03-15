@@ -98,6 +98,15 @@ class _QuickAddSheetContent extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.casino_outlined),
+              title: Text(l10n.searchBoardGame),
+              subtitle: Text(l10n.searchBoardGameSubtitle),
+              onTap: () {
+                Navigator.pop(context);
+                _showApiSearchDialog(parentContext, 'boardgame', '');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.edit),
               title: Text(l10n.manualEntry),
               subtitle: Text(l10n.manualEntrySubtitle),
@@ -117,6 +126,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
   final tags = tagsFromBarcode(barcode);
 
   if (barcode.startsWith('978') || barcode.startsWith('979')) {
+    // ISBN — look up as book
     final data = await ApiService.lookupIsbn(barcode);
     if (data != null) {
       final info = ApiService.extractBookInfo(data);
@@ -131,9 +141,36 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
       return;
     }
   } else {
+    // Try OpenFoodFacts first (food products)
     final data = await ApiService.lookupBarcode(barcode);
     if (data != null) {
       final info = ApiService.extractProductInfo(data);
+      if (context.mounted) {
+        context.push('/add', extra: PrefillData(
+          title: info.title,
+          imageUrl: info.imageUrl,
+          tags: info.tags,
+          barcode: barcode,
+        ));
+      }
+      return;
+    }
+
+    // Try general barcode lookup (UPC Item DB — covers board games, electronics, etc.)
+    final generalData = await ApiService.lookupBarcodeGeneral(barcode);
+    if (generalData != null && context.mounted) {
+      final info = ApiService.extractGeneralProductInfo(generalData);
+      // Always try BGG to get a better image and proper game tagging
+      final bggResult = await _tryBoardGameLookup(info.title);
+      if (bggResult != null && context.mounted) {
+        context.push('/add', extra: PrefillData(
+          title: bggResult.title,
+          imageUrl: bggResult.imageUrl,
+          tags: bggResult.tags,
+          barcode: barcode,
+        ));
+        return;
+      }
       if (context.mounted) {
         context.push('/add', extra: PrefillData(
           title: info.title,
@@ -148,6 +185,23 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
 
   if (context.mounted) {
     context.push('/add', extra: PrefillData(tags: tags, barcode: barcode));
+  }
+}
+
+/// Try to find a board game on Wikipedia by title and fetch its image
+Future<({String title, String imageUrl, List<String> tags})?> _tryBoardGameLookup(String title) async {
+  try {
+    final results = await ApiService.searchBoardGames(title);
+    if (results.isEmpty) return null;
+    final pageTitle = results.first['title'] as String? ?? '';
+    if (pageTitle.isEmpty) return null;
+    final details = await ApiService.getBoardGameDetails(pageTitle);
+    if (details == null) return null;
+    final info = ApiService.extractBoardGameInfo(details);
+    if (info.imageUrl.isEmpty) return null;
+    return info;
+  } catch (_) {
+    return null;
   }
 }
 
@@ -240,6 +294,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'tmdb' => l10n.searchMoviesAndSeries,
       'place' => l10n.searchPlaces,
       'book' => l10n.searchBooks,
+      'boardgame' => l10n.searchBoardGames,
       _ => l10n.searchTitle,
     };
   }
@@ -252,6 +307,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'tmdb' => await ApiService.searchTmdb(query, widget.tmdbApiKey),
       'place' => await ApiService.searchPlaces(query),
       'book' => await ApiService.searchBooks(query),
+      'boardgame' => await ApiService.searchBoardGames(query),
       _ => <Map<String, dynamic>>[],
     };
 
@@ -263,7 +319,22 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
     }
   }
 
-  void _selectResult(Map<String, dynamic> result) {
+  Future<void> _selectResult(Map<String, dynamic> result) async {
+    if (widget.type == 'boardgame') {
+      // Wikipedia search returns title, fetch details for image
+      Navigator.pop(context);
+      final pageTitle = result['title'] as String? ?? '';
+      if (pageTitle.isNotEmpty) {
+        final details = await ApiService.getBoardGameDetails(pageTitle);
+        if (details != null) {
+          widget.onSelected(ApiService.extractBoardGameInfo(details));
+          return;
+        }
+      }
+      widget.onSelected((title: pageTitle, imageUrl: '', tags: ['game']));
+      return;
+    }
+
     final info = switch (widget.type) {
       'tmdb' => ApiService.extractTmdbInfo(result),
       'place' => ApiService.extractPlaceInfo(result),
@@ -279,6 +350,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'tmdb' => (result['title'] ?? result['name'] ?? 'Unknown') as String,
       'place' => result['display_name'] as String? ?? 'Unknown',
       'book' => result['title'] as String? ?? 'Unknown',
+      'boardgame' => result['title'] as String? ?? 'Unknown',
       _ => 'Unknown',
     };
   }
@@ -295,6 +367,11 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       case 'book':
         final authors = result['author_name'] as List<dynamic>?;
         return authors?.join(', ');
+      case 'boardgame':
+        // Wikipedia search results have a snippet
+        final snippet = (result['snippet'] as String? ?? '')
+            .replaceAll(RegExp(r'<[^>]*>'), ''); // strip HTML
+        return snippet.isNotEmpty ? snippet : null;
       default:
         return null;
     }

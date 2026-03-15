@@ -69,39 +69,63 @@ class _ILikeAppState extends State<ILikeApp> {
     ReceiveSharingIntent.instance.reset();
 
     if (isValidUrl(text.trim())) {
-      // Pure URL — resolve shortened URLs and fetch metadata
-      final url = await resolveUrl(text.trim());
-      final metadata = await fetchUrlMetadata(url);
-      final title = cleanPageTitle(metadata.title ?? extractDomain(url) ?? url);
+      final rawUrl = text.trim();
+      // Navigate immediately with what we know
       _navigateToAdd(PrefillData(
-        title: title,
-        imageUrl: metadata.imageUrl ?? '',
-        sourceUrl: url,
-        tags: tagsFromUrl(url, title: metadata.title, description: metadata.description),
+        title: extractDomain(rawUrl) ?? rawUrl,
+        sourceUrl: rawUrl,
+        tags: ['url'],
       ));
+      // Fetch metadata in background and update the screen
+      _fetchAndUpdateMetadata(rawUrl);
     } else {
-      // Text that may contain a URL (e.g. Amazon, Netflix share text)
       final rawUrl = extractUrlFromText(text);
       if (rawUrl != null) {
-        // Resolve shortened URLs (amzn.eu, bit.ly, etc.) to get the real URL
-        final url = await resolveUrl(rawUrl);
-        final metadata = await fetchUrlMetadata(url);
-        final metaTitle = cleanPageTitle(metadata.title ?? '');
         final sharedTitle = extractTitleFromSharedText(text);
-        // Use shared text title as fallback when metadata is generic/empty
-        final title = _isMeaningfulTitle(metaTitle)
-            ? metaTitle
-            : sharedTitle ?? (metaTitle.isNotEmpty ? metaTitle : (extractDomain(url) ?? url));
+        // Navigate immediately with title from shared text
         _navigateToAdd(PrefillData(
-          title: title,
-          imageUrl: metadata.imageUrl ?? '',
-          sourceUrl: url,
-          tags: tagsFromUrl(url, title: metadata.title, description: metadata.description, sharedText: text),
+          title: sharedTitle ?? extractDomain(rawUrl) ?? rawUrl,
+          sourceUrl: rawUrl,
+          tags: tagsFromUrl(rawUrl),
         ));
+        // Fetch metadata in background and update the screen
+        _fetchAndUpdateMetadata(rawUrl, sharedText: text, sharedTitle: sharedTitle);
       } else {
         // Plain text with no URL — use as title
         _navigateToAdd(PrefillData(title: text));
       }
+    }
+  }
+
+  /// Fetch metadata asynchronously and update the add rating screen
+  Future<void> _fetchAndUpdateMetadata(String rawUrl, {String? sharedText, String? sharedTitle}) async {
+    final container = ProviderScope.containerOf(context);
+    final url = await resolveUrl(rawUrl);
+    final metadata = await fetchUrlMetadata(url);
+
+    if (!mounted) return;
+    final notifier = container.read(addRatingProvider.notifier);
+
+    // Update source URL to resolved URL
+    notifier.setSourceUrl(url);
+
+    // Update tags based on resolved URL
+    final tags = tagsFromUrl(url, title: metadata.title, description: metadata.description, sharedText: sharedText ?? '');
+    for (final tag in tags) {
+      notifier.addTag(tag);
+    }
+
+    // Update title if metadata has a better one
+    final metaTitle = cleanPageTitle(metadata.title ?? '');
+    if (_isMeaningfulTitle(metaTitle)) {
+      notifier.setTitle(metaTitle);
+    } else if (sharedTitle == null && metaTitle.isNotEmpty) {
+      notifier.setTitle(metaTitle);
+    }
+
+    // Update image
+    if (metadata.imageUrl != null && metadata.imageUrl!.isNotEmpty) {
+      notifier.setImageUrl(metadata.imageUrl!);
     }
   }
 
@@ -114,7 +138,6 @@ class _ILikeAppState extends State<ILikeApp> {
       'twitter', 'youtube', 'spotify', 'booking', 'airbnb', 'tripadvisor',
     ];
     for (final generic in genericTitles) {
-      // "Amazon.de", "eBay Kleinanzeigen" etc. are not meaningful
       if (lower.replaceAll(RegExp(r'[.\-\s].*'), '') == generic) return false;
     }
     return true;

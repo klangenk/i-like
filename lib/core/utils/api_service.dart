@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 class ApiService {
   static const _openLibraryBase = 'https://openlibrary.org';
   static const _openFoodFactsBase = 'https://world.openfoodfacts.org/api/v0';
@@ -222,5 +221,99 @@ out body;
   static String poiType(Map<String, dynamic> element) {
     final tags = element['tags'] as Map<String, dynamic>? ?? {};
     return (tags['amenity'] ?? tags['shop'] ?? tags['tourism'] ?? tags['leisure'] ?? '') as String;
+  }
+
+  // --- Board Games (via Wikipedia) ---
+
+  /// Search board games via Wikipedia
+  static Future<List<Map<String, dynamic>>> searchBoardGames(String query) async {
+    try {
+      // Search Wikipedia with "board game" or "card game" appended for better results
+      final searchQuery = '$query board game';
+      final response = await http.get(
+        Uri.parse(
+          'https://en.wikipedia.org/w/api.php?action=query&list=search'
+          '&srsearch=${Uri.encodeComponent(searchQuery)}'
+          '&format=json&srlimit=10',
+        ),
+        headers: {'User-Agent': 'ILikeApp/1.0'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final results = data['query']?['search'] as List<dynamic>? ?? [];
+        return results.cast<Map<String, dynamic>>();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Get board game image from Wikipedia by page title
+  static Future<Map<String, dynamic>?> getBoardGameDetails(String pageTitle) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://en.wikipedia.org/w/api.php?action=query'
+          '&titles=${Uri.encodeComponent(pageTitle)}'
+          '&prop=pageimages|extracts&pithumbsize=400&exintro=1&explaintext=1'
+          '&format=json',
+        ),
+        headers: {'User-Agent': 'ILikeApp/1.0'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final pages = data['query']?['pages'] as Map<String, dynamic>? ?? {};
+        for (final page in pages.values) {
+          final pageData = page as Map<String, dynamic>;
+          if (pageData.containsKey('missing')) continue;
+          final name = pageData['title'] as String? ?? '';
+          final thumbnail = pageData['thumbnail'] as Map<String, dynamic>?;
+          final imageUrl = thumbnail?['source'] as String? ?? '';
+          return {'name': name, 'image': imageUrl};
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static ({String title, String imageUrl, List<String> tags}) extractBoardGameInfo(
+      Map<String, dynamic> data) {
+    final title = data['name'] as String? ?? 'Unknown Game';
+    final imageUrl = data['image'] as String? ?? '';
+    return (title: title, imageUrl: imageUrl, tags: ['game']);
+  }
+
+  // --- General Barcode Lookup (UPC Item DB) ---
+
+  /// Look up any barcode via UPC Item DB (free trial, no key needed)
+  static Future<Map<String, dynamic>?> lookupBarcodeGeneral(String barcode) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode'),
+        headers: {'User-Agent': 'ILikeApp/1.0'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final items = data['items'] as List<dynamic>? ?? [];
+        if (items.isNotEmpty) {
+          return items.first as Map<String, dynamic>;
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static ({String title, String imageUrl, List<String> tags}) extractGeneralProductInfo(
+      Map<String, dynamic> data) {
+    final title = data['title'] as String? ?? 'Unknown Product';
+    final images = data['images'] as List<dynamic>? ?? [];
+    final imageUrl = images.isNotEmpty ? images.first as String : '';
+    final category = (data['category'] as String? ?? '').toLowerCase();
+    final tags = <String>['product'];
+    if (category.contains('game') || category.contains('toy') || category.contains('puzzle')) {
+      tags
+        ..clear()
+        ..add('game');
+    }
+    return (title: title, imageUrl: imageUrl, tags: tags);
   }
 }

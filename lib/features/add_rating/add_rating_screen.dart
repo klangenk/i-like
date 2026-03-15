@@ -22,6 +22,7 @@ class AddRatingScreen extends ConsumerStatefulWidget {
 class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
+  String _lastProviderTitle = '';
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       final p = widget.prefill!;
       _titleController.text = p.title;
       _notesController.text = p.notes;
+      _lastProviderTitle = p.title;
       // Defer provider updates to after build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final notifier = ref.read(addRatingProvider.notifier);
@@ -91,6 +93,13 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(addRatingProvider);
     final notifier = ref.read(addRatingProvider.notifier);
+
+    // Sync title controller when provider updates asynchronously (e.g. metadata fetch)
+    if (state.title != _lastProviderTitle && state.title != _titleController.text) {
+      _lastProviderTitle = state.title;
+      _titleController.text = state.title;
+    }
+    _lastProviderTitle = state.title;
 
     return Scaffold(
       appBar: AppBar(
