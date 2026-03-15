@@ -344,6 +344,24 @@ abstract class AppLocalizations {
   /// **'Search Open Library for books'**
   String get searchBookSubtitle;
 
+  /// No description provided for @searchBoardGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Board Game'**
+  String get searchBoardGame;
+
+  /// No description provided for @searchBoardGameSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search BoardGameGeek'**
+  String get searchBoardGameSubtitle;
+
+  /// No description provided for @searchBoardGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Board Games'**
+  String get searchBoardGames;
+
   /// No description provided for @manualEntry.
   ///
   /// In en, this message translates to:
@@ -595,6 +613,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get tagOther;
+
+  /// No description provided for @dataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get dataTitle;
+
+  /// No description provided for @exportRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'Export JSON'**
+  String get exportRatings;
+
+  /// No description provided for @importRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'Import JSON'**
+  String get importRatings;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} ratings'**
+  String exportSuccess(int count);
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {imported} ratings, {skipped} skipped'**
+  String importSuccess(int imported, int skipped);
+
+  /// No description provided for @importError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the file. Please make sure it is a valid export file.'**
+  String get importError;
+
+  /// No description provided for @noRatingsToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'No ratings to export'**
+  String get noRatingsToExport;
+
+  /// No description provided for @sortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get sortNewest;
+
+  /// No description provided for @sortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get sortOldest;
+
+  /// No description provided for @sortHighest.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest rated'**
+  String get sortHighest;
+
+  /// No description provided for @sortLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest rated'**
+  String get sortLowest;
+
+  /// No description provided for @sortAZ.
+  ///
+  /// In en, this message translates to:
+  /// **'A – Z'**
+  String get sortAZ;
+
+  /// No description provided for @sortZA.
+  ///
+  /// In en, this message translates to:
+  /// **'Z – A'**
+  String get sortZA;
+
+  /// No description provided for @exportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportCsv;
 }
 
 class _AppLocalizationsDelegate

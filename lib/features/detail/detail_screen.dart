@@ -12,6 +12,7 @@ import '../../shared/widgets/tag_badge.dart';
 import '../home/home_provider.dart';
 import 'detail_provider.dart';
 import '../add_rating/widgets/star_input.dart';
+import '../add_rating/widgets/tag_input.dart';
 
 final _dateFormat = DateFormat('dd.MM.yyyy HH:mm');
 
@@ -29,6 +30,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _notesController;
   double _editScore = 0;
+  List<String> _editTags = [];
 
   @override
   void initState() {
@@ -50,6 +52,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       _titleController.text = rating.title;
       _notesController.text = rating.notes;
       _editScore = rating.score;
+      _editTags = rating.tags
+          .split(',')
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList();
     });
   }
 
@@ -59,6 +66,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       title: _titleController.text,
       notes: _notesController.text,
       score: _editScore,
+      tags: _editTags.join(', '),
       updatedAt: DateTime.now(),
     );
     await dao.updateRating(updated);
@@ -204,7 +212,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          if (tags.isNotEmpty) ...[
+          if (_isEditing) ...[
+            TagInput(
+              tags: _editTags,
+              onTagAdded: (tag) => setState(() {
+                if (!_editTags.contains(tag)) _editTags.add(tag);
+              }),
+              onTagRemoved: (tag) => setState(() => _editTags.remove(tag)),
+            ),
+            const SizedBox(height: 16),
+          ] else if (tags.isNotEmpty) ...[
             Wrap(
               spacing: 6,
               runSpacing: 6,

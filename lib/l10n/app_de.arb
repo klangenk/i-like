@@ -49,6 +49,9 @@
   "searchPlaceSubtitle": "Einen Ort über OpenStreetMap finden",
   "searchBook": "Buch suchen",
   "searchBookSubtitle": "Open Library nach Büchern durchsuchen",
+  "searchBoardGame": "Brettspiel suchen",
+  "searchBoardGameSubtitle": "BoardGameGeek durchsuchen",
+  "searchBoardGames": "Brettspiele suchen",
   "manualEntry": "Manuell eingeben",
   "manualEntrySubtitle": "Alle Details selbst eingeben",
 
@@ -101,5 +104,22 @@
   "tagGame": "Spiel",
   "tagApp": "App",
   "tagMagazine": "Zeitschrift",
-  "tagOther": "Sonstiges"
+  "tagOther": "Sonstiges",
+
+  "dataTitle": "Daten",
+  "exportRatings": "JSON exportieren",
+  "importRatings": "JSON importieren",
+  "exportSuccess": "{count} Bewertungen exportiert",
+  "importSuccess": "{imported} importiert, {skipped} übersprungen",
+  "importError": "Datei konnte nicht gelesen werden. Bitte stelle sicher, dass es eine gültige Exportdatei ist.",
+  "noRatingsToExport": "Keine Bewertungen zum Exportieren",
+
+  "sortNewest": "Neueste zuerst",
+  "sortOldest": "Älteste zuerst",
+  "sortHighest": "Beste zuerst",
+  "sortLowest": "Schlechteste zuerst",
+  "sortAZ": "A – Z",
+  "sortZA": "Z – A",
+
+  "exportCsv": "CSV exportieren"
 }

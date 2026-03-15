@@ -132,6 +132,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchBookSubtitle => 'Search Open Library for books';
 
   @override
+  String get searchBoardGame => 'Search Board Game';
+
+  @override
+  String get searchBoardGameSubtitle => 'Search BoardGameGeek';
+
+  @override
+  String get searchBoardGames => 'Search Board Games';
+
+  @override
   String get manualEntry => 'Manual Entry';
 
   @override
@@ -270,4 +279,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tagOther => 'Other';
+
+  @override
+  String get dataTitle => 'Data';
+
+  @override
+  String get exportRatings => 'Export JSON';
+
+  @override
+  String get importRatings => 'Import JSON';
+
+  @override
+  String exportSuccess(int count) {
+    return 'Exported $count ratings';
+  }
+
+  @override
+  String importSuccess(int imported, int skipped) {
+    return 'Imported $imported ratings, $skipped skipped';
+  }
+
+  @override
+  String get importError =>
+      'Could not read the file. Please make sure it is a valid export file.';
+
+  @override
+  String get noRatingsToExport => 'No ratings to export';
+
+  @override
+  String get sortNewest => 'Newest first';
+
+  @override
+  String get sortOldest => 'Oldest first';
+
+  @override
+  String get sortHighest => 'Highest rated';
+
+  @override
+  String get sortLowest => 'Lowest rated';
+
+  @override
+  String get sortAZ => 'A – Z';
+
+  @override
+  String get sortZA => 'Z – A';
+
+  @override
+  String get exportCsv => 'Export CSV';
 }

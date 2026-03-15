@@ -133,6 +133,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchBookSubtitle => 'Open Library nach Büchern durchsuchen';
 
   @override
+  String get searchBoardGame => 'Brettspiel suchen';
+
+  @override
+  String get searchBoardGameSubtitle => 'BoardGameGeek durchsuchen';
+
+  @override
+  String get searchBoardGames => 'Brettspiele suchen';
+
+  @override
   String get manualEntry => 'Manuell eingeben';
 
   @override
@@ -271,4 +280,51 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tagOther => 'Sonstiges';
+
+  @override
+  String get dataTitle => 'Daten';
+
+  @override
+  String get exportRatings => 'JSON exportieren';
+
+  @override
+  String get importRatings => 'JSON importieren';
+
+  @override
+  String exportSuccess(int count) {
+    return '$count Bewertungen exportiert';
+  }
+
+  @override
+  String importSuccess(int imported, int skipped) {
+    return '$imported importiert, $skipped übersprungen';
+  }
+
+  @override
+  String get importError =>
+      'Datei konnte nicht gelesen werden. Bitte stelle sicher, dass es eine gültige Exportdatei ist.';
+
+  @override
+  String get noRatingsToExport => 'Keine Bewertungen zum Exportieren';
+
+  @override
+  String get sortNewest => 'Neueste zuerst';
+
+  @override
+  String get sortOldest => 'Älteste zuerst';
+
+  @override
+  String get sortHighest => 'Beste zuerst';
+
+  @override
+  String get sortLowest => 'Schlechteste zuerst';
+
+  @override
+  String get sortAZ => 'A – Z';
+
+  @override
+  String get sortZA => 'Z – A';
+
+  @override
+  String get exportCsv => 'CSV exportieren';
 }

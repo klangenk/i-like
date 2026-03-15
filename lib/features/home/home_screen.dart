@@ -10,6 +10,41 @@ import '../../shared/widgets/empty_state.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  void _showSortMenu(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(sortOptionProvider);
+
+    final options = [
+      (SortOption.newest, l10n.sortNewest, Icons.arrow_downward),
+      (SortOption.oldest, l10n.sortOldest, Icons.arrow_upward),
+      (SortOption.highest, l10n.sortHighest, Icons.star),
+      (SortOption.lowest, l10n.sortLowest, Icons.star_border),
+      (SortOption.az, l10n.sortAZ, Icons.sort_by_alpha),
+      (SortOption.za, l10n.sortZA, Icons.sort_by_alpha),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: options.map((o) {
+            final (option, label, icon) = o;
+            return ListTile(
+              leading: Icon(icon),
+              title: Text(label),
+              trailing: current == option ? const Icon(Icons.check) : null,
+              onTap: () {
+                ref.read(sortOptionProvider.notifier).state = option;
+                Navigator.pop(ctx);
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -19,6 +54,10 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.homeTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: () => _showSortMenu(context, ref),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),

@@ -49,6 +49,9 @@
   "searchPlaceSubtitle": "Find a place via OpenStreetMap",
   "searchBook": "Search Book",
   "searchBookSubtitle": "Search Open Library for books",
+  "searchBoardGame": "Search Board Game",
+  "searchBoardGameSubtitle": "Search BoardGameGeek",
+  "searchBoardGames": "Search Board Games",
   "manualEntry": "Manual Entry",
   "manualEntrySubtitle": "Enter all details yourself",
 
@@ -131,5 +134,33 @@
   "tagGame": "Game",
   "tagApp": "App",
   "tagMagazine": "Magazine",
-  "tagOther": "Other"
+  "tagOther": "Other",
+
+  "dataTitle": "Data",
+  "exportRatings": "Export JSON",
+  "importRatings": "Import JSON",
+  "exportSuccess": "Exported {count} ratings",
+  "@exportSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "importSuccess": "Imported {imported} ratings, {skipped} skipped",
+  "@importSuccess": {
+    "placeholders": {
+      "imported": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+  "importError": "Could not read the file. Please make sure it is a valid export file.",
+  "noRatingsToExport": "No ratings to export",
+
+  "sortNewest": "Newest first",
+  "sortOldest": "Oldest first",
+  "sortHighest": "Highest rated",
+  "sortLowest": "Lowest rated",
+  "sortAZ": "A – Z",
+  "sortZA": "Z – A",
+
+  "exportCsv": "Export CSV"
 }
