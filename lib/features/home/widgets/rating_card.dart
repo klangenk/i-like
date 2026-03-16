@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/rating_image.dart';
 import '../../../shared/widgets/star_display.dart';
 import '../../../shared/widgets/tag_badge.dart';
 
@@ -102,38 +102,13 @@ class RatingCard extends StatelessWidget {
   }
 
   Widget _buildThumbnail() {
-    if (rating.imageUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: CachedNetworkImage(
-          imageUrl: rating.imageUrl,
-          width: 56,
-          height: 56,
-          fit: BoxFit.cover,
-          placeholder: (_, _) => const SizedBox(
-            width: 56,
-            height: 56,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          ),
-          errorWidget: (_, _, _) => _placeholderIcon(),
-        ),
-      );
-    }
-    return _placeholderIcon();
-  }
-
-  Widget _placeholderIcon() {
-    return Container(
+    return RatingImage(
+      imageUrl: rating.imageUrl,
+      localImagePath: rating.localImagePath,
       width: 56,
       height: 56,
-      decoration: BoxDecoration(
-        color: Colors.grey.withAlpha(30),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        Icons.star,
-        color: Colors.grey.withAlpha(100),
-      ),
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(8),
     );
   }
 }

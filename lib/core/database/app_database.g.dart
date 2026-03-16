@@ -99,6 +99,18 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _localImagePathMeta = const VerificationMeta(
+    'localImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> localImagePath = GeneratedColumn<String>(
+    'local_image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -133,6 +145,7 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
     imageUrl,
     sourceUrl,
     barcode,
+    localImagePath,
     createdAt,
     updatedAt,
   ];
@@ -197,6 +210,15 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
         barcode.isAcceptableOrUnknown(data['barcode']!, _barcodeMeta),
       );
     }
+    if (data.containsKey('local_image_path')) {
+      context.handle(
+        _localImagePathMeta,
+        localImagePath.isAcceptableOrUnknown(
+          data['local_image_path']!,
+          _localImagePathMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -250,6 +272,10 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
         DriftSqlType.string,
         data['${effectivePrefix}barcode'],
       )!,
+      localImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_image_path'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -271,11 +297,19 @@ class Rating extends DataClass implements Insertable<Rating> {
   final int id;
   final String title;
   final double score;
+
+  /// Comma-separated tag list, e.g. `"movie, sci-fi"`. Empty string = no tags.
   final String tags;
   final String notes;
   final String imageUrl;
   final String sourceUrl;
   final String barcode;
+
+  /// Path to the locally downloaded copy of [imageUrl]. Empty if not yet
+  /// downloaded or if the download failed. Display code should prefer this
+  /// over [imageUrl] so the image remains available even after the remote URL
+  /// goes stale.
+  final String localImagePath;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Rating({
@@ -287,6 +321,7 @@ class Rating extends DataClass implements Insertable<Rating> {
     required this.imageUrl,
     required this.sourceUrl,
     required this.barcode,
+    required this.localImagePath,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -301,6 +336,7 @@ class Rating extends DataClass implements Insertable<Rating> {
     map['image_url'] = Variable<String>(imageUrl);
     map['source_url'] = Variable<String>(sourceUrl);
     map['barcode'] = Variable<String>(barcode);
+    map['local_image_path'] = Variable<String>(localImagePath);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -316,6 +352,7 @@ class Rating extends DataClass implements Insertable<Rating> {
       imageUrl: Value(imageUrl),
       sourceUrl: Value(sourceUrl),
       barcode: Value(barcode),
+      localImagePath: Value(localImagePath),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -335,6 +372,7 @@ class Rating extends DataClass implements Insertable<Rating> {
       imageUrl: serializer.fromJson<String>(json['imageUrl']),
       sourceUrl: serializer.fromJson<String>(json['sourceUrl']),
       barcode: serializer.fromJson<String>(json['barcode']),
+      localImagePath: serializer.fromJson<String>(json['localImagePath']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -351,6 +389,7 @@ class Rating extends DataClass implements Insertable<Rating> {
       'imageUrl': serializer.toJson<String>(imageUrl),
       'sourceUrl': serializer.toJson<String>(sourceUrl),
       'barcode': serializer.toJson<String>(barcode),
+      'localImagePath': serializer.toJson<String>(localImagePath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -365,6 +404,7 @@ class Rating extends DataClass implements Insertable<Rating> {
     String? imageUrl,
     String? sourceUrl,
     String? barcode,
+    String? localImagePath,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Rating(
@@ -376,6 +416,7 @@ class Rating extends DataClass implements Insertable<Rating> {
     imageUrl: imageUrl ?? this.imageUrl,
     sourceUrl: sourceUrl ?? this.sourceUrl,
     barcode: barcode ?? this.barcode,
+    localImagePath: localImagePath ?? this.localImagePath,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -389,6 +430,9 @@ class Rating extends DataClass implements Insertable<Rating> {
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
       barcode: data.barcode.present ? data.barcode.value : this.barcode,
+      localImagePath: data.localImagePath.present
+          ? data.localImagePath.value
+          : this.localImagePath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -405,6 +449,7 @@ class Rating extends DataClass implements Insertable<Rating> {
           ..write('imageUrl: $imageUrl, ')
           ..write('sourceUrl: $sourceUrl, ')
           ..write('barcode: $barcode, ')
+          ..write('localImagePath: $localImagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -421,6 +466,7 @@ class Rating extends DataClass implements Insertable<Rating> {
     imageUrl,
     sourceUrl,
     barcode,
+    localImagePath,
     createdAt,
     updatedAt,
   );
@@ -436,6 +482,7 @@ class Rating extends DataClass implements Insertable<Rating> {
           other.imageUrl == this.imageUrl &&
           other.sourceUrl == this.sourceUrl &&
           other.barcode == this.barcode &&
+          other.localImagePath == this.localImagePath &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -449,6 +496,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
   final Value<String> imageUrl;
   final Value<String> sourceUrl;
   final Value<String> barcode;
+  final Value<String> localImagePath;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const RatingsCompanion({
@@ -460,6 +508,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     this.imageUrl = const Value.absent(),
     this.sourceUrl = const Value.absent(),
     this.barcode = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -472,6 +521,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     this.imageUrl = const Value.absent(),
     this.sourceUrl = const Value.absent(),
     this.barcode = const Value.absent(),
+    this.localImagePath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : title = Value(title),
@@ -485,6 +535,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     Expression<String>? imageUrl,
     Expression<String>? sourceUrl,
     Expression<String>? barcode,
+    Expression<String>? localImagePath,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -497,6 +548,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
       if (imageUrl != null) 'image_url': imageUrl,
       if (sourceUrl != null) 'source_url': sourceUrl,
       if (barcode != null) 'barcode': barcode,
+      if (localImagePath != null) 'local_image_path': localImagePath,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -511,6 +563,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     Value<String>? imageUrl,
     Value<String>? sourceUrl,
     Value<String>? barcode,
+    Value<String>? localImagePath,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -523,6 +576,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
       imageUrl: imageUrl ?? this.imageUrl,
       sourceUrl: sourceUrl ?? this.sourceUrl,
       barcode: barcode ?? this.barcode,
+      localImagePath: localImagePath ?? this.localImagePath,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -555,6 +609,9 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     if (barcode.present) {
       map['barcode'] = Variable<String>(barcode.value);
     }
+    if (localImagePath.present) {
+      map['local_image_path'] = Variable<String>(localImagePath.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -575,6 +632,7 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
           ..write('imageUrl: $imageUrl, ')
           ..write('sourceUrl: $sourceUrl, ')
           ..write('barcode: $barcode, ')
+          ..write('localImagePath: $localImagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -603,6 +661,7 @@ typedef $$RatingsTableCreateCompanionBuilder =
       Value<String> imageUrl,
       Value<String> sourceUrl,
       Value<String> barcode,
+      Value<String> localImagePath,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -616,6 +675,7 @@ typedef $$RatingsTableUpdateCompanionBuilder =
       Value<String> imageUrl,
       Value<String> sourceUrl,
       Value<String> barcode,
+      Value<String> localImagePath,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -666,6 +726,11 @@ class $$RatingsTableFilterComposer
 
   ColumnFilters<String> get barcode => $composableBuilder(
     column: $table.barcode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -729,6 +794,11 @@ class $$RatingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -773,6 +843,11 @@ class $$RatingsTableAnnotationComposer
   GeneratedColumn<String> get barcode =>
       $composableBuilder(column: $table.barcode, builder: (column) => column);
 
+  GeneratedColumn<String> get localImagePath => $composableBuilder(
+    column: $table.localImagePath,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -816,6 +891,7 @@ class $$RatingsTableTableManager
                 Value<String> imageUrl = const Value.absent(),
                 Value<String> sourceUrl = const Value.absent(),
                 Value<String> barcode = const Value.absent(),
+                Value<String> localImagePath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RatingsCompanion(
@@ -827,6 +903,7 @@ class $$RatingsTableTableManager
                 imageUrl: imageUrl,
                 sourceUrl: sourceUrl,
                 barcode: barcode,
+                localImagePath: localImagePath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -840,6 +917,7 @@ class $$RatingsTableTableManager
                 Value<String> imageUrl = const Value.absent(),
                 Value<String> sourceUrl = const Value.absent(),
                 Value<String> barcode = const Value.absent(),
+                Value<String> localImagePath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RatingsCompanion.insert(
@@ -851,6 +929,7 @@ class $$RatingsTableTableManager
                 imageUrl: imageUrl,
                 sourceUrl: sourceUrl,
                 barcode: barcode,
+                localImagePath: localImagePath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

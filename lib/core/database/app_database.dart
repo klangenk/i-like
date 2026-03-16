@@ -23,6 +23,12 @@ class Ratings extends Table {
   TextColumn get sourceUrl =>
       text().named('source_url').withDefault(const Constant(''))();
   TextColumn get barcode => text().withDefault(const Constant(''))();
+  /// Path to the locally downloaded copy of [imageUrl]. Empty if not yet
+  /// downloaded or if the download failed. Display code should prefer this
+  /// over [imageUrl] so the image remains available even after the remote URL
+  /// goes stale.
+  TextColumn get localImagePath =>
+      text().named('local_image_path').withDefault(const Constant(''))();
   DateTimeColumn get createdAt =>
       dateTime().named('created_at').withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt =>
@@ -55,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -67,11 +73,9 @@ class AppDatabase extends _$AppDatabase {
       /// Called when the on-device [schemaVersion] is lower than the current
       /// one. [from] is the old version, [to] is the new version.
       onUpgrade: (m, from, to) async {
-        // Add migration steps here when schemaVersion is bumped.
-        // Example for a future version 2:
-        // if (from < 2) {
-        //   await m.addColumn(ratings, ratings.someNewColumn);
-        // }
+        if (from < 2) {
+          await m.addColumn(ratings, ratings.localImagePath);
+        }
       },
       /// Runs before the database is used on every app start.
       beforeOpen: (details) async {

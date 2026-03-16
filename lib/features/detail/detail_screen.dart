@@ -1,12 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/database/app_database.dart';
+import '../../core/utils/image_store.dart';
 import '../../core/utils/url_helper.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/rating_image.dart';
 import '../../shared/widgets/star_display.dart';
 import '../../shared/widgets/tag_badge.dart';
 import '../home/home_provider.dart';
@@ -94,6 +95,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     );
 
     if (confirmed == true) {
+      final rating = ref.read(ratingDetailProvider(widget.ratingId)).valueOrNull;
+      await ImageStore.delete(rating?.localImagePath);
       await ref.read(ratingsDaoProvider).deleteRating(widget.ratingId);
       if (mounted) context.pop();
     }
@@ -167,25 +170,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (rating.imageUrl.isNotEmpty)
+          if (rating.imageUrl.isNotEmpty || rating.localImagePath.isNotEmpty)
             Center(
-              child: ClipRRect(
+              child: RatingImage(
+                imageUrl: rating.imageUrl,
+                localImagePath: rating.localImagePath,
+                height: 200,
+                fit: BoxFit.contain,
                 borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(
-                  imageUrl: rating.imageUrl,
-                  height: 200,
-                  fit: BoxFit.contain,
-                  errorWidget: (_, _, _) => Container(
-                    height: 200,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(30),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.broken_image_outlined,
-                        size: 48, color: Colors.grey.withAlpha(120)),
-                  ),
-                ),
               ),
             ),
           const SizedBox(height: 16),

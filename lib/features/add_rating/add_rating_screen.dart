@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/database/app_database.dart';
+import '../../core/utils/image_store.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
@@ -72,6 +73,8 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       return;
     }
 
+    final localImagePath = await ImageStore.downloadAndStore(state.imageUrl);
+
     final dao = ref.read(ratingsDaoProvider);
     await dao.insertRating(RatingsCompanion(
       title: Value(state.title),
@@ -81,6 +84,7 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       imageUrl: Value(state.imageUrl),
       sourceUrl: Value(state.sourceUrl),
       barcode: Value(state.barcode),
+      localImagePath: Value(localImagePath ?? ''),
     ));
 
     if (mounted) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/utils/image_store.dart';
 import '../../l10n/app_localizations.dart';
 import '../add_rating/quick_add_sheet.dart';
 import 'home_provider.dart';
@@ -90,6 +91,7 @@ class HomeScreen extends ConsumerWidget {
                     return RatingCard(
                       rating: rating,
                       onDismissed: () {
+                        ImageStore.delete(rating.localImagePath);
                         ref.read(ratingsDaoProvider).deleteRating(rating.id);
                       },
                     );
