@@ -125,12 +125,23 @@ class _QuickAddSheetContent extends ConsumerWidget {
 Future<void> _handleBarcode(BuildContext context, String barcode) async {
   final tags = tagsFromBarcode(barcode);
 
+  // Show loading indicator while fetching metadata
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const PopScope(
+      canPop: false,
+      child: Center(child: CircularProgressIndicator()),
+    ),
+  );
+
   if (barcode.startsWith('978') || barcode.startsWith('979')) {
     // ISBN — look up as book
     final data = await ApiService.lookupIsbn(barcode);
     if (data != null) {
       final info = ApiService.extractBookInfo(data);
       if (context.mounted) {
+        Navigator.pop(context); // dismiss loading
         context.push('/add', extra: PrefillData(
           title: info.title,
           imageUrl: info.imageUrl,
@@ -146,6 +157,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
     if (data != null) {
       final info = ApiService.extractProductInfo(data);
       if (context.mounted) {
+        Navigator.pop(context); // dismiss loading
         context.push('/add', extra: PrefillData(
           title: info.title,
           imageUrl: info.imageUrl,
@@ -163,6 +175,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
       // Always try BGG to get a better image and proper game tagging
       final bggResult = await _tryBoardGameLookup(info.title);
       if (bggResult != null && context.mounted) {
+        Navigator.pop(context); // dismiss loading
         context.push('/add', extra: PrefillData(
           title: bggResult.title,
           imageUrl: bggResult.imageUrl,
@@ -172,6 +185,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
         return;
       }
       if (context.mounted) {
+        Navigator.pop(context); // dismiss loading
         context.push('/add', extra: PrefillData(
           title: info.title,
           imageUrl: info.imageUrl,
@@ -184,6 +198,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
   }
 
   if (context.mounted) {
+    Navigator.pop(context); // dismiss loading
     context.push('/add', extra: PrefillData(tags: tags, barcode: barcode));
   }
 }
