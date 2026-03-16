@@ -162,5 +162,8 @@
   "sortAZ": "A – Z",
   "sortZA": "Z – A",
 
-  "exportCsv": "Export CSV"
+  "exportCsv": "Export CSV",
+
+  "onboardingSubtitle": "Scan a barcode, search for a movie, book, or place — or add anything manually.",
+  "getStarted": "Get started"
 }

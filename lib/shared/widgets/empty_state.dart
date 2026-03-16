@@ -5,12 +5,14 @@ class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final Widget? action;
 
   const EmptyState({
     super.key,
     this.icon = Icons.star_border,
     required this.title,
     required this.subtitle,
+    this.action,
   });
 
   @override
@@ -46,6 +48,10 @@ class EmptyState extends StatelessWidget {
                   ),
               textAlign: TextAlign.center,
             ),
+            if (action != null) ...[
+              const SizedBox(height: 24),
+              action!,
+            ],
           ],
         ),
       ),

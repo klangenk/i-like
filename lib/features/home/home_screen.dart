@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
+import '../add_rating/quick_add_sheet.dart';
 import 'home_provider.dart';
 import 'widgets/rating_card.dart';
 import 'widgets/filter_chips.dart';
@@ -73,7 +74,12 @@ class HomeScreen extends ConsumerWidget {
                 if (ratings.isEmpty) {
                   return EmptyState(
                     title: l10n.noRatingsYet,
-                    subtitle: l10n.tapToRate,
+                    subtitle: l10n.onboardingSubtitle,
+                    action: FilledButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.getStarted),
+                      onPressed: () => showQuickAddSheet(context),
+                    ),
                   );
                 }
                 return ListView.builder(

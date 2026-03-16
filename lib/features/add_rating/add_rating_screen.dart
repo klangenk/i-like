@@ -126,7 +126,15 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                         imageUrl: state.imageUrl,
                         height: 150,
                         fit: BoxFit.contain,
-                        errorWidget: (_, _, _) => const SizedBox.shrink(),
+                        errorWidget: (_, _, _) => Container(
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withAlpha(30),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.broken_image_outlined,
+                              size: 40, color: Colors.grey.withAlpha(120)),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),

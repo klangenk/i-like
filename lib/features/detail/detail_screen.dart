@@ -175,7 +175,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   imageUrl: rating.imageUrl,
                   height: 200,
                   fit: BoxFit.contain,
-                  errorWidget: (_, _, _) => const SizedBox.shrink(),
+                  errorWidget: (_, _, _) => Container(
+                    height: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withAlpha(30),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.broken_image_outlined,
+                        size: 48, color: Colors.grey.withAlpha(120)),
+                  ),
                 ),
               ),
             ),

@@ -121,5 +121,8 @@
   "sortAZ": "A – Z",
   "sortZA": "Z – A",
 
-  "exportCsv": "CSV exportieren"
+  "exportCsv": "CSV exportieren",
+
+  "onboardingSubtitle": "Scanne einen Barcode, suche nach einem Film, Buch oder Ort – oder füge alles manuell hinzu.",
+  "getStarted": "Los geht's"
 }

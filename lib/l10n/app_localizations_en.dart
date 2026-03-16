@@ -326,4 +326,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportCsv => 'Export CSV';
+
+  @override
+  String get onboardingSubtitle =>
+      'Scan a barcode, search for a movie, book, or place — or add anything manually.';
+
+  @override
+  String get getStarted => 'Get started';
 }
