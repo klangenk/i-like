@@ -33,6 +33,26 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (m) async {
+        await m.createAll();
+      },
+      onUpgrade: (m, from, to) async {
+        // Add migration steps here when schemaVersion is bumped.
+        // Example for a future version 2:
+        // if (from < 2) {
+        //   await m.addColumn(ratings, ratings.someNewColumn);
+        // }
+      },
+      beforeOpen: (details) async {
+        // Enable foreign keys (good practice even if not used yet)
+        await customStatement('PRAGMA foreign_keys = ON');
+      },
+    );
+  }
+
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
