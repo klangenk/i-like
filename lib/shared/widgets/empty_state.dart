@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/rating_level.dart';
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
@@ -23,17 +24,19 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 80,
-              color: AppColors.accent.withAlpha(120),
+            Container(
+              width: 112,
+              height: 112,
+              decoration: BoxDecoration(
+                color: RatingLevel.liebe.tint(context),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 52, color: AppColors.heart),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

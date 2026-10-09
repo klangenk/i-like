@@ -14,6 +14,10 @@ class RatingImage extends StatelessWidget {
   final BoxFit fit;
   final BorderRadius borderRadius;
 
+  /// Shown when there is no image or it fails to load. Defaults to a neutral
+  /// broken-image tile.
+  final Widget? placeholder;
+
   const RatingImage({
     super.key,
     required this.imageUrl,
@@ -22,6 +26,7 @@ class RatingImage extends StatelessWidget {
     this.width,
     this.fit = BoxFit.cover,
     this.borderRadius = BorderRadius.zero,
+    this.placeholder,
   });
 
   @override
@@ -57,6 +62,12 @@ class RatingImage extends StatelessWidget {
   }
 
   Widget _placeholder() {
+    if (placeholder != null) {
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: SizedBox(height: height, width: width, child: placeholder),
+      );
+    }
     return Container(
       height: height,
       width: width,

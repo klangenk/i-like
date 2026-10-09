@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -10,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/url_helper.dart';
 import 'features/add_rating/add_rating_provider.dart';
+import 'features/add_rating/quick_add_sheet.dart';
 import 'features/home/home_provider.dart';
 import 'features/settings/settings_provider.dart';
 import 'l10n/app_localizations.dart';
@@ -40,6 +42,8 @@ class ILikeApp extends StatefulWidget {
 class _ILikeAppState extends State<ILikeApp> {
   StreamSubscription<List<SharedMediaFile>>? _shareSubscription;
 
+  static const _shortcutChannel = MethodChannel('com.ilike.i_like/shortcuts');
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +58,23 @@ class _ILikeAppState extends State<ILikeApp> {
       if (value.isNotEmpty) {
         _handleSharedMedia(value);
       }
+    });
+
+    // Handle Quick Settings tile — cold start
+    _shortcutChannel.invokeMethod<String>('getInitialShortcut').then((shortcut) {
+      if (shortcut == 'quick_add') _openQuickAdd();
+    });
+
+    // Handle Quick Settings tile — app already running
+    _shortcutChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onQuickAdd') _openQuickAdd();
+    });
+  }
+
+  void _openQuickAdd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx != null) showQuickAddSheet(ctx);
     });
   }
 

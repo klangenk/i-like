@@ -1,114 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/theme/rating_level.dart';
+import '../../../core/utils/date_label.dart';
+import '../../../core/utils/tag_l10n.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/level_badge.dart';
 import '../../../shared/widgets/rating_image.dart';
-import '../../../shared/widgets/star_display.dart';
-import '../../../shared/widgets/tag_badge.dart';
 
+/// Grid tile: photo with the word level on it, title and "category · date".
+/// Long-press offers delete.
 class RatingCard extends StatelessWidget {
   final Rating rating;
-  final VoidCallback? onDismissed;
+  final VoidCallback? onDelete;
 
   const RatingCard({
     super.key,
     required this.rating,
-    this.onDismissed,
+    this.onDelete,
   });
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    HapticFeedback.mediumImpact();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteRating),
+        content: Text(l10n.deleteItemConfirm(rating.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.onSurface),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) onDelete?.call();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final tags = rating.tags
+    final l10n = AppLocalizations.of(context)!;
+    final level = RatingLevel.fromScore(rating.score);
+    final firstTag = rating.tags
         .split(',')
         .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+        .firstWhere((t) => t.isNotEmpty, orElse: () => '');
+    final meta = [
+      if (firstTag.isNotEmpty) localizedTagName(firstTag, l10n),
+      shortDateLabel(context, rating.createdAt),
+    ].join(' · ');
 
-    return Dismissible(
-      key: ValueKey(rating.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
-        final l10n = AppLocalizations.of(context)!;
-        return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.deleteRating),
-            content: Text(l10n.deleteItemConfirm(rating.title)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
-              ),
-            ],
-          ),
-        );
-      },
-      onDismissed: (_) => onDismissed?.call(),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => context.push('/detail/${rating.id}'),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
+    final radius = BorderRadius.circular(20);
+    // Neutral so the coloured level badge stands out on it.
+    final placeholderColor = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final placeholderIcon = Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return InkWell(
+      borderRadius: radius,
+      onTap: () => context.push('/detail/${rating.id}'),
+      onLongPress: onDelete == null ? null : () => _confirmDelete(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                _buildThumbnail(),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        rating.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      StarDisplay(score: rating.score, size: 18),
-                      if (tags.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: tags.map((t) => TagBadge(tag: t)).toList(),
-                        ),
-                      ],
-                    ],
+                RatingImage(
+                  imageUrl: rating.imageUrl,
+                  localImagePath: rating.localImagePath,
+                  fit: BoxFit.cover,
+                  borderRadius: radius,
+                  placeholder: Container(
+                    color: placeholderColor,
+                    alignment: Alignment.center,
+                    child: Icon(Icons.image_outlined, size: 36, color: placeholderIcon),
                   ),
                 ),
+                if (level != null)
+                  Positioned(left: 8, bottom: 8, child: LevelBadge(level: level)),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            rating.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, height: 1.2),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            meta,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildThumbnail() {
-    return RatingImage(
-      imageUrl: rating.imageUrl,
-      localImagePath: rating.localImagePath,
-      width: 56,
-      height: 56,
-      fit: BoxFit.cover,
-      borderRadius: BorderRadius.circular(8),
     );
   }
 }

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/database/app_database.dart';
 import '../../core/utils/image_store.dart';
 import '../../core/utils/url_helper.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme/rating_level.dart';
+import '../../core/utils/date_label.dart';
+import '../../core/utils/tag_l10n.dart';
+import '../../shared/widgets/level_badge.dart';
 import '../../shared/widgets/rating_image.dart';
-import '../../shared/widgets/star_display.dart';
-import '../../shared/widgets/tag_badge.dart';
+import '../../shared/widgets/round_icon_button.dart';
 import '../home/home_provider.dart';
 import 'detail_provider.dart';
-import '../add_rating/widgets/star_input.dart';
+import '../add_rating/widgets/level_picker.dart';
 import '../add_rating/widgets/tag_input.dart';
-
-final _dateFormat = DateFormat('dd.MM.yyyy HH:mm');
 
 class DetailScreen extends ConsumerStatefulWidget {
   final int ratingId;
@@ -103,9 +103,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   }
 
   void _shareRating(Rating rating) {
-    final stars = '${'★' * rating.score.floor()}${'☆' * (5 - rating.score.floor())}';
+    final l10n = AppLocalizations.of(context)!;
+    final level = RatingLevel.fromScore(rating.score);
     final buffer = StringBuffer();
-    buffer.writeln('${rating.title} $stars (${rating.score.toInt()}/5)');
+    buffer.writeln(level == null
+        ? rating.title
+        : '${rating.title} – ${level.word(l10n)} (${level.value}/5)');
     if (rating.tags.isNotEmpty) {
       buffer.writeln('Tags: ${rating.tags}');
     }
@@ -122,33 +125,39 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final ratingAsync = ref.watch(ratingDetailProvider(widget.ratingId));
+    final rating = ratingAsync.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.detailsTitle),
-        actions: [
-          if (!_isEditing) ...[
-            IconButton(
-              icon: const Icon(Icons.share_outlined),
-              onPressed: () {
-                final rating = ratingAsync.valueOrNull;
-                if (rating != null) _shareRating(rating);
-              },
+      bottomNavigationBar: rating == null
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: _isEditing
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
+                              onPressed: () => setState(() => _isEditing = false),
+                              child: Text(l10n.cancel),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () => _saveEdits(rating),
+                              child: Text(l10n.save),
+                            ),
+                          ),
+                        ],
+                      )
+                    : FilledButton(
+                        onPressed: () => _startEditing(rating),
+                        child: Text(l10n.editRating),
+                      ),
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                final rating = ratingAsync.valueOrNull;
-                if (rating != null) _startEditing(rating);
-              },
-            ),
-          ],
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _deleteRating,
-          ),
-        ],
-      ),
       body: ratingAsync.when(
         data: (rating) => _buildContent(rating),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -159,138 +168,222 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
   Widget _buildContent(Rating rating) {
     final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final level = RatingLevel.fromScore(rating.score);
     final tags = rating.tags
         .split(',')
         .map((t) => t.trim())
         .where((t) => t.isNotEmpty)
         .toList();
+    final meta = [
+      ...tags.map((t) => localizedTagName(t, l10n)),
+      l10n.ratedOn(longDateLabel(context, rating.createdAt)),
+    ].join(' · ');
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (rating.imageUrl.isNotEmpty || rating.localImagePath.isNotEmpty)
-            Center(
-              child: RatingImage(
-                imageUrl: rating.imageUrl,
-                localImagePath: rating.localImagePath,
-                height: 200,
-                fit: BoxFit.contain,
-                borderRadius: BorderRadius.circular(12),
+    return SafeArea(
+      bottom: false,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Photo with actions and level
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                height: _isEditing ? 200 : 350,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    RatingImage(
+                      imageUrl: rating.imageUrl,
+                      localImagePath: rating.localImagePath,
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(30),
+                      placeholder: Container(
+                        color: scheme.surfaceContainerHighest,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.image_outlined,
+                          size: 56,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      right: 12,
+                      child: Row(
+                        children: [
+                          RoundIconButton(
+                            icon: Icons.arrow_back_rounded,
+                            tooltip: l10n.back,
+                            background: scheme.surface,
+                            onPressed: () => context.pop(),
+                          ),
+                          const Spacer(),
+                          if (!_isEditing) ...[
+                            RoundIconButton(
+                              icon: Icons.ios_share_rounded,
+                              tooltip: l10n.share,
+                              background: scheme.surface,
+                              onPressed: () => _shareRating(rating),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          RoundIconButton(
+                            icon: Icons.delete_outline_rounded,
+                            tooltip: l10n.delete,
+                            background: scheme.surface,
+                            foreground: scheme.error,
+                            onPressed: _deleteRating,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (level != null && !_isEditing)
+                      Positioned(
+                        left: 14,
+                        bottom: 14,
+                        child: LevelBadge(level: level, large: true),
+                      ),
+                  ],
+                ),
               ),
             ),
-          const SizedBox(height: 16),
 
-          if (_isEditing)
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.titleRequired),
-              style: Theme.of(context).textTheme.headlineSmall,
-            )
-          else
-            Text(
-              rating.title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_isEditing)
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(hintText: l10n.titleHint),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      maxLines: null,
+                    )
+                  else ...[
+                    Text(rating.title, style: Theme.of(context).textTheme.headlineMedium),
+                    const SizedBox(height: 8),
+                    Text(meta, style: TextStyle(fontSize: 15, color: scheme.onSurfaceVariant)),
+                  ],
+                  const SizedBox(height: 20),
 
-          if (_isEditing)
-            StarInput(
-              score: _editScore,
-              onChanged: (s) => setState(() => _editScore = s),
-            )
-          else
-            Center(child: StarDisplay(score: rating.score, size: 32)),
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
-              l10n.scoreDisplay((_isEditing ? _editScore : rating.score).toInt().toString()),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          if (_isEditing) ...[
-            TagInput(
-              tags: _editTags,
-              onTagAdded: (tag) => setState(() {
-                if (!_editTags.contains(tag)) _editTags.add(tag);
-              }),
-              onTagRemoved: (tag) => setState(() => _editTags.remove(tag)),
-            ),
-            const SizedBox(height: 16),
-          ] else if (tags.isNotEmpty) ...[
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: tags.map((t) => TagBadge(tag: t)).toList(),
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          if (_isEditing) ...[
-            TextField(
-              controller: _notesController,
-              decoration: InputDecoration(labelText: l10n.notes),
-              maxLines: 4,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => _saveEdits(rating),
-              child: Text(l10n.saveChanges),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => setState(() => _isEditing = false),
-              child: Text(l10n.cancel),
-            ),
-          ] else if (rating.notes.isNotEmpty) ...[
-            Text(
-              l10n.notes,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(rating.notes),
-          ],
-
-          if (rating.sourceUrl.isNotEmpty && !_isEditing) ...[
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () => openUrl(rating.sourceUrl),
-              icon: const Icon(Icons.link, size: 18),
-              label: Text(
-                extractDomain(rating.sourceUrl) ?? rating.sourceUrl,
-                overflow: TextOverflow.ellipsis,
+                  if (_isEditing) ...[
+                    LevelPicker(
+                      score: _editScore,
+                      onChanged: (s) => setState(() => _editScore = s),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(l10n.category.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+                    const SizedBox(height: 10),
+                    TagInput(
+                      tags: _editTags,
+                      onTagAdded: (tag) => setState(() {
+                        if (!_editTags.contains(tag)) _editTags.add(tag);
+                      }),
+                      onTagRemoved: (tag) => setState(() => _editTags.remove(tag)),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(l10n.notes.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _notesController,
+                      decoration: InputDecoration(hintText: l10n.notesHint),
+                      maxLines: 4,
+                      minLines: 2,
+                    ),
+                  ] else ...[
+                    if (level != null) LevelScale(level: level),
+                    if (rating.notes.isNotEmpty) ...[
+                      const SizedBox(height: 22),
+                      Text(rating.notes, style: const TextStyle(fontSize: 16, height: 1.45)),
+                    ],
+                    if (rating.sourceUrl.isNotEmpty || rating.barcode.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      const Divider(),
+                    ],
+                    if (rating.sourceUrl.isNotEmpty)
+                      _InfoRow(
+                        label: l10n.source,
+                        onTap: () => openUrl(rating.sourceUrl),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                extractDomain(rating.sourceUrl) ?? rating.sourceUrl,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: scheme.tertiary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(Icons.north_east_rounded, size: 15, color: scheme.tertiary),
+                          ],
+                        ),
+                      ),
+                    if (rating.sourceUrl.isNotEmpty && rating.barcode.isNotEmpty) const Divider(),
+                    if (rating.barcode.isNotEmpty)
+                      _InfoRow(
+                        label: l10n.barcodeLabel,
+                        child: Text(
+                          rating.barcode,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                    if (rating.updatedAt != rating.createdAt) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.updated(longDateLabel(context, rating.updatedAt)),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ],
+                ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
 
-          if (rating.barcode.isNotEmpty && !_isEditing) ...[
-            const SizedBox(height: 12),
-            Text(
-              l10n.barcode(rating.barcode),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final Widget child;
+  final VoidCallback? onTap;
 
-          if (!_isEditing) ...[
-            const SizedBox(height: 24),
+  const _InfoRow({required this.label, required this.child, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: Row(
+          children: [
             Text(
-              l10n.created(_dateFormat.format(rating.createdAt)),
-              style: Theme.of(context).textTheme.bodySmall,
+              label,
+              style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
-            if (rating.updatedAt != rating.createdAt)
-              Text(
-                l10n.updated(_dateFormat.format(rating.updatedAt)),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+            const SizedBox(width: 16),
+            Expanded(child: Align(alignment: Alignment.centerRight, child: child)),
           ],
-        ],
+        ),
       ),
     );
   }

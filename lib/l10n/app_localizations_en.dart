@@ -15,31 +15,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'I Like';
 
   @override
-  String get searchTitle => 'Search';
-
-  @override
   String get settingsTitle => 'Settings';
 
   @override
   String get detailsTitle => 'Details';
 
   @override
-  String get addRatingTitle => 'Add Rating';
+  String get addRatingTitle => 'New rating';
 
   @override
   String get scanBarcodeTitle => 'Scan Barcode';
 
   @override
-  String get homeTab => 'Home';
-
-  @override
-  String get searchTab => 'Search';
-
-  @override
   String get noRatingsYet => 'No ratings yet';
-
-  @override
-  String get tapToRate => 'Tap + to rate something!';
 
   @override
   String get noResults => 'No results';
@@ -84,7 +72,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTagHint => 'Add a tag...';
 
   @override
-  String get searchHint => 'Search ratings...';
+  String get searchHint => 'Search your ratings';
 
   @override
   String get searchEllipsis => 'Search...';
@@ -93,7 +81,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterTitle => 'Please enter a title';
 
   @override
-  String get pleaseGiveRating => 'Please give a rating';
+  String get pleaseGiveRating => 'How was it? Pick a level.';
 
   @override
   String get quickAdd => 'Quick Add (Scan, URL, ...)';
@@ -105,34 +93,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanBarcode => 'Scan Barcode';
 
   @override
-  String get scanBarcodeSubtitle => 'Scan a product or book barcode';
+  String get scanBarcodeSubtitle => 'Recognise a product or book';
 
   @override
-  String get fromUrl => 'From URL';
+  String get fromUrl => 'From link';
 
   @override
-  String get fromUrlSubtitle => 'Paste a link to auto-fill details';
+  String get fromUrlSubtitle => 'Details load automatically';
 
   @override
-  String get searchMovieSeries => 'Search Movie / Series';
+  String get searchMovieSeries => 'Movie & series';
 
   @override
-  String get searchMovieSeriesSubtitle => 'Search TMDB for movies & TV shows';
+  String get searchMovieSeriesSubtitle => 'The Movie Database';
 
   @override
-  String get searchPlace => 'Search Place';
+  String get searchPlace => 'Place';
 
   @override
-  String get searchPlaceSubtitle => 'Find a place via OpenStreetMap';
+  String get searchPlaceSubtitle => 'Find it on OpenStreetMap';
 
   @override
-  String get searchBook => 'Search Book';
+  String get searchBook => 'Book';
 
   @override
-  String get searchBookSubtitle => 'Search Open Library for books';
+  String get searchBookSubtitle => 'Search Open Library';
 
   @override
-  String get searchBoardGame => 'Search Board Game';
+  String get searchBoardGame => 'Board game';
 
   @override
   String get searchBoardGameSubtitle => 'Search BoardGameGeek';
@@ -141,7 +129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchBoardGames => 'Search Board Games';
 
   @override
-  String get manualEntry => 'Manual Entry';
+  String get manualEntry => 'Enter it yourself';
 
   @override
   String get manualEntrySubtitle => 'Enter all details yourself';
@@ -313,10 +301,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortOldest => 'Oldest first';
 
   @override
-  String get sortHighest => 'Highest rated';
+  String get sortHighest => 'Love first';
 
   @override
-  String get sortLowest => 'Lowest rated';
+  String get sortLowest => 'Nope first';
 
   @override
   String get sortAZ => 'A – Z';
@@ -333,4 +321,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get getStarted => 'Get started';
+
+  @override
+  String get rateNowPlaying => 'Just watched';
+
+  @override
+  String get rateNowPlayingSubtitle => 'Netflix, Prime & more';
+
+  @override
+  String get notificationPermissionTitle => 'Notification Access Required';
+
+  @override
+  String get notificationPermissionBody =>
+      'To detect what you\'re watching, grant notification access in Settings.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get nothingPlaying => 'Nothing is currently playing';
+
+  @override
+  String get levelNope => 'Nope';
+
+  @override
+  String get levelNaja => 'Meh';
+
+  @override
+  String get levelOkay => 'Okay';
+
+  @override
+  String get levelGood => 'Good';
+
+  @override
+  String get levelLove => 'Love';
+
+  @override
+  String get levelNopePhrase => 'Never again';
+
+  @override
+  String get levelNajaPhrase => 'Rather not';
+
+  @override
+  String get levelOkayPhrase => 'It\'s fine';
+
+  @override
+  String get levelGoodPhrase => 'Would have it again';
+
+  @override
+  String get levelLovePhrase => 'Absolute favourite';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterByLevel => 'Filter by level';
+
+  @override
+  String homeSummary(int count, int loved) {
+    return '$count things rated — you love $loved of them.';
+  }
+
+  @override
+  String homeSummaryShort(int count) {
+    return '$count things rated';
+  }
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get showResults => 'Show';
+
+  @override
+  String get newRating => 'New rating';
+
+  @override
+  String get whatToRate => 'What do you want to rate?';
+
+  @override
+  String get howWasIt => 'How was it?';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get editRating => 'Edit rating';
+
+  @override
+  String ratedOn(String date) {
+    return 'rated on $date';
+  }
+
+  @override
+  String get source => 'Source';
+
+  @override
+  String get barcodeLabel => 'Barcode';
+
+  @override
+  String get sortNewestHint => 'Most recently rated on top';
+
+  @override
+  String get sortOldestHint => 'Your first ratings on top';
+
+  @override
+  String get sortHighestHint => 'Your favourites on top';
+
+  @override
+  String get sortLowestHint => 'What you never want again';
+
+  @override
+  String get sortAZHint => 'Alphabetical';
+
+  @override
+  String get sortZAHint => 'Reverse alphabetical';
+
+  @override
+  String get yourBalance => 'Your balance';
+
+  @override
+  String ratingsCount(int count) {
+    return '$count ratings';
+  }
+
+  @override
+  String get servicesTitle => 'Services';
+
+  @override
+  String get moviesSeries => 'Movies & series';
+
+  @override
+  String get tmdbNeedsKey => 'Free TMDB key required';
+
+  @override
+  String get tmdbConnected => 'Connected via TMDB';
+
+  @override
+  String get setUp => 'Set up';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get placesShort => 'Places';
+
+  @override
+  String get placesSubtitle => 'OpenStreetMap, no key needed';
+
+  @override
+  String get exportJsonLong => 'Export as JSON';
+
+  @override
+  String get exportCsvLong => 'Export as CSV';
+
+  @override
+  String get nothingInLevel => 'Nothing here yet';
+
+  @override
+  String get nothingInLevelSubtitle =>
+      'Once you rate something like this, it shows up here.';
+
+  @override
+  String get rateAction => 'Rate';
+
+  @override
+  String get today => 'today';
+
+  @override
+  String get yesterday => 'yesterday';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get addCategory => 'Add';
+
+  @override
+  String get pickALevel => 'Tap a level';
 }

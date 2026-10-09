@@ -8,7 +8,8 @@ import '../../core/utils/image_store.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
-import 'widgets/star_input.dart';
+import '../../shared/widgets/round_icon_button.dart';
+import 'widgets/level_picker.dart';
 import 'widgets/tag_input.dart';
 
 class AddRatingScreen extends ConsumerStatefulWidget {
@@ -107,83 +108,94 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.addRatingTitle),
-        actions: [
-          TextButton(
-            onPressed: _saveRating,
-            child: Text(l10n.save),
-          ),
-        ],
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            RoundIconButton(
+              icon: Icons.close_rounded,
+              tooltip: l10n.close,
+              onPressed: () => context.pop(),
+            ),
+            const SizedBox(width: 12),
+            Text(l10n.addRatingTitle),
+          ],
+        ),
       ),
+      bottomNavigationBar: state.isLoading
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                child: FilledButton(
+                  onPressed: _saveRating,
+                  child: Text(l10n.save),
+                ),
+              ),
+            ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Image preview
-                  if (state.imageUrl.isNotEmpty) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: CachedNetworkImage(
-                        imageUrl: state.imageUrl,
-                        height: 150,
-                        fit: BoxFit.contain,
-                        errorWidget: (_, _, _) => Container(
-                          height: 150,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withAlpha(30),
-                            borderRadius: BorderRadius.circular(12),
+                  // Item: image + title
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        if (state.imageUrl.isNotEmpty) ...[
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: CachedNetworkImage(
+                              imageUrl: state.imageUrl,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, _, _) => const SizedBox(
+                                width: 64,
+                                height: 64,
+                                child: Icon(Icons.image_outlined),
+                              ),
+                            ),
                           ),
-                          child: Icon(Icons.broken_image_outlined,
-                              size: 40, color: Colors.grey.withAlpha(120)),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(
+                          child: TextField(
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                              hintText: l10n.titleHint,
+                              fillColor: Colors.transparent,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              focusedBorder: InputBorder.none,
+                            ),
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                            maxLines: null,
+                            onChanged: notifier.setTitle,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Title
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.titleRequired,
-                      hintText: l10n.titleHint,
-                    ),
-                    onChanged: notifier.setTitle,
-                    textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 24),
 
-                  // Star Rating
-                  Text(
-                    l10n.rating,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  StarInput(
+                  Text(l10n.howWasIt, style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height: 18),
+                  LevelPicker(
                     score: state.score,
                     onChanged: notifier.setScore,
                   ),
-                  if (state.score > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        l10n.scoreDisplay(state.score.toInt().toString()),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
 
-                  // Tags
-                  Text(
-                    l10n.tags,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
+                  Text(l10n.category.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+                  const SizedBox(height: 10),
                   TagInput(
                     tags: state.tags,
                     onTagAdded: notifier.addTag,
@@ -191,19 +203,16 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Notes
+                  Text(l10n.notes.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _notesController,
-                    decoration: InputDecoration(
-                      labelText: l10n.notes,
-                      hintText: l10n.notesHint,
-                      alignLabelWithHint: true,
-                    ),
+                    decoration: InputDecoration(hintText: l10n.notesHint),
                     onChanged: notifier.setNotes,
                     maxLines: 4,
+                    minLines: 2,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 80),
                 ],
               ),
             ),

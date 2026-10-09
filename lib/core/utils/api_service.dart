@@ -136,22 +136,24 @@ class ApiService {
 
   // --- Info Extractors ---
 
-  static ({String title, String imageUrl, List<String> tags}) extractBookInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractBookInfo(
       Map<String, dynamic> data) {
     final title = data['title'] as String? ?? 'Unknown Book';
     final cover = data['cover'] as Map<String, dynamic>?;
     final imageUrl = cover?['medium'] as String? ?? '';
-    return (title: title, imageUrl: imageUrl, tags: ['book']);
+    final sourceUrl = (data['url'] as String?) ??
+        (data['key'] != null ? '$_openLibraryBase${data['key']}' : '');
+    return (title: title, imageUrl: imageUrl, tags: ['book'], sourceUrl: sourceUrl);
   }
 
-  static ({String title, String imageUrl, List<String> tags}) extractProductInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractProductInfo(
       Map<String, dynamic> data) {
     final title = data['product_name'] as String? ?? 'Unknown Product';
     final imageUrl = data['image_url'] as String? ?? '';
-    return (title: title, imageUrl: imageUrl, tags: ['product', 'food']);
+    return (title: title, imageUrl: imageUrl, tags: ['product', 'food'], sourceUrl: '');
   }
 
-  static ({String title, String imageUrl, List<String> tags}) extractTmdbInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractTmdbInfo(
       Map<String, dynamic> data) {
     final mediaType = data['media_type'] as String? ?? 'movie';
     final title = (data['title'] ?? data['name'] ?? 'Unknown') as String;
@@ -159,13 +161,22 @@ class ApiService {
     final imageUrl =
         posterPath != null ? 'https://image.tmdb.org/t/p/w342$posterPath' : '';
     final tag = mediaType == 'tv' ? 'series' : 'movie';
-    return (title: title, imageUrl: imageUrl, tags: [tag]);
+    final id = data['id'];
+    final sourceUrl = id != null
+        ? 'https://www.themoviedb.org/${mediaType == 'tv' ? 'tv' : 'movie'}/$id'
+        : '';
+    return (title: title, imageUrl: imageUrl, tags: [tag], sourceUrl: sourceUrl);
   }
 
-  static ({String title, String imageUrl, List<String> tags}) extractPlaceInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractPlaceInfo(
       Map<String, dynamic> data) {
     final title = data['display_name'] as String? ?? 'Unknown Place';
-    return (title: title, imageUrl: '', tags: ['place']);
+    final osmType = data['osm_type'] as String? ?? '';
+    final osmId = data['osm_id'];
+    final sourceUrl = (osmType.isNotEmpty && osmId != null)
+        ? 'https://www.openstreetmap.org/$osmType/$osmId'
+        : '';
+    return (title: title, imageUrl: '', tags: ['place'], sourceUrl: sourceUrl);
   }
 
   /// Reverse geocode coordinates to a place name
@@ -275,11 +286,14 @@ out body;
     return null;
   }
 
-  static ({String title, String imageUrl, List<String> tags}) extractBoardGameInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractBoardGameInfo(
       Map<String, dynamic> data) {
     final title = data['name'] as String? ?? 'Unknown Game';
     final imageUrl = data['image'] as String? ?? '';
-    return (title: title, imageUrl: imageUrl, tags: ['game']);
+    final sourceUrl = title.isNotEmpty
+        ? 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(title)}'
+        : '';
+    return (title: title, imageUrl: imageUrl, tags: ['game'], sourceUrl: sourceUrl);
   }
 
   // --- General Barcode Lookup (UPC Item DB) ---
@@ -302,7 +316,7 @@ out body;
     return null;
   }
 
-  static ({String title, String imageUrl, List<String> tags}) extractGeneralProductInfo(
+  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractGeneralProductInfo(
       Map<String, dynamic> data) {
     final title = data['title'] as String? ?? 'Unknown Product';
     final images = data['images'] as List<dynamic>? ?? [];
@@ -314,6 +328,6 @@ out body;
         ..clear()
         ..add('game');
     }
-    return (title: title, imageUrl: imageUrl, tags: tags);
+    return (title: title, imageUrl: imageUrl, tags: tags, sourceUrl: '');
   }
 }

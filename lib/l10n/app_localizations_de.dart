@@ -15,31 +15,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeTitle => 'I Like';
 
   @override
-  String get searchTitle => 'Suche';
-
-  @override
   String get settingsTitle => 'Einstellungen';
 
   @override
   String get detailsTitle => 'Details';
 
   @override
-  String get addRatingTitle => 'Bewertung hinzufügen';
+  String get addRatingTitle => 'Neue Bewertung';
 
   @override
   String get scanBarcodeTitle => 'Barcode scannen';
 
   @override
-  String get homeTab => 'Start';
-
-  @override
-  String get searchTab => 'Suche';
-
-  @override
   String get noRatingsYet => 'Noch keine Bewertungen';
-
-  @override
-  String get tapToRate => 'Tippe auf + um etwas zu bewerten!';
 
   @override
   String get noResults => 'Keine Ergebnisse';
@@ -84,7 +72,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addTagHint => 'Tag hinzufügen...';
 
   @override
-  String get searchHint => 'Bewertungen durchsuchen...';
+  String get searchHint => 'In deinen Bewertungen suchen';
 
   @override
   String get searchEllipsis => 'Suchen...';
@@ -93,7 +81,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pleaseEnterTitle => 'Bitte gib einen Titel ein';
 
   @override
-  String get pleaseGiveRating => 'Bitte vergib eine Bewertung';
+  String get pleaseGiveRating => 'Wie fandest du’s? Wähle eine Stufe.';
 
   @override
   String get quickAdd => 'Schnell hinzufügen (Scan, URL, ...)';
@@ -105,35 +93,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanBarcode => 'Barcode scannen';
 
   @override
-  String get scanBarcodeSubtitle => 'Produkt- oder Buch-Barcode scannen';
+  String get scanBarcodeSubtitle => 'Produkt oder Buch erkennen';
 
   @override
-  String get fromUrl => 'Von URL';
+  String get fromUrl => 'Von Link';
 
   @override
-  String get fromUrlSubtitle => 'Link einfügen für automatische Details';
+  String get fromUrlSubtitle => 'Details werden automatisch geladen';
 
   @override
-  String get searchMovieSeries => 'Film / Serie suchen';
+  String get searchMovieSeries => 'Film & Serie';
 
   @override
-  String get searchMovieSeriesSubtitle =>
-      'TMDB nach Filmen & Serien durchsuchen';
+  String get searchMovieSeriesSubtitle => 'The Movie Database';
 
   @override
-  String get searchPlace => 'Ort suchen';
+  String get searchPlace => 'Ort';
 
   @override
-  String get searchPlaceSubtitle => 'Einen Ort über OpenStreetMap finden';
+  String get searchPlaceSubtitle => 'Über OpenStreetMap finden';
 
   @override
-  String get searchBook => 'Buch suchen';
+  String get searchBook => 'Buch';
 
   @override
-  String get searchBookSubtitle => 'Open Library nach Büchern durchsuchen';
+  String get searchBookSubtitle => 'Open Library durchsuchen';
 
   @override
-  String get searchBoardGame => 'Brettspiel suchen';
+  String get searchBoardGame => 'Brettspiel';
 
   @override
   String get searchBoardGameSubtitle => 'BoardGameGeek durchsuchen';
@@ -142,7 +129,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchBoardGames => 'Brettspiele suchen';
 
   @override
-  String get manualEntry => 'Manuell eingeben';
+  String get manualEntry => 'Selbst eintragen';
 
   @override
   String get manualEntrySubtitle => 'Alle Details selbst eingeben';
@@ -314,10 +301,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sortOldest => 'Älteste zuerst';
 
   @override
-  String get sortHighest => 'Beste zuerst';
+  String get sortHighest => 'Liebe zuerst';
 
   @override
-  String get sortLowest => 'Schlechteste zuerst';
+  String get sortLowest => 'Nope zuerst';
 
   @override
   String get sortAZ => 'A – Z';
@@ -334,4 +321,194 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get getStarted => 'Los geht\'s';
+
+  @override
+  String get rateNowPlaying => 'Gerade gesehen';
+
+  @override
+  String get rateNowPlayingSubtitle => 'Netflix, Prime & mehr';
+
+  @override
+  String get notificationPermissionTitle => 'Benachrichtigungszugriff benötigt';
+
+  @override
+  String get notificationPermissionBody =>
+      'Um zu erkennen, was du gerade schaust, erlaube den Benachrichtigungszugriff in den Einstellungen.';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get nothingPlaying => 'Aktuell wird nichts abgespielt';
+
+  @override
+  String get levelNope => 'Nope';
+
+  @override
+  String get levelNaja => 'Naja';
+
+  @override
+  String get levelOkay => 'Okay';
+
+  @override
+  String get levelGood => 'Gut';
+
+  @override
+  String get levelLove => 'Liebe';
+
+  @override
+  String get levelNopePhrase => 'Nie wieder';
+
+  @override
+  String get levelNajaPhrase => 'Eher nicht';
+
+  @override
+  String get levelOkayPhrase => 'Kann man machen';
+
+  @override
+  String get levelGoodPhrase => 'Gerne wieder';
+
+  @override
+  String get levelLovePhrase => 'Absoluter Liebling';
+
+  @override
+  String get filterAll => 'Alle';
+
+  @override
+  String get filterByLevel => 'Nach Stufe filtern';
+
+  @override
+  String homeSummary(int count, int loved) {
+    return '$count Dinge bewertet – $loved davon liebst du.';
+  }
+
+  @override
+  String homeSummaryShort(int count) {
+    return '$count Dinge bewertet';
+  }
+
+  @override
+  String get search => 'Suchen';
+
+  @override
+  String get sort => 'Sortieren';
+
+  @override
+  String get showResults => 'Anzeigen';
+
+  @override
+  String get newRating => 'Neue Bewertung';
+
+  @override
+  String get whatToRate => 'Was möchtest du bewerten?';
+
+  @override
+  String get howWasIt => 'Wie fandest du’s?';
+
+  @override
+  String get category => 'Kategorie';
+
+  @override
+  String get editRating => 'Bewertung ändern';
+
+  @override
+  String ratedOn(String date) {
+    return 'bewertet am $date';
+  }
+
+  @override
+  String get source => 'Quelle';
+
+  @override
+  String get barcodeLabel => 'Barcode';
+
+  @override
+  String get sortNewestHint => 'Zuletzt bewertet oben';
+
+  @override
+  String get sortOldestHint => 'Deine ersten Bewertungen oben';
+
+  @override
+  String get sortHighestHint => 'Deine Lieblinge oben';
+
+  @override
+  String get sortLowestHint => 'Was du nie wieder willst';
+
+  @override
+  String get sortAZHint => 'Alphabetisch';
+
+  @override
+  String get sortZAHint => 'Alphabetisch rückwärts';
+
+  @override
+  String get yourBalance => 'Deine Bilanz';
+
+  @override
+  String ratingsCount(int count) {
+    return '$count Bewertungen';
+  }
+
+  @override
+  String get servicesTitle => 'Dienste';
+
+  @override
+  String get moviesSeries => 'Filme & Serien';
+
+  @override
+  String get tmdbNeedsKey => 'Kostenloser TMDB-Schlüssel nötig';
+
+  @override
+  String get tmdbConnected => 'Verbunden über TMDB';
+
+  @override
+  String get setUp => 'Einrichten';
+
+  @override
+  String get ready => 'Bereit';
+
+  @override
+  String get placesShort => 'Orte';
+
+  @override
+  String get placesSubtitle => 'OpenStreetMap, ohne Schlüssel';
+
+  @override
+  String get exportJsonLong => 'Als JSON exportieren';
+
+  @override
+  String get exportCsvLong => 'Als CSV exportieren';
+
+  @override
+  String get nothingInLevel => 'Hier ist noch nichts';
+
+  @override
+  String get nothingInLevelSubtitle =>
+      'Sobald du etwas so bewertest, taucht es hier auf.';
+
+  @override
+  String get rateAction => 'Bewerten';
+
+  @override
+  String get today => 'heute';
+
+  @override
+  String get yesterday => 'gestern';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get back => 'Zurück';
+
+  @override
+  String get share => 'Teilen';
+
+  @override
+  String get edit => 'Bearbeiten';
+
+  @override
+  String get addCategory => 'Hinzufügen';
+
+  @override
+  String get pickALevel => 'Tippe auf eine Stufe';
 }

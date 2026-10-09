@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/rating_level.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/barcode_helper.dart';
 import '../../core/utils/url_helper.dart';
@@ -11,6 +14,7 @@ import 'add_rating_provider.dart';
 void showQuickAddSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
     builder: (ctx) => _QuickAddSheetContent(parentContext: context),
   );
 }
@@ -24,105 +28,272 @@ class _QuickAddSheetContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final hasTmdbKey = ref.watch(tmdbApiKeyProvider).isNotEmpty;
+    final scheme = Theme.of(context).colorScheme;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.howToAdd,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.qr_code_scanner),
-              title: Text(l10n.scanBarcode),
-              subtitle: Text(l10n.scanBarcodeSubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                final ctx = parentContext;
-                ctx.push('/scanner').then((result) {
-                  if (result != null && result is String && ctx.mounted) {
-                    _handleBarcode(ctx, result);
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l10n.whatToRate, style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 16),
+              // Primary: barcode
+              Material(
+                color: scheme.onSurface,
+                borderRadius: BorderRadius.circular(22),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(22),
+                  onTap: () {
+                    Navigator.pop(context);
+                    final ctx = parentContext;
+                    ctx.push('/scanner').then((result) {
+                      if (result != null && result is String && ctx.mounted) {
+                        handleBarcode(ctx, result);
+                      }
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: AppColors.raspberry,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 26),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.scanBarcode,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: scheme.surface,
+                                ),
+                              ),
+                              Text(
+                                l10n.scanBarcodeSubtitle,
+                                style: TextStyle(fontSize: 14, color: scheme.surface.withAlpha(190)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, color: scheme.surface),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              _SourceTile(
+                icon: Icons.link_rounded,
+                title: l10n.fromUrl,
+                subtitle: l10n.fromUrlSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  _showUrlDialog(parentContext);
+                },
+              ),
+              _SourceTile(
+                icon: Icons.live_tv_rounded,
+                title: l10n.rateNowPlaying,
+                subtitle: l10n.rateNowPlayingSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  _detectNowPlaying(parentContext, l10n);
+                },
+              ),
+              _SourceTile(
+                icon: Icons.movie_outlined,
+                title: l10n.searchMovieSeries,
+                subtitle: l10n.searchMovieSeriesSubtitle,
+                badge: hasTmdbKey ? null : l10n.setUp,
+                onTap: () {
+                  Navigator.pop(context);
+                  if (hasTmdbKey) {
+                    _showApiSearchDialog(parentContext, 'tmdb', ref.read(tmdbApiKeyProvider));
+                  } else {
+                    parentContext.push('/settings');
                   }
-                });
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.link),
-              title: Text(l10n.fromUrl),
-              subtitle: Text(l10n.fromUrlSubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                _showUrlDialog(parentContext);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.movie_outlined),
-              title: Text(l10n.searchMovieSeries),
-              subtitle: Text(l10n.searchMovieSeriesSubtitle),
-              enabled: hasTmdbKey,
-              onTap: () {
-                Navigator.pop(context);
-                _showApiSearchDialog(parentContext, 'tmdb', ref.read(tmdbApiKeyProvider));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.place_outlined),
-              title: Text(l10n.searchPlace),
-              subtitle: Text(l10n.searchPlaceSubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                final ctx = parentContext;
-                ctx.push('/map').then((result) {
-                  if (result != null && ctx.mounted) {
-                    final info = result as ({String title, String imageUrl, List<String> tags});
-                    ctx.push('/add', extra: PrefillData(
-                      title: info.title,
-                      imageUrl: info.imageUrl,
-                      tags: info.tags,
-                    ));
-                  }
-                });
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.menu_book_outlined),
-              title: Text(l10n.searchBook),
-              subtitle: Text(l10n.searchBookSubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                _showApiSearchDialog(parentContext, 'book', '');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.casino_outlined),
-              title: Text(l10n.searchBoardGame),
-              subtitle: Text(l10n.searchBoardGameSubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                _showApiSearchDialog(parentContext, 'boardgame', '');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: Text(l10n.manualEntry),
-              subtitle: Text(l10n.manualEntrySubtitle),
-              onTap: () {
-                Navigator.pop(context);
-                parentContext.push('/add');
-              },
-            ),
-          ],
+                },
+              ),
+              _SourceTile(
+                icon: Icons.place_outlined,
+                title: l10n.searchPlace,
+                subtitle: l10n.searchPlaceSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  final ctx = parentContext;
+                  ctx.push('/map').then((result) {
+                    if (result != null && ctx.mounted) {
+                      final info = result as ({String title, String imageUrl, List<String> tags, String sourceUrl});
+                      ctx.push('/add', extra: PrefillData(
+                        title: info.title,
+                        imageUrl: info.imageUrl,
+                        tags: info.tags,
+                        sourceUrl: info.sourceUrl,
+                      ));
+                    }
+                  });
+                },
+              ),
+              _SourceTile(
+                icon: Icons.menu_book_outlined,
+                title: l10n.searchBook,
+                subtitle: l10n.searchBookSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  _showApiSearchDialog(parentContext, 'book', '');
+                },
+              ),
+              _SourceTile(
+                icon: Icons.casino_outlined,
+                title: l10n.searchBoardGame,
+                subtitle: l10n.searchBoardGameSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  _showApiSearchDialog(parentContext, 'boardgame', '');
+                },
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: Text(l10n.manualEntry),
+                onPressed: () {
+                  Navigator.pop(context);
+                  parentContext.push('/add');
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-Future<void> _handleBarcode(BuildContext context, String barcode) async {
+class _SourceTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _SourceTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 58),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              if (badge != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: RatingLevel.liebe.tint(context),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: RatingLevel.liebe.strong(context),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _detectNowPlaying(BuildContext context, AppLocalizations l10n) async {
+  const channel = MethodChannel('com.ilike.i_like/shortcuts');
+  final result = await channel.invokeMapMethod<String, dynamic>('getNowPlaying');
+
+  if (result?['error'] == 'permission_denied') {
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.notificationPermissionTitle),
+        content: Text(l10n.notificationPermissionBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              const MethodChannel('com.ilike.i_like/shortcuts')
+                  .invokeMethod('openNotificationSettings');
+            },
+            child: Text(l10n.openSettings),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  if (!context.mounted) return;
+
+  final title = result?['title'] as String?;
+  if (title == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.nothingPlaying)),
+    );
+    return;
+  }
+
+  context.push('/add', extra: PrefillData(title: title, tags: ['series']));
+}
+
+Future<void> handleBarcode(BuildContext context, String barcode) async {
   final tags = tagsFromBarcode(barcode);
 
   // Show loading indicator while fetching metadata
@@ -146,6 +317,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
           title: info.title,
           imageUrl: info.imageUrl,
           tags: info.tags,
+          sourceUrl: 'https://openlibrary.org/isbn/$barcode',
           barcode: barcode,
         ));
       }
@@ -162,6 +334,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
           title: info.title,
           imageUrl: info.imageUrl,
           tags: info.tags,
+          sourceUrl: 'https://world.openfoodfacts.org/product/$barcode',
           barcode: barcode,
         ));
       }
@@ -180,6 +353,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
           title: bggResult.title,
           imageUrl: bggResult.imageUrl,
           tags: bggResult.tags,
+          sourceUrl: bggResult.sourceUrl,
           barcode: barcode,
         ));
         return;
@@ -204,7 +378,7 @@ Future<void> _handleBarcode(BuildContext context, String barcode) async {
 }
 
 /// Try to find a board game on Wikipedia by title and fetch its image
-Future<({String title, String imageUrl, List<String> tags})?> _tryBoardGameLookup(String title) async {
+Future<({String title, String imageUrl, List<String> tags, String sourceUrl})?> _tryBoardGameLookup(String title) async {
   try {
     final results = await ApiService.searchBoardGames(title);
     if (results.isEmpty) return null;
@@ -277,6 +451,7 @@ void _showApiSearchDialog(BuildContext context, String type, String tmdbApiKey) 
           title: info.title,
           imageUrl: info.imageUrl,
           tags: info.tags,
+          sourceUrl: info.sourceUrl,
         ));
       },
     ),
@@ -287,7 +462,7 @@ class _ApiSearchDialog extends StatefulWidget {
   final String type;
   final TextEditingController searchController;
   final String tmdbApiKey;
-  final void Function(({String title, String imageUrl, List<String> tags})) onSelected;
+  final void Function(({String title, String imageUrl, List<String> tags, String sourceUrl})) onSelected;
 
   const _ApiSearchDialog({
     required this.type,
@@ -310,7 +485,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'place' => l10n.searchPlaces,
       'book' => l10n.searchBooks,
       'boardgame' => l10n.searchBoardGames,
-      _ => l10n.searchTitle,
+      _ => l10n.searchEllipsis,
     };
   }
 
@@ -346,7 +521,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
           return;
         }
       }
-      widget.onSelected((title: pageTitle, imageUrl: '', tags: ['game']));
+      widget.onSelected((title: pageTitle, imageUrl: '', tags: ['game'], sourceUrl: ''));
       return;
     }
 
@@ -354,7 +529,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'tmdb' => ApiService.extractTmdbInfo(result),
       'place' => ApiService.extractPlaceInfo(result),
       'book' => ApiService.extractBookInfo(result),
-      _ => (title: 'Unknown', imageUrl: '', tags: <String>[]),
+      _ => (title: 'Unknown', imageUrl: '', tags: <String>[], sourceUrl: ''),
     };
     widget.onSelected(info);
     Navigator.pop(context);

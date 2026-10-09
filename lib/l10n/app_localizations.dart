@@ -110,12 +110,6 @@ abstract class AppLocalizations {
   /// **'I Like'**
   String get homeTitle;
 
-  /// No description provided for @searchTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get searchTitle;
-
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -131,7 +125,7 @@ abstract class AppLocalizations {
   /// No description provided for @addRatingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Add Rating'**
+  /// **'New rating'**
   String get addRatingTitle;
 
   /// No description provided for @scanBarcodeTitle.
@@ -140,29 +134,11 @@ abstract class AppLocalizations {
   /// **'Scan Barcode'**
   String get scanBarcodeTitle;
 
-  /// No description provided for @homeTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Home'**
-  String get homeTab;
-
-  /// No description provided for @searchTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get searchTab;
-
   /// No description provided for @noRatingsYet.
   ///
   /// In en, this message translates to:
   /// **'No ratings yet'**
   String get noRatingsYet;
-
-  /// No description provided for @tapToRate.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap + to rate something!'**
-  String get tapToRate;
 
   /// No description provided for @noResults.
   ///
@@ -251,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search ratings...'**
+  /// **'Search your ratings'**
   String get searchHint;
 
   /// No description provided for @searchEllipsis.
@@ -269,7 +245,7 @@ abstract class AppLocalizations {
   /// No description provided for @pleaseGiveRating.
   ///
   /// In en, this message translates to:
-  /// **'Please give a rating'**
+  /// **'How was it? Pick a level.'**
   String get pleaseGiveRating;
 
   /// No description provided for @quickAdd.
@@ -293,61 +269,61 @@ abstract class AppLocalizations {
   /// No description provided for @scanBarcodeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Scan a product or book barcode'**
+  /// **'Recognise a product or book'**
   String get scanBarcodeSubtitle;
 
   /// No description provided for @fromUrl.
   ///
   /// In en, this message translates to:
-  /// **'From URL'**
+  /// **'From link'**
   String get fromUrl;
 
   /// No description provided for @fromUrlSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Paste a link to auto-fill details'**
+  /// **'Details load automatically'**
   String get fromUrlSubtitle;
 
   /// No description provided for @searchMovieSeries.
   ///
   /// In en, this message translates to:
-  /// **'Search Movie / Series'**
+  /// **'Movie & series'**
   String get searchMovieSeries;
 
   /// No description provided for @searchMovieSeriesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Search TMDB for movies & TV shows'**
+  /// **'The Movie Database'**
   String get searchMovieSeriesSubtitle;
 
   /// No description provided for @searchPlace.
   ///
   /// In en, this message translates to:
-  /// **'Search Place'**
+  /// **'Place'**
   String get searchPlace;
 
   /// No description provided for @searchPlaceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Find a place via OpenStreetMap'**
+  /// **'Find it on OpenStreetMap'**
   String get searchPlaceSubtitle;
 
   /// No description provided for @searchBook.
   ///
   /// In en, this message translates to:
-  /// **'Search Book'**
+  /// **'Book'**
   String get searchBook;
 
   /// No description provided for @searchBookSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Search Open Library for books'**
+  /// **'Search Open Library'**
   String get searchBookSubtitle;
 
   /// No description provided for @searchBoardGame.
   ///
   /// In en, this message translates to:
-  /// **'Search Board Game'**
+  /// **'Board game'**
   String get searchBoardGame;
 
   /// No description provided for @searchBoardGameSubtitle.
@@ -365,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @manualEntry.
   ///
   /// In en, this message translates to:
-  /// **'Manual Entry'**
+  /// **'Enter it yourself'**
   String get manualEntry;
 
   /// No description provided for @manualEntrySubtitle.
@@ -671,13 +647,13 @@ abstract class AppLocalizations {
   /// No description provided for @sortHighest.
   ///
   /// In en, this message translates to:
-  /// **'Highest rated'**
+  /// **'Love first'**
   String get sortHighest;
 
   /// No description provided for @sortLowest.
   ///
   /// In en, this message translates to:
-  /// **'Lowest rated'**
+  /// **'Nope first'**
   String get sortLowest;
 
   /// No description provided for @sortAZ.
@@ -709,6 +685,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get started'**
   String get getStarted;
+
+  /// No description provided for @rateNowPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Just watched'**
+  String get rateNowPlaying;
+
+  /// No description provided for @rateNowPlayingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Netflix, Prime & more'**
+  String get rateNowPlayingSubtitle;
+
+  /// No description provided for @notificationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Access Required'**
+  String get notificationPermissionTitle;
+
+  /// No description provided for @notificationPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To detect what you\'re watching, grant notification access in Settings.'**
+  String get notificationPermissionBody;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @nothingPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is currently playing'**
+  String get nothingPlaying;
+
+  /// No description provided for @levelNope.
+  ///
+  /// In en, this message translates to:
+  /// **'Nope'**
+  String get levelNope;
+
+  /// No description provided for @levelNaja.
+  ///
+  /// In en, this message translates to:
+  /// **'Meh'**
+  String get levelNaja;
+
+  /// No description provided for @levelOkay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get levelOkay;
+
+  /// No description provided for @levelGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get levelGood;
+
+  /// No description provided for @levelLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Love'**
+  String get levelLove;
+
+  /// No description provided for @levelNopePhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Never again'**
+  String get levelNopePhrase;
+
+  /// No description provided for @levelNajaPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Rather not'**
+  String get levelNajaPhrase;
+
+  /// No description provided for @levelOkayPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s fine'**
+  String get levelOkayPhrase;
+
+  /// No description provided for @levelGoodPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Would have it again'**
+  String get levelGoodPhrase;
+
+  /// No description provided for @levelLovePhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Absolute favourite'**
+  String get levelLovePhrase;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterByLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by level'**
+  String get filterByLevel;
+
+  /// No description provided for @homeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} things rated — you love {loved} of them.'**
+  String homeSummary(int count, int loved);
+
+  /// No description provided for @homeSummaryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} things rated'**
+  String homeSummaryShort(int count);
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @showResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showResults;
+
+  /// No description provided for @newRating.
+  ///
+  /// In en, this message translates to:
+  /// **'New rating'**
+  String get newRating;
+
+  /// No description provided for @whatToRate.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to rate?'**
+  String get whatToRate;
+
+  /// No description provided for @howWasIt.
+  ///
+  /// In en, this message translates to:
+  /// **'How was it?'**
+  String get howWasIt;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @editRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rating'**
+  String get editRating;
+
+  /// No description provided for @ratedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'rated on {date}'**
+  String ratedOn(String date);
+
+  /// No description provided for @source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get source;
+
+  /// No description provided for @barcodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcodeLabel;
+
+  /// No description provided for @sortNewestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Most recently rated on top'**
+  String get sortNewestHint;
+
+  /// No description provided for @sortOldestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first ratings on top'**
+  String get sortOldestHint;
+
+  /// No description provided for @sortHighestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your favourites on top'**
+  String get sortHighestHint;
+
+  /// No description provided for @sortLowestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you never want again'**
+  String get sortLowestHint;
+
+  /// No description provided for @sortAZHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get sortAZHint;
+
+  /// No description provided for @sortZAHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse alphabetical'**
+  String get sortZAHint;
+
+  /// No description provided for @yourBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance'**
+  String get yourBalance;
+
+  /// No description provided for @ratingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ratings'**
+  String ratingsCount(int count);
+
+  /// No description provided for @servicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get servicesTitle;
+
+  /// No description provided for @moviesSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies & series'**
+  String get moviesSeries;
+
+  /// No description provided for @tmdbNeedsKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Free TMDB key required'**
+  String get tmdbNeedsKey;
+
+  /// No description provided for @tmdbConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected via TMDB'**
+  String get tmdbConnected;
+
+  /// No description provided for @setUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get setUp;
+
+  /// No description provided for @ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get ready;
+
+  /// No description provided for @placesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get placesShort;
+
+  /// No description provided for @placesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap, no key needed'**
+  String get placesSubtitle;
+
+  /// No description provided for @exportJsonLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as JSON'**
+  String get exportJsonLong;
+
+  /// No description provided for @exportCsvLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as CSV'**
+  String get exportCsvLong;
+
+  /// No description provided for @nothingInLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get nothingInLevel;
+
+  /// No description provided for @nothingInLevelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you rate something like this, it shows up here.'**
+  String get nothingInLevelSubtitle;
+
+  /// No description provided for @rateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get rateAction;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get yesterday;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addCategory;
+
+  /// No description provided for @pickALevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a level'**
+  String get pickALevel;
 }
 
 class _AppLocalizationsDelegate

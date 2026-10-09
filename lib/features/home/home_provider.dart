@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/ratings_dao.dart';
+import '../../core/theme/rating_level.dart';
 
 enum SortOption { newest, oldest, highest, lowest, az, za }
 
@@ -19,11 +20,17 @@ final ratingsProvider = StreamProvider<List<Rating>>((ref) {
   return ref.watch(ratingsDaoProvider).watchAll();
 });
 
+// Search query
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
+// Whether the search field is expanded
+final searchExpandedProvider = StateProvider<bool>((ref) => false);
+
 // Selected tag filter
 final selectedTagFilterProvider = StateProvider<String?>((ref) => null);
 
-// Minimum star filter
-final minStarFilterProvider = StateProvider<double>((ref) => 0);
+// Word-level filter (null = all levels)
+final levelFilterProvider = StateProvider<RatingLevel?>((ref) => null);
 
 // Sort option
 final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest);
@@ -31,12 +38,21 @@ final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest)
 // Filtered and sorted ratings
 final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
   final ratingsAsync = ref.watch(ratingsProvider);
+  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
   final selectedTag = ref.watch(selectedTagFilterProvider);
-  final minStars = ref.watch(minStarFilterProvider);
+  final level = ref.watch(levelFilterProvider);
   final sort = ref.watch(sortOptionProvider);
 
   return ratingsAsync.whenData((ratings) {
     var filtered = ratings.toList();
+
+    if (query.isNotEmpty) {
+      filtered = filtered.where((r) =>
+        r.title.toLowerCase().contains(query) ||
+        r.tags.toLowerCase().contains(query) ||
+        r.notes.toLowerCase().contains(query)
+      ).toList();
+    }
 
     if (selectedTag != null) {
       filtered = filtered.where((r) {
@@ -45,8 +61,8 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
       }).toList();
     }
 
-    if (minStars > 0) {
-      filtered = filtered.where((r) => r.score >= minStars).toList();
+    if (level != null) {
+      filtered = filtered.where((r) => RatingLevel.fromScore(r.score) == level).toList();
     }
 
     switch (sort) {

@@ -1,22 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color accent = Color(0xFFF59E0B); // Amber
-  static const Color accentLight = Color(0xFFFBBF24);
-  static const Color accentDark = Color(0xFFD97706);
+  // Brand
+  static const Color raspberry = Color(0xFFD41D55); // Actions, white text passes AA
+  static const Color heart = Color(0xFFE5245E); // Heart glyph only
+  static const Color raspberryText = Color(0xFFC2184F); // Links on light
+
+  // Neutrals – light
+  static const Color ink = Color(0xFF1C1B22);
+  static const Color inkMuted = Color(0xFF5E5C6B);
+  static const Color mist = Color(0xFFF5F4F7);
+  static const Color line = Color(0xFFECEBF0);
+
+  // Neutrals – dark
+  static const Color nightBackground = Color(0xFF121116);
+  static const Color nightSurface = Color(0xFF1E1D24);
+  static const Color nightLine = Color(0xFF2C2B33);
+  static const Color nightInk = Color(0xFFF3F2F6);
+  static const Color nightInkMuted = Color(0xFFA9A7B6);
+
+  /// Kept for older call sites; the brand accent is now raspberry.
+  static const Color accent = raspberry;
 
   static const Map<String, Color> tagColors = {
-    'product': Color(0xFF3B82F6),   // Blue
-    'book': Color(0xFF8B5CF6),      // Purple
-    'movie': Color(0xFFEF4444),     // Red
-    'series': Color(0xFFF97316),    // Orange
-    'place': Color(0xFF10B981),     // Green
-    'url': Color(0xFF06B6D4),       // Cyan
-    'food': Color(0xFFF59E0B),      // Amber
-    'music': Color(0xFFEC4899),     // Pink
-    'game': Color(0xFF6366F1),      // Indigo
-    'app': Color(0xFF14B8A6),       // Teal
-    'other': Color(0xFF6B7280),     // Gray
+    'product': Color(0xFF2453B0),
+    'book': Color(0xFF0B6B5F),
+    'movie': Color(0xFF7A2DB8),
+    'series': Color(0xFF7A2DB8),
+    'place': Color(0xFF2D6A1F),
+    'url': Color(0xFF0E6A8A),
+    'food': Color(0xFF8A5200),
+    'music': Color(0xFFB0123F),
+    'game': Color(0xFFA11F55),
+    'app': Color(0xFF0B6B5F),
+    'other': Color(0xFF4E4C5C),
   };
 
   static Color tagColor(String tag) {
@@ -25,18 +42,17 @@ class AppColors {
   }
 
   static Color _hashColor(String tag) {
-    final hash = tag.hashCode;
-    final colors = [
-      const Color(0xFF3B82F6),
-      const Color(0xFF8B5CF6),
-      const Color(0xFFEF4444),
-      const Color(0xFFF97316),
-      const Color(0xFF10B981),
-      const Color(0xFF06B6D4),
-      const Color(0xFFEC4899),
-      const Color(0xFF6366F1),
-      const Color(0xFF14B8A6),
-    ];
-    return colors[hash.abs() % colors.length];
+    final colors = tagColors.values.toList();
+    return colors[tag.hashCode.abs() % colors.length];
   }
+
+  /// Neutral surface for secondary fills (icon circles, inputs, segments).
+  static Color subtle(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? nightSurface : mist;
+
+  static Color muted(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? nightInkMuted : inkMuted;
+
+  static Color divider(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? nightLine : line;
 }
