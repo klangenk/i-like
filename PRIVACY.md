@@ -83,9 +83,9 @@ Die App richtet sich nicht gezielt an Kinder unter 13 Jahren und erhebt bewusst 
 
 ## 10. Änderungen
 
-Wenn sich diese Datenschutzerklärung wesentlich ändert, wird die Versionsdaten oben aktualisiert. Die jeweils aktuelle Version ist unter folgender Adresse abrufbar:
+Wenn sich diese Datenschutzerklärung wesentlich ändert, wird das Datum oben aktualisiert. Die jeweils aktuelle Version findest du in der App unter **Einstellungen → Über → Datenschutz** sowie unter folgender Adresse:
 
-**https://github.com/[dein-github-nutzername]/[repo-name]/blob/main/PRIVACY.md**
+**https://github.com/klangenk/i-like/blob/main/PRIVACY.md**
 
 ---
 
