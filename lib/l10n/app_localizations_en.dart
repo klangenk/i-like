@@ -511,4 +511,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickALevel => 'Tap a level';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get version => 'Version';
 }

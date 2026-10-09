@@ -6,6 +6,7 @@ import '../../features/add_rating/add_rating_provider.dart';
 import '../../features/add_rating/map_screen.dart';
 import '../../features/add_rating/scanner_screen.dart';
 import '../../features/detail/detail_screen.dart';
+import '../../features/settings/privacy_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -43,6 +44,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/privacy',
+      builder: (context, state) => const PrivacyScreen(),
     ),
   ],
 );

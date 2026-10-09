@@ -157,5 +157,8 @@
   "share": "Teilen",
   "edit": "Bearbeiten",
   "addCategory": "Hinzufügen",
-  "pickALevel": "Tippe auf eine Stufe"
+  "pickALevel": "Tippe auf eine Stufe",
+  "aboutTitle": "Über",
+  "privacyPolicy": "Datenschutz",
+  "version": "Version"
 }

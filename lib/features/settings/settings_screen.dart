@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -14,6 +16,8 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'export_import_service.dart';
 import 'settings_provider.dart';
+
+final _packageInfoProvider = FutureProvider<PackageInfo>((ref) => PackageInfo.fromPlatform());
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -69,6 +73,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final hasKey = ref.watch(tmdbApiKeyProvider).isNotEmpty;
     final ratings = ref.watch(ratingsProvider).valueOrNull ?? const [];
+    final version = ref.watch(_packageInfoProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -125,6 +130,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: Icons.download_rounded,
             title: l10n.importRatings,
             onTap: _handleImport,
+          ),
+          const SizedBox(height: 24),
+
+          _SectionLabel(l10n.aboutTitle),
+          _SettingsRow(
+            icon: Icons.shield_outlined,
+            title: l10n.privacyPolicy,
+            trailing: Icon(Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+            onTap: () => context.push('/privacy'),
+          ),
+          _SettingsRow(
+            icon: Icons.info_outline_rounded,
+            title: l10n.version,
+            trailing: Text(
+              version == null ? '' : '${version.version} (${version.buildNumber})',
+              style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
           ),
         ],
       ),

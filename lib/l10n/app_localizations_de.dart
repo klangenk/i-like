@@ -511,4 +511,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get pickALevel => 'Tippe auf eine Stufe';
+
+  @override
+  String get aboutTitle => 'Über';
+
+  @override
+  String get privacyPolicy => 'Datenschutz';
+
+  @override
+  String get version => 'Version';
 }

@@ -247,5 +247,8 @@
   "share": "Share",
   "edit": "Edit",
   "addCategory": "Add",
-  "pickALevel": "Tap a level"
+  "pickALevel": "Tap a level",
+  "aboutTitle": "About",
+  "privacyPolicy": "Privacy policy",
+  "version": "Version"
 }
