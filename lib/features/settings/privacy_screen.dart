@@ -5,8 +5,8 @@ import '../../core/utils/url_helper.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/round_icon_button.dart';
 
-/// Shows the bundled PRIVACY.md, so the policy is readable offline and
-/// independent of where the repository is hosted.
+/// Shows the bundled privacy policy (German PRIVACY.md, English
+/// PRIVACY.en.md for every other locale), so it is readable offline.
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
 
@@ -15,6 +15,9 @@ class PrivacyScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final asset = Localizations.localeOf(context).languageCode == 'de'
+        ? 'PRIVACY.md'
+        : 'PRIVACY.en.md';
 
     final styleSheet = MarkdownStyleSheet.fromTheme(theme).copyWith(
       h1: theme.textTheme.headlineMedium,
@@ -47,7 +50,7 @@ class PrivacyScreen extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<String>(
-        future: rootBundle.loadString('PRIVACY.md'),
+        future: rootBundle.loadString(asset),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

@@ -1,6 +1,6 @@
 # Datenschutzerklärung – I Like
 
-*Zuletzt aktualisiert: März 2026*
+*Zuletzt aktualisiert: Oktober 2026* · [English version](https://github.com/klangenk/i-like/blob/main/PRIVACY.en.md)
 
 ## 1. Verantwortlicher
 
