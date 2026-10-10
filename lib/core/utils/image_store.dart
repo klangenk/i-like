@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-/// Downloads remote images to the app's documents directory so they remain
-/// available even after the original URL goes stale or is deleted.
+/// Keeps rating images in the app's documents directory: downloaded remote
+/// images (so they survive stale URLs) and the user's own photos.
 class ImageStore {
   /// Downloads [imageUrl] and saves it under
   /// `<documents>/rating_images/<timestamp>.<ext>`.
@@ -30,6 +30,24 @@ class ImageStore {
       await file.writeAsBytes(response.bodyBytes);
 
       return file.path;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Copies a photo the user took or picked (e.g. from image_picker's cache)
+  /// into `<documents>/rating_images/`. Returns the new path, or `null` on
+  /// failure.
+  static Future<String?> storeLocalCopy(String sourcePath) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory('${dir.path}/rating_images');
+      await imagesDir.create(recursive: true);
+      final dot = sourcePath.lastIndexOf('.');
+      final ext = dot > sourcePath.lastIndexOf('/') ? sourcePath.substring(dot) : '.jpg';
+      final target = File('${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}$ext');
+      await File(sourcePath).copy(target.path);
+      return target.path;
     } catch (_) {
       return null;
     }

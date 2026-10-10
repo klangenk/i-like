@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchBoardGame => 'Board game';
 
   @override
-  String get searchBoardGameSubtitle => 'Search BoardGameGeek';
+  String get searchBoardGameSubtitle => 'Find it on Wikipedia';
 
   @override
   String get searchBoardGames => 'Search Board Games';
@@ -379,12 +379,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeSummary(int count, int loved) {
-    return '$count things rated — you love $loved of them.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things rated',
+      one: '1 thing rated',
+    );
+    return '$_temp0 — you love $loved of them.';
   }
 
   @override
   String homeSummaryShort(int count) {
-    return '$count things rated';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things rated',
+      one: '1 thing rated',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -445,7 +457,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ratingsCount(int count) {
-    return '$count ratings';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ratings',
+      one: '1 rating',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -520,4 +538,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get version => 'Version';
+
+  @override
+  String get addPhoto => 'Add photo';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get photoError => 'The photo could not be loaded.';
+
+  @override
+  String get creatorLabel => 'By';
+
+  @override
+  String get creatorHint => 'Author, maker, brand …';
+
+  @override
+  String get yearLabel => 'Year';
+
+  @override
+  String byCreator(String creator) {
+    return 'by $creator';
+  }
 }

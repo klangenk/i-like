@@ -17,14 +17,14 @@ Diese App wird privat betrieben. Bei Fragen zum Datenschutz wende dich an den En
 ## 3. Berechtigungen
 
 ### Kamera
-- **Wofür:** Barcode-Scanner (Produkte, Bücher, Brettspiele)
-- **Wann:** Nur wenn du den Scanner aktiv öffnest
-- **Gespeichert:** Nein – die Kamera wird ausschließlich zur Erkennung des Barcodes genutzt; es werden keine Fotos aufgenommen oder gespeichert
+- **Wofür:** Barcode-Scanner (Produkte, Bücher, Brettspiele) und – wenn du möchtest – ein eigenes Foto für eine Bewertung
+- **Wann:** Nur wenn du den Scanner öffnest oder aktiv „Foto aufnehmen“ wählst
+- **Gespeichert:** Beim Scannen werden keine Fotos aufgenommen. Fotos, die du für eine Bewertung aufnimmst, werden ausschließlich lokal in der App gespeichert
 
-### Standort
-- **Wofür:** Anzeige deines aktuellen Standorts auf der Karte bei der Ortssuche
-- **Wann:** Nur wenn du die Ortssuche öffnest und die Berechtigung erteilst
-- **Gespeichert:** Nein – der Standort wird nicht gespeichert oder übermittelt
+### Fotos (Galerie)
+- **Wofür:** Ein vorhandenes Foto als Bild für eine Bewertung auswählen
+- **Wann:** Nur wenn du aktiv „Aus Galerie wählen“ antippst; die App sieht dabei nur das Foto, das du auswählst
+- **Gespeichert:** Eine Kopie des gewählten Fotos wird lokal in der App gespeichert und nicht übertragen
 
 ---
 
@@ -37,10 +37,8 @@ Wenn du bestimmte Funktionen nutzt, werden Anfragen an folgende externe Dienste 
 | Produktsuche via Barcode (Lebensmittel) | [Open Food Facts](https://world.openfoodfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
 | Produktsuche via Barcode (allgemein) | [UPC Item DB](https://www.upcitemdb.com) | [upcitemdb.com/privacy](https://www.upcitemdb.com/privacy) |
 | Buchsuche & ISBN-Lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
-| Film- & Seriensuche | [TMDB](https://www.themoviedb.org) (nur mit selbst hinterlegtem API-Schlüssel) | [themoviedb.org/privacy-policy](https://www.themoviedb.org/privacy-policy) |
-| Ortssuche & Kartenanzeige | [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org) & [OpenStreetMap](https://www.openstreetmap.org) | [osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy) |
-| Brettspielsuche | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
-| URL-Vorschau | Die jeweils aufgerufene Website | Abhängig von der Website |
+| Brettspielsuche (inkl. Bilder) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
+| Details zu einem Link (Titel, Bild) | Die jeweils aufgerufene Website, z. B. Amazon | Abhängig von der Website |
 
 Alle Anfragen erfolgen nur dann, wenn du die entsprechende Funktion aktiv verwendest.
 

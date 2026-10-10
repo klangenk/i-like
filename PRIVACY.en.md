@@ -17,14 +17,14 @@ This app is operated privately. If you have any questions about privacy, please 
 ## 3. Permissions
 
 ### Camera
-- **Purpose:** Barcode scanner (products, books, board games)
-- **When:** Only when you actively open the scanner
-- **Stored:** No – the camera is used solely to recognise the barcode; no photos are taken or stored
+- **Purpose:** Barcode scanner (products, books, board games) and – if you want – your own photo for a rating
+- **When:** Only when you open the scanner or actively choose "Take photo"
+- **Stored:** Scanning takes no photos. Photos you take for a rating are stored only locally in the app
 
-### Location
-- **Purpose:** Showing your current location on the map when searching for places
-- **When:** Only when you open the place search and grant the permission
-- **Stored:** No – your location is neither stored nor transmitted
+### Photos (gallery)
+- **Purpose:** Choosing an existing photo as the image for a rating
+- **When:** Only when you actively tap "Choose from gallery"; the app only sees the photo you select
+- **Stored:** A copy of the selected photo is stored locally in the app and is not transmitted
 
 ---
 
@@ -37,10 +37,8 @@ When you use certain features, requests are sent to the following external servi
 | Product lookup via barcode (food) | [Open Food Facts](https://world.openfoodfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
 | Product lookup via barcode (general) | [UPC Item DB](https://www.upcitemdb.com) | [upcitemdb.com/privacy](https://www.upcitemdb.com/privacy) |
 | Book search & ISBN lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
-| Movie & series search | [TMDB](https://www.themoviedb.org) (only with an API key you provide yourself) | [themoviedb.org/privacy-policy](https://www.themoviedb.org/privacy-policy) |
-| Place search & map display | [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org) & [OpenStreetMap](https://www.openstreetmap.org) | [osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy) |
-| Board game search | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
-| Link preview | The website you open | Depends on the website |
+| Board game search (incl. images) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
+| Details for a link (title, image) | The website you open, e.g. Amazon | Depends on the website |
 
 Requests are only made when you actively use the corresponding feature.
 

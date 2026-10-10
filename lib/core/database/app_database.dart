@@ -29,6 +29,10 @@ class Ratings extends Table {
   /// goes stale.
   TextColumn get localImagePath =>
       text().named('local_image_path').withDefault(const Constant(''))();
+  /// Author, manufacturer, brand or designer – whoever made the item.
+  TextColumn get creator => text().withDefault(const Constant(''))();
+  /// Release or publication year as entered/fetched, e.g. "1995". Empty if unknown.
+  TextColumn get year => text().withDefault(const Constant(''))();
   DateTimeColumn get createdAt =>
       dateTime().named('created_at').withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt =>
@@ -61,7 +65,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -75,6 +79,10 @@ class AppDatabase extends _$AppDatabase {
       onUpgrade: (m, from, to) async {
         if (from < 2) {
           await m.addColumn(ratings, ratings.localImagePath);
+        }
+        if (from < 3) {
+          await m.addColumn(ratings, ratings.creator);
+          await m.addColumn(ratings, ratings.year);
         }
       },
       /// Runs before the database is used on every app start.

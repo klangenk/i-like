@@ -15,7 +15,6 @@ import '../../shared/widgets/round_icon_button.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'export_import_service.dart';
-import 'settings_provider.dart';
 
 final _packageInfoProvider = FutureProvider<PackageInfo>((ref) => PackageInfo.fromPlatform());
 
@@ -27,51 +26,9 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  Future<void> _showTmdbDialog() async {
-    final l10n = AppLocalizations.of(context)!;
-    final hasKey = ref.read(tmdbApiKeyProvider).isNotEmpty;
-    final messenger = ScaffoldMessenger.of(context);
-
-    if (hasKey) {
-      final remove = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.moviesSeries),
-          content: Text(l10n.apiKeyConfigured),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.onSurface),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
-              child: Text(l10n.removeKey),
-            ),
-          ],
-        ),
-      );
-      if (remove == true) await ref.read(tmdbApiKeyProvider.notifier).clearApiKey();
-      return;
-    }
-
-    final key = await showDialog<String>(
-      context: context,
-      builder: (ctx) => const _TmdbKeyDialog(),
-    );
-    if (key != null && key.isNotEmpty) {
-      await ref.read(tmdbApiKeyProvider.notifier).setApiKey(key);
-      if (mounted) {
-        messenger.showSnackBar(SnackBar(content: Text(l10n.tmdbApiKeySaved)));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final hasKey = ref.watch(tmdbApiKeyProvider).isNotEmpty;
     final ratings = ref.watch(ratingsProvider).valueOrNull ?? const [];
     final version = ref.watch(_packageInfoProvider).valueOrNull;
 
@@ -96,24 +53,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _BalanceCard(ratings: ratings),
             const SizedBox(height: 24),
           ],
-
-          _SectionLabel(l10n.servicesTitle),
-          _SettingsRow(
-            icon: Icons.movie_outlined,
-            title: l10n.moviesSeries,
-            subtitle: hasKey ? l10n.tmdbConnected : l10n.tmdbNeedsKey,
-            trailing: hasKey
-                ? _StatusPill.ready(context, l10n.ready)
-                : _StatusPill.action(context, l10n.setUp),
-            onTap: _showTmdbDialog,
-          ),
-          _SettingsRow(
-            icon: Icons.place_outlined,
-            title: l10n.placesShort,
-            subtitle: l10n.placesSubtitle,
-            trailing: _StatusPill.ready(context, l10n.ready),
-          ),
-          const SizedBox(height: 24),
 
           _SectionLabel(l10n.dataTitle),
           _SettingsRow(
@@ -347,14 +286,12 @@ class _SectionLabel extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
 
   const _SettingsRow({
     required this.icon,
     required this.title,
-    this.subtitle,
     this.trailing,
     this.onTap,
   });
@@ -365,7 +302,7 @@ class _SettingsRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: subtitle == null ? 54 : 62),
+        constraints: const BoxConstraints(minHeight: 54),
         child: Row(
           children: [
             Container(
@@ -384,8 +321,6 @@ class _SettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                  if (subtitle != null)
-                    Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
@@ -393,109 +328,6 @@ class _SettingsRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  final String label;
-  final Color background;
-  final Color foreground;
-  final IconData? icon;
-
-  const _StatusPill({
-    required this.label,
-    required this.background,
-    required this.foreground,
-    this.icon,
-  });
-
-  factory _StatusPill.ready(BuildContext context, String label) => _StatusPill(
-        label: label,
-        background: RatingLevel.okay.tint(context),
-        foreground: RatingLevel.okay.strong(context),
-        icon: Icons.check_rounded,
-      );
-
-  factory _StatusPill.action(BuildContext context, String label) => _StatusPill(
-        label: label,
-        background: RatingLevel.liebe.tint(context),
-        foreground: RatingLevel.liebe.strong(context),
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 13, color: foreground),
-            const SizedBox(width: 4),
-          ],
-          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: foreground)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TmdbKeyDialog extends StatefulWidget {
-  const _TmdbKeyDialog();
-
-  @override
-  State<_TmdbKeyDialog> createState() => _TmdbKeyDialogState();
-}
-
-class _TmdbKeyDialogState extends State<_TmdbKeyDialog> {
-  final _controller = TextEditingController();
-  bool _obscure = true;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.moviesSeries),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.tmdbDescription, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _controller,
-            obscureText: _obscure,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.enterTmdbApiKey,
-              suffixIcon: IconButton(
-                icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                onPressed: () => setState(() => _obscure = !_obscure),
-              ),
-            ),
-            onSubmitted: (v) => Navigator.pop(context, v.trim()),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface),
-          child: Text(l10n.cancel),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, _controller.text.trim()),
-          child: Text(l10n.save),
-        ),
-      ],
     );
   }
 }

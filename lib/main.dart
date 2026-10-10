@@ -42,7 +42,7 @@ class ILikeApp extends StatefulWidget {
 class _ILikeAppState extends State<ILikeApp> {
   StreamSubscription<List<SharedMediaFile>>? _shareSubscription;
 
-  static const _shortcutChannel = MethodChannel('com.ilike.i_like/shortcuts');
+  static const _shortcutChannel = MethodChannel('de.langenk.ilike/shortcuts');
 
   @override
   void initState() {
@@ -147,6 +147,11 @@ class _ILikeAppState extends State<ILikeApp> {
     // Update image
     if (metadata.imageUrl != null && metadata.imageUrl!.isNotEmpty) {
       notifier.setImageUrl(metadata.imageUrl!);
+    }
+
+    // Brand / author, where the page reveals it (e.g. Amazon)
+    if (metadata.creator != null && metadata.creator!.isNotEmpty) {
+      notifier.setCreator(metadata.creator!);
     }
   }
 

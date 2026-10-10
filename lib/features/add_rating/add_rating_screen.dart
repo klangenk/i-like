@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
 import '../../shared/widgets/round_icon_button.dart';
+import '../../shared/widgets/photo_picker.dart';
 import 'widgets/level_picker.dart';
 import 'widgets/tag_input.dart';
 
@@ -25,6 +28,9 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
   String _lastProviderTitle = '';
+  final _creatorController = TextEditingController();
+  final _yearController = TextEditingController();
+  String _lastProviderCreator = '';
 
   @override
   void initState() {
@@ -34,6 +40,9 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       _titleController.text = p.title;
       _notesController.text = p.notes;
       _lastProviderTitle = p.title;
+      _creatorController.text = p.creator;
+      _yearController.text = p.year;
+      _lastProviderCreator = p.creator;
       // Defer provider updates to after build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final notifier = ref.read(addRatingProvider.notifier);
@@ -43,6 +52,8 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
           tags: p.tags,
           barcode: p.barcode,
           sourceUrl: p.sourceUrl,
+          creator: p.creator,
+          year: p.year,
         );
         if (p.notes.isNotEmpty) {
           notifier.setNotes(p.notes);
@@ -51,9 +62,35 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     }
   }
 
+  /// Set once the rating is stored, so [dispose] keeps the picked photo.
+  bool _saved = false;
+  String _pickedPath = '';
+
+  Future<void> _pickPhoto(AddRatingState state) async {
+    final pick = await pickRatingPhoto(
+      context,
+      canRemove: state.imageUrl.isNotEmpty || state.localImagePath.isNotEmpty,
+    );
+    if (pick == null || !mounted) return;
+    final notifier = ref.read(addRatingProvider.notifier);
+    // A replaced photo that was never saved is just a stray file.
+    if (_pickedPath.isNotEmpty) ImageStore.delete(_pickedPath);
+    switch (pick) {
+      case PhotoPicked(:final localPath):
+        _pickedPath = localPath;
+        notifier.setLocalImage(localPath);
+      case PhotoRemoved():
+        _pickedPath = '';
+        notifier.clearImage();
+    }
+  }
+
   @override
   void dispose() {
+    if (!_saved && _pickedPath.isNotEmpty) ImageStore.delete(_pickedPath);
     _titleController.dispose();
+    _creatorController.dispose();
+    _yearController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -74,7 +111,10 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       return;
     }
 
-    final localImagePath = await ImageStore.downloadAndStore(state.imageUrl);
+    final localImagePath = state.localImagePath.isNotEmpty
+        ? state.localImagePath
+        : await ImageStore.downloadAndStore(state.imageUrl);
+    _saved = true;
 
     final dao = ref.read(ratingsDaoProvider);
     await dao.insertRating(RatingsCompanion(
@@ -85,6 +125,8 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       imageUrl: Value(state.imageUrl),
       sourceUrl: Value(state.sourceUrl),
       barcode: Value(state.barcode),
+      creator: Value(state.creator.trim()),
+      year: Value(state.year.trim()),
       localImagePath: Value(localImagePath ?? ''),
     ));
 
@@ -102,6 +144,11 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     // Sync title controller when provider updates asynchronously (e.g. metadata fetch)
     if (state.title != _lastProviderTitle && state.title != _titleController.text) {
       _lastProviderTitle = state.title;
+    // Same for the creator, which shared links may fill in after a fetch
+    if (state.creator != _lastProviderCreator && state.creator != _creatorController.text) {
+      _creatorController.text = state.creator;
+    }
+    _lastProviderCreator = state.creator;
       _titleController.text = state.title;
     }
     _lastProviderTitle = state.title;
@@ -149,23 +196,12 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                     ),
                     child: Row(
                       children: [
-                        if (state.imageUrl.isNotEmpty) ...[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: CachedNetworkImage(
-                              imageUrl: state.imageUrl,
-                              width: 64,
-                              height: 64,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, _, _) => const SizedBox(
-                                width: 64,
-                                height: 64,
-                                child: Icon(Icons.image_outlined),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
+                        _PhotoSlot(
+                          imageUrl: state.imageUrl,
+                          localImagePath: state.localImagePath,
+                          onTap: () => _pickPhoto(state),
+                        ),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: TextField(
                             controller: _titleController,
@@ -183,6 +219,39 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: TextField(
+                          controller: _creatorController,
+                          decoration: InputDecoration(
+                            labelText: l10n.creatorLabel,
+                            hintText: l10n.creatorHint,
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                          ),
+                          onChanged: notifier.setCreator,
+                          textCapitalization: TextCapitalization.words,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _yearController,
+                          decoration: InputDecoration(
+                            labelText: l10n.yearLabel,
+                            hintText: '2026',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            counterText: '',
+                          ),
+                          keyboardType: TextInputType.number,
+                          maxLength: 4,
+                          onChanged: notifier.setYear,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
 
@@ -216,6 +285,64 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+/// 64 px photo tile in the item card; tap to take, pick or remove a photo.
+class _PhotoSlot extends StatelessWidget {
+  final String imageUrl;
+  final String localImagePath;
+  final VoidCallback onTap;
+
+  const _PhotoSlot({required this.imageUrl, required this.localImagePath, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final hasImage = imageUrl.isNotEmpty || localImagePath.isNotEmpty;
+    final placeholder = Container(
+      color: scheme.surface,
+      alignment: Alignment.center,
+      child: Icon(Icons.add_a_photo_outlined, color: scheme.onSurfaceVariant),
+    );
+
+    return Semantics(
+      button: true,
+      label: hasImage ? l10n.changePhoto : l10n.addPhoto,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: localImagePath.isNotEmpty
+                    ? Image.file(File(localImagePath), fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => placeholder)
+                    : imageUrl.isNotEmpty
+                        ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover,
+                            errorWidget: (_, _, _) => placeholder)
+                        : placeholder,
+              ),
+              if (hasImage)
+                Positioned(
+                  right: 3,
+                  bottom: 3,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(color: scheme.surface, shape: BoxShape.circle),
+                    child: Icon(Icons.edit_rounded, size: 12, color: scheme.onSurface),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -38,7 +38,7 @@
   "searchBook": "Book",
   "searchBookSubtitle": "Search Open Library",
   "searchBoardGame": "Board game",
-  "searchBoardGameSubtitle": "Search BoardGameGeek",
+  "searchBoardGameSubtitle": "Find it on Wikipedia",
   "searchBoardGames": "Search Board Games",
   "manualEntry": "Enter it yourself",
   "manualEntrySubtitle": "Enter all details yourself",
@@ -175,7 +175,7 @@
   "levelLovePhrase": "Absolute favourite",
   "filterAll": "All",
   "filterByLevel": "Filter by level",
-  "homeSummary": "{count} things rated — you love {loved} of them.",
+  "homeSummary": "{count, plural, =1{1 thing rated} other{{count} things rated}} — you love {loved} of them.",
   "@homeSummary": {
     "placeholders": {
       "count": {
@@ -186,7 +186,7 @@
       }
     }
   },
-  "homeSummaryShort": "{count} things rated",
+  "homeSummaryShort": "{count, plural, =1{1 thing rated} other{{count} things rated}}",
   "@homeSummaryShort": {
     "placeholders": {
       "count": {
@@ -219,7 +219,7 @@
   "sortAZHint": "Alphabetical",
   "sortZAHint": "Reverse alphabetical",
   "yourBalance": "Your balance",
-  "ratingsCount": "{count} ratings",
+  "ratingsCount": "{count, plural, =1{1 rating} other{{count} ratings}}",
   "@ratingsCount": {
     "placeholders": {
       "count": {
@@ -250,5 +250,22 @@
   "pickALevel": "Tap a level",
   "aboutTitle": "About",
   "privacyPolicy": "Privacy policy",
-  "version": "Version"
+  "version": "Version",
+  "addPhoto": "Add photo",
+  "changePhoto": "Change photo",
+  "takePhoto": "Take photo",
+  "chooseFromGallery": "Choose from gallery",
+  "removePhoto": "Remove photo",
+  "photoError": "The photo could not be loaded.",
+  "creatorLabel": "By",
+  "creatorHint": "Author, maker, brand …",
+  "yearLabel": "Year",
+  "byCreator": "by {creator}",
+  "@byCreator": {
+    "placeholders": {
+      "creator": {
+        "type": "String"
+      }
+    }
+  }
 }

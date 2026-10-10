@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>I Like nutzt die Kamera, um Barcodes zu scannen und Fotos für deine Bewertungen aufzunehmen.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>I Like greift auf deine Fotos zu, damit du ein Bild für eine Bewertung auswählen kannst.</string>
 </dict>
 </plist>

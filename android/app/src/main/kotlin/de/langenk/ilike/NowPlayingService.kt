@@ -1,4 +1,4 @@
-package com.ilike.i_like
+package de.langenk.ilike
 
 import android.service.notification.NotificationListenerService
 

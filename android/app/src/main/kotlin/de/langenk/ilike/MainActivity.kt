@@ -1,4 +1,4 @@
-package com.ilike.i_like
+package de.langenk.ilike
 
 import android.content.ComponentName
 import android.content.Context
@@ -12,7 +12,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val channel = "com.ilike.i_like/shortcuts"
+    private val channel = "de.langenk.ilike/shortcuts"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

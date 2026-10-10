@@ -160,11 +160,16 @@ String? extractDomain(String url) {
   return uri.host;
 }
 
+/// What a page tells us about the linked item.
+typedef UrlMetadata = ({String? title, String? description, String? imageUrl, String? creator});
+
 /// Fetch metadata (title, description, image) from a URL
-Future<({String? title, String? description, String? imageUrl})> fetchUrlMetadata(
+Future<UrlMetadata> fetchUrlMetadata(
     String url) async {
   // Resolve shortened URLs first
   final resolvedUrl = await resolveUrl(url);
+  final host = Uri.tryParse(resolvedUrl)?.host.toLowerCase() ?? '';
+  if (host.contains('amazon.')) return _fetchAmazonMetadata(resolvedUrl);
   try {
     final metadata = await AnyLinkPreview.getMetadata(link: resolvedUrl);
     final hasImage = metadata?.image != null && metadata!.image!.isNotEmpty;
@@ -173,6 +178,7 @@ Future<({String? title, String? description, String? imageUrl})> fetchUrlMetadat
         title: metadata.title,
         description: metadata.desc,
         imageUrl: metadata.image,
+        creator: null,
       );
     }
     // If no image from AnyLinkPreview, try site-specific extraction or HTML fallback
@@ -182,6 +188,7 @@ Future<({String? title, String? description, String? imageUrl})> fetchUrlMetadat
         title: metadata?.title,
         description: metadata?.desc,
         imageUrl: fallbackImage,
+        creator: null,
       );
     }
     // Try direct HTML fetch for image
@@ -190,13 +197,63 @@ Future<({String? title, String? description, String? imageUrl})> fetchUrlMetadat
       title: fallback.title ?? metadata?.title,
       description: fallback.description ?? metadata?.desc,
       imageUrl: fallback.imageUrl ?? metadata?.image,
+      creator: fallback.creator,
     );
   } catch (_) {}
   // Last resort: try direct HTML fetch
   try {
     return await _fetchMetaFromHtml(resolvedUrl);
   } catch (_) {}
-  return (title: null, description: null, imageUrl: null);
+  return (title: null, description: null, imageUrl: null, creator: null);
+}
+
+/// Amazon serves link-preview bots a generic "Amazon.de" page, so read the
+/// product page directly and fall back to data encoded in the URL itself.
+Future<UrlMetadata> _fetchAmazonMetadata(
+    String url) async {
+  String? title;
+  String? imageUrl;
+  String? creator;
+  try {
+    final page = await _fetchMetaFromHtml(url);
+    title = _cleanAmazonTitle(page.title);
+    imageUrl = page.imageUrl;
+    creator = page.creator;
+  } catch (_) {}
+  title ??= _titleFromAmazonSlug(url);
+  // The ASIN image endpoint returns the main product photo; images scraped
+  // from the page are often badges or thumbnails.
+  imageUrl = _siteSpecificImage(url) ?? imageUrl;
+  return (title: title, description: null, imageUrl: imageUrl, creator: creator);
+}
+
+/// "Product name | SEO keywords : Amazon.de: Spielzeug" -> "Product name".
+/// Returns null for block/captcha pages that only carry the site name.
+String? _cleanAmazonTitle(String? raw) {
+  if (raw == null) return null;
+  final title = raw
+      .replaceAll('&amp;', '&')
+      .replaceAll(RegExp(r'\s*:\s*Amazon\.[a-z.]+.*$', caseSensitive: false), '')
+      .replaceFirst(RegExp(r'^Amazon\.[a-z.]+\s*:\s*', caseSensitive: false), '')
+      .split(' | ')
+      .first
+      .trim();
+  if (title.isEmpty || RegExp(r'^amazon(\.[a-z.]+)?$', caseSensitive: false).hasMatch(title)) {
+    return null;
+  }
+  return title;
+}
+
+/// "/LEGO-Teenage-Hauptquartier-9120049246557/dp/B00CYHRMP8" -> "LEGO Teenage Hauptquartier"
+String? _titleFromAmazonSlug(String url) {
+  final segments = Uri.tryParse(url)?.pathSegments ?? const [];
+  final dp = segments.indexOf('dp');
+  if (dp < 1) return null;
+  final words = Uri.decodeComponent(segments[dp - 1])
+      .split('-')
+      .where((w) => w.isNotEmpty && !RegExp(r'^\d{8,}$').hasMatch(w))
+      .toList();
+  return words.isEmpty ? null : words.join(' ');
 }
 
 /// Try to construct an image URL from the URL structure (no network needed)
@@ -229,7 +286,7 @@ String? _extractAmazonAsin(String url) {
 }
 
 /// Directly fetch HTML and extract metadata
-Future<({String? title, String? description, String? imageUrl})> _fetchMetaFromHtml(
+Future<UrlMetadata> _fetchMetaFromHtml(
     String url) async {
   final client = HttpClient();
   try {
@@ -243,7 +300,7 @@ Future<({String? title, String? description, String? imageUrl})> _fetchMetaFromH
 
     final response = await request.close().timeout(const Duration(seconds: 10));
     if (response.statusCode != 200) {
-      return (title: null, description: null, imageUrl: null);
+      return (title: null, description: null, imageUrl: null, creator: null);
     }
 
     final bytes = await consolidateHttpClientResponseBytes(response);
@@ -254,7 +311,9 @@ Future<({String? title, String? description, String? imageUrl})> _fetchMetaFromH
     final ogDesc = _extractMeta(html, 'og:description');
 
     // Also try name="title" and name="description" (used by Amazon)
-    final metaTitle = ogTitle ?? _extractMeta(html, 'title');
+    final metaTitle = ogTitle ??
+        _extractMeta(html, 'title') ??
+        RegExp(r'<title[^>]*>([^<]+)</title>', caseSensitive: false).firstMatch(html)?.group(1)?.trim();
     final metaDesc = ogDesc ?? _extractMeta(html, 'description');
 
     // If no og:image, try to find product images in the HTML (Amazon, etc.)
@@ -264,6 +323,7 @@ Future<({String? title, String? description, String? imageUrl})> _fetchMetaFromH
       title: metaTitle,
       description: metaDesc,
       imageUrl: imageUrl,
+      creator: _extractBrand(html, url),
     );
   } finally {
     client.close();
@@ -272,23 +332,30 @@ Future<({String? title, String? description, String? imageUrl})> _fetchMetaFromH
 
 /// Decompress and consolidate HttpClientResponse bytes
 Future<List<int>> consolidateHttpClientResponseBytes(HttpClientResponse response) async {
+  // HttpClient.autoUncompress (on by default) already inflates gzip/deflate
+  // bodies; the content-encoding header stays set, so don't decode again.
   final bytes = <int>[];
-  final completer = Completer<List<int>>();
-  final encoding = response.headers.value('content-encoding');
-
-  Stream<List<int>> stream = response;
-  if (encoding == 'gzip') {
-    stream = stream.transform(gzip.decoder);
-  } else if (encoding == 'deflate') {
-    stream = stream.transform(zlib.decoder);
+  await for (final chunk in response) {
+    bytes.addAll(chunk);
   }
+  return bytes;
+}
 
-  stream.listen(
-    bytes.addAll,
-    onDone: () => completer.complete(bytes),
-    onError: completer.completeError,
-  );
-  return completer.future;
+/// Brand from an Amazon product page ("Besuche den LEGO-Store", "Visit the
+/// LEGO Store", "Marke: LEGO"); null elsewhere.
+String? _extractBrand(String html, String url) {
+  final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
+  if (!host.contains('amazon.')) return null;
+  for (final pattern in [
+    RegExp(r'Besuche den ([^<"]{1,40}?)-Store'),
+    RegExp(r'Visit the ([^<"]{1,40}?) Store'),
+    RegExp(r'Marke:\s*([^<"]{1,40})'),
+    RegExp(r'Brand:\s*([^<"]{1,40})'),
+  ]) {
+    final brand = pattern.firstMatch(html)?.group(1)?.trim();
+    if (brand != null && brand.isNotEmpty) return brand;
+  }
+  return null;
 }
 
 /// Extract product image from HTML body (for sites without og:image)

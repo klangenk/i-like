@@ -1,5 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+/// Normalised result of a book/product/game lookup, used to prefill a rating.
+typedef LookupInfo = ({
+  String title,
+  String imageUrl,
+  List<String> tags,
+  String sourceUrl,
+  String creator,
+  String year,
+});
+
+/// First four-digit year in [value] ("June 12, 1995" -> "1995"), or ''.
+String yearFrom(Object? value) =>
+    RegExp(r'\b(1[5-9]\d\d|20\d\d)\b').firstMatch('${value ?? ''}')?.group(1) ?? '';
+
 class ApiService {
   static const _openLibraryBase = 'https://openlibrary.org';
   static const _openFoodFactsBase = 'https://world.openfoodfacts.org/api/v0';
@@ -136,24 +151,47 @@ class ApiService {
 
   // --- Info Extractors ---
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractBookInfo(
+  static LookupInfo extractBookInfo(
       Map<String, dynamic> data) {
+    // Handles both ISBN lookups (jscmd=data) and search results (search.json).
     final title = data['title'] as String? ?? 'Unknown Book';
     final cover = data['cover'] as Map<String, dynamic>?;
-    final imageUrl = cover?['medium'] as String? ?? '';
+    final coverId = data['cover_i'];
+    final imageUrl = cover?['medium'] as String? ??
+        (coverId != null ? 'https://covers.openlibrary.org/b/id/$coverId-L.jpg' : '');
     final sourceUrl = (data['url'] as String?) ??
         (data['key'] != null ? '$_openLibraryBase${data['key']}' : '');
-    return (title: title, imageUrl: imageUrl, tags: ['book'], sourceUrl: sourceUrl);
+    final authors = [
+      for (final a in data['authors'] as List<dynamic>? ?? const [])
+        if (a is Map && a['name'] is String) a['name'] as String,
+      for (final a in data['author_name'] as List<dynamic>? ?? const []) '$a',
+    ];
+    return (
+      title: title,
+      imageUrl: imageUrl,
+      tags: ['book'],
+      sourceUrl: sourceUrl,
+      creator: authors.take(2).join(', '),
+      year: yearFrom(data['first_publish_year'] ?? data['publish_date']),
+    );
   }
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractProductInfo(
+  static LookupInfo extractProductInfo(
       Map<String, dynamic> data) {
     final title = data['product_name'] as String? ?? 'Unknown Product';
     final imageUrl = data['image_url'] as String? ?? '';
-    return (title: title, imageUrl: imageUrl, tags: ['product', 'food'], sourceUrl: '');
+    final brand = (data['brands'] as String? ?? '').split(',').first.trim();
+    return (
+      title: title,
+      imageUrl: imageUrl,
+      tags: ['product', 'food'],
+      sourceUrl: '',
+      creator: brand,
+      year: '',
+    );
   }
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractTmdbInfo(
+  static LookupInfo extractTmdbInfo(
       Map<String, dynamic> data) {
     final mediaType = data['media_type'] as String? ?? 'movie';
     final title = (data['title'] ?? data['name'] ?? 'Unknown') as String;
@@ -165,10 +203,17 @@ class ApiService {
     final sourceUrl = id != null
         ? 'https://www.themoviedb.org/${mediaType == 'tv' ? 'tv' : 'movie'}/$id'
         : '';
-    return (title: title, imageUrl: imageUrl, tags: [tag], sourceUrl: sourceUrl);
+    return (
+      title: title,
+      imageUrl: imageUrl,
+      tags: [tag],
+      sourceUrl: sourceUrl,
+      creator: '',
+      year: yearFrom(data['release_date'] ?? data['first_air_date']),
+    );
   }
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractPlaceInfo(
+  static LookupInfo extractPlaceInfo(
       Map<String, dynamic> data) {
     final title = data['display_name'] as String? ?? 'Unknown Place';
     final osmType = data['osm_type'] as String? ?? '';
@@ -176,7 +221,7 @@ class ApiService {
     final sourceUrl = (osmType.isNotEmpty && osmId != null)
         ? 'https://www.openstreetmap.org/$osmType/$osmId'
         : '';
-    return (title: title, imageUrl: '', tags: ['place'], sourceUrl: sourceUrl);
+    return (title: title, imageUrl: '', tags: ['place'], sourceUrl: sourceUrl, creator: '', year: '');
   }
 
   /// Reverse geocode coordinates to a place name
@@ -236,64 +281,131 @@ out body;
 
   // --- Board Games (via Wikipedia) ---
 
-  /// Search board games via Wikipedia
+  /// Search board games via Wikipedia. Restricting to articles that use the
+  /// "Infobox game" template filters out designers, lists and other noise;
+  /// falls back to a plain search when nothing matches.
   static Future<List<Map<String, dynamic>>> searchBoardGames(String query) async {
+    final games = await _searchWikipedia('$query hastemplate:"Infobox game"');
+    if (games.isNotEmpty) return games;
+    return _searchWikipedia('$query board game');
+  }
+
+  /// One request returns titles, a short intro and a thumbnail per hit, so
+  /// the result list can show images without extra lookups.
+  static Future<List<Map<String, dynamic>>> _searchWikipedia(String searchQuery) async {
     try {
-      // Search Wikipedia with "board game" or "card game" appended for better results
-      final searchQuery = '$query board game';
       final response = await http.get(
         Uri.parse(
-          'https://en.wikipedia.org/w/api.php?action=query&list=search'
-          '&srsearch=${Uri.encodeComponent(searchQuery)}'
-          '&format=json&srlimit=10',
+          'https://en.wikipedia.org/w/api.php?action=query&format=json'
+          '&generator=search&gsrsearch=${Uri.encodeComponent(searchQuery)}&gsrlimit=10'
+          // pilicense=any: box art is non-free, so the default (free-only) skips it.
+          '&prop=pageimages|extracts&piprop=thumbnail&pithumbsize=600&pilicense=any'
+          '&exintro=1&explaintext=1&exsentences=2&exlimit=max',
         ),
         headers: {'User-Agent': 'ILikeApp/1.0'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
-        final results = data['query']?['search'] as List<dynamic>? ?? [];
-        return results.cast<Map<String, dynamic>>();
+        final pages = (data['query']?['pages'] as Map<String, dynamic>? ?? {})
+            .values
+            .cast<Map<String, dynamic>>()
+            .toList()
+          ..sort((a, b) => (a['index'] as int? ?? 0).compareTo(b['index'] as int? ?? 0));
+        return [
+          for (final page in pages)
+            {
+              'title': page['title'] as String? ?? '',
+              'snippet': page['extract'] as String? ?? '',
+              'image': (page['thumbnail'] as Map<String, dynamic>?)?['source'] as String? ?? '',
+            },
+        ];
       }
     } catch (_) {}
     return [];
   }
 
-  /// Get board game image from Wikipedia by page title
+  /// "Azul (board game)" -> "Azul"
+  static String cleanGameTitle(String title) =>
+      title.replaceFirst(RegExp(r'\s*\((board |card |tabletop )?game\)$'), '');
+
+  /// Image, designer and release year for a Wikipedia board game article.
   static Future<Map<String, dynamic>?> getBoardGameDetails(String pageTitle) async {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://en.wikipedia.org/w/api.php?action=query'
+          'https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2'
           '&titles=${Uri.encodeComponent(pageTitle)}'
-          '&prop=pageimages|extracts&pithumbsize=400&exintro=1&explaintext=1'
-          '&format=json',
+          // pilicense=any: box art is non-free, so the default (free-only) skips it.
+          '&prop=pageimages|revisions&pithumbsize=600&pilicense=any'
+          '&rvprop=content&rvslots=main&rvsection=0',
         ),
         headers: {'User-Agent': 'ILikeApp/1.0'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
-        final pages = data['query']?['pages'] as Map<String, dynamic>? ?? {};
-        for (final page in pages.values) {
-          final pageData = page as Map<String, dynamic>;
-          if (pageData.containsKey('missing')) continue;
-          final name = pageData['title'] as String? ?? '';
-          final thumbnail = pageData['thumbnail'] as Map<String, dynamic>?;
-          final imageUrl = thumbnail?['source'] as String? ?? '';
-          return {'name': name, 'image': imageUrl};
+        final pages = data['query']?['pages'] as List<dynamic>? ?? const [];
+        for (final page in pages.cast<Map<String, dynamic>>()) {
+          if (page['missing'] == true) continue;
+          final revisions = page['revisions'] as List<dynamic>? ?? const [];
+          final wikitext = revisions.isEmpty
+              ? ''
+              : (revisions.first['slots']?['main']?['content'] as String? ?? '');
+          return {
+            'name': page['title'] as String? ?? '',
+            'image': (page['thumbnail'] as Map<String, dynamic>?)?['source'] as String? ?? '',
+            'designer': _cleanWikiValue(_infoboxField(wikitext, 'designer')),
+            'year': yearFrom(_infoboxField(wikitext, 'date') ?? _infoboxField(wikitext, 'years')),
+          };
         }
       }
     } catch (_) {}
     return null;
   }
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractBoardGameInfo(
+  /// Raw value of `| field = …` in an infobox, including continuation lines
+  /// (e.g. `{{plainlist|` blocks) up to the next field.
+  static String? _infoboxField(String wikitext, String field) {
+    final match = RegExp(
+      r'^\s*\|\s*' + field + r'\s*=([\s\S]*?)(?=^\s*\|\s*[\w ]+=|^\}\})',
+      multiLine: true,
+    ).firstMatch(wikitext);
+    final value = match?.group(1)?.trim();
+    return (value == null || value.isEmpty) ? null : value;
+  }
+
+  /// `[[Klaus Teuber]]<ref>…</ref>` -> `Klaus Teuber`
+  static String _cleanWikiValue(String? raw) {
+    if (raw == null) return '';
+    var v = raw
+        .replaceAll(RegExp(r'<ref[^>]*/>'), '')
+        .replaceAll(RegExp(r'<ref[\s\S]*?</ref>'), '')
+        .replaceAll(RegExp(r'<br\s*/?>'), ', ')
+        .replaceAllMapped(RegExp(r'\[\[(?:[^|\]]*\|)?([^\]]+)\]\]'), (m) => m.group(1)!)
+        .replaceAll(RegExp(r'\{\{[^{}]*\|'), '')
+        .replaceAll(RegExp(r'[{}]'), '')
+        .replaceAll("''", '')
+        .replaceAll(RegExp(r'^\s*\*\s*', multiLine: true), '')
+        .replaceAll(RegExp(r'\s*\n\s*'), ', ')
+        .trim();
+    v = v.replaceAll(RegExp(r'^,\s*|,\s*$'), '');
+    return v.length > 80 ? '${v.substring(0, 77)}…' : v;
+  }
+
+  static LookupInfo extractBoardGameInfo(
       Map<String, dynamic> data) {
-    final title = data['name'] as String? ?? 'Unknown Game';
+    final pageTitle = data['name'] as String? ?? 'Unknown Game';
     final imageUrl = data['image'] as String? ?? '';
-    final sourceUrl = title.isNotEmpty
-        ? 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(title)}'
+    final sourceUrl = pageTitle.isNotEmpty
+        ? 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(pageTitle.replaceAll(' ', '_'))}'
         : '';
-    return (title: title, imageUrl: imageUrl, tags: ['game'], sourceUrl: sourceUrl);
+    return (
+      title: cleanGameTitle(pageTitle),
+      imageUrl: imageUrl,
+      tags: ['game'],
+      sourceUrl: sourceUrl,
+      creator: data['designer'] as String? ?? '',
+      year: data['year'] as String? ?? '',
+    );
   }
 
   // --- General Barcode Lookup (UPC Item DB) ---
@@ -316,7 +428,7 @@ out body;
     return null;
   }
 
-  static ({String title, String imageUrl, List<String> tags, String sourceUrl}) extractGeneralProductInfo(
+  static LookupInfo extractGeneralProductInfo(
       Map<String, dynamic> data) {
     final title = data['title'] as String? ?? 'Unknown Product';
     final images = data['images'] as List<dynamic>? ?? [];
@@ -328,6 +440,13 @@ out body;
         ..clear()
         ..add('game');
     }
-    return (title: title, imageUrl: imageUrl, tags: tags, sourceUrl: '');
+    return (
+      title: title,
+      imageUrl: imageUrl,
+      tags: tags,
+      sourceUrl: '',
+      creator: (data['brand'] as String? ?? '').trim(),
+      year: '',
+    );
   }
 }

@@ -18,6 +18,8 @@ class ExportImportService {
       'imageUrl': r.imageUrl,
       'sourceUrl': r.sourceUrl,
       'barcode': r.barcode,
+      'creator': r.creator,
+      'year': r.year,
       'createdAt': r.createdAt.toUtc().toIso8601String(),
       'updatedAt': r.updatedAt.toUtc().toIso8601String(),
     }).toList();
@@ -34,10 +36,12 @@ class ExportImportService {
   static Future<List<int>> exportToCsv(RatingsDao dao) async {
     final ratings = await dao.getAll();
     final buf = StringBuffer();
-    buf.writeln('title;score;tags;notes;imageUrl;sourceUrl;barcode;createdAt;updatedAt');
+    buf.writeln('title;creator;year;score;tags;notes;imageUrl;sourceUrl;barcode;createdAt;updatedAt');
     for (final r in ratings) {
       buf.writeln([
         _csvCell(r.title),
+        _csvCell(r.creator),
+        _csvCell(r.year),
         r.score.toString(),
         _csvCell(r.tags),
         _csvCell(r.notes),
@@ -101,6 +105,8 @@ class ExportImportService {
         imageUrl: Value(map['imageUrl'] as String? ?? ''),
         sourceUrl: Value(map['sourceUrl'] as String? ?? ''),
         barcode: Value(map['barcode'] as String? ?? ''),
+        creator: Value(map['creator'] as String? ?? ''),
+        year: Value(map['year'] as String? ?? ''),
         createdAt: Value(DateTime.parse(map['createdAt'] as String)),
         updatedAt: Value(DateTime.parse(map['updatedAt'] as String)),
       ));

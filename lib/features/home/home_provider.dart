@@ -49,6 +49,7 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
     if (query.isNotEmpty) {
       filtered = filtered.where((r) =>
         r.title.toLowerCase().contains(query) ||
+        r.creator.toLowerCase().contains(query) ||
         r.tags.toLowerCase().contains(query) ||
         r.notes.toLowerCase().contains(query)
       ).toList();

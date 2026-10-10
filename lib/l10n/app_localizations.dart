@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchBoardGameSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Search BoardGameGeek'**
+  /// **'Find it on Wikipedia'**
   String get searchBoardGameSubtitle;
 
   /// No description provided for @searchBoardGames.
@@ -797,13 +797,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeSummary.
   ///
   /// In en, this message translates to:
-  /// **'{count} things rated — you love {loved} of them.'**
+  /// **'{count, plural, =1{1 thing rated} other{{count} things rated}} — you love {loved} of them.'**
   String homeSummary(int count, int loved);
 
   /// No description provided for @homeSummaryShort.
   ///
   /// In en, this message translates to:
-  /// **'{count} things rated'**
+  /// **'{count, plural, =1{1 thing rated} other{{count} things rated}}'**
   String homeSummaryShort(int count);
 
   /// No description provided for @search.
@@ -917,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @ratingsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} ratings'**
+  /// **'{count, plural, =1{1 rating} other{{count} ratings}}'**
   String ratingsCount(int count);
 
   /// No description provided for @servicesTitle.
@@ -1063,6 +1063,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get version;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhoto;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @photoError.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo could not be loaded.'**
+  String get photoError;
+
+  /// No description provided for @creatorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By'**
+  String get creatorLabel;
+
+  /// No description provided for @creatorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Author, maker, brand …'**
+  String get creatorHint;
+
+  /// No description provided for @yearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get yearLabel;
+
+  /// No description provided for @byCreator.
+  ///
+  /// In en, this message translates to:
+  /// **'by {creator}'**
+  String byCreator(String creator);
 }
 
 class _AppLocalizationsDelegate

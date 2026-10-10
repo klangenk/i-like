@@ -1,14 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/rating_level.dart';
 import '../../core/utils/api_service.dart';
 import '../../core/utils/barcode_helper.dart';
 import '../../core/utils/url_helper.dart';
 import '../../l10n/app_localizations.dart';
-import '../settings/settings_provider.dart';
 import 'add_rating_provider.dart';
 
 void showQuickAddSheet(BuildContext context) {
@@ -27,7 +25,6 @@ class _QuickAddSheetContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final hasTmdbKey = ref.watch(tmdbApiKeyProvider).isNotEmpty;
     final scheme = Theme.of(context).colorScheme;
 
     return SafeArea(
@@ -106,49 +103,6 @@ class _QuickAddSheetContent extends ConsumerWidget {
                 },
               ),
               _SourceTile(
-                icon: Icons.live_tv_rounded,
-                title: l10n.rateNowPlaying,
-                subtitle: l10n.rateNowPlayingSubtitle,
-                onTap: () {
-                  Navigator.pop(context);
-                  _detectNowPlaying(parentContext, l10n);
-                },
-              ),
-              _SourceTile(
-                icon: Icons.movie_outlined,
-                title: l10n.searchMovieSeries,
-                subtitle: l10n.searchMovieSeriesSubtitle,
-                badge: hasTmdbKey ? null : l10n.setUp,
-                onTap: () {
-                  Navigator.pop(context);
-                  if (hasTmdbKey) {
-                    _showApiSearchDialog(parentContext, 'tmdb', ref.read(tmdbApiKeyProvider));
-                  } else {
-                    parentContext.push('/settings');
-                  }
-                },
-              ),
-              _SourceTile(
-                icon: Icons.place_outlined,
-                title: l10n.searchPlace,
-                subtitle: l10n.searchPlaceSubtitle,
-                onTap: () {
-                  Navigator.pop(context);
-                  final ctx = parentContext;
-                  ctx.push('/map').then((result) {
-                    if (result != null && ctx.mounted) {
-                      final info = result as ({String title, String imageUrl, List<String> tags, String sourceUrl});
-                      ctx.push('/add', extra: PrefillData(
-                        title: info.title,
-                        imageUrl: info.imageUrl,
-                        tags: info.tags,
-                        sourceUrl: info.sourceUrl,
-                      ));
-                    }
-                  });
-                },
-              ),
-              _SourceTile(
                 icon: Icons.menu_book_outlined,
                 title: l10n.searchBook,
                 subtitle: l10n.searchBookSubtitle,
@@ -187,7 +141,6 @@ class _SourceTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final String? badge;
   final VoidCallback onTap;
 
   const _SourceTile({
@@ -195,7 +148,6 @@ class _SourceTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
-    this.badge,
   });
 
   @override
@@ -229,68 +181,12 @@ class _SourceTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (badge != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: RatingLevel.liebe.tint(context),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    badge!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: RatingLevel.liebe.strong(context),
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-Future<void> _detectNowPlaying(BuildContext context, AppLocalizations l10n) async {
-  const channel = MethodChannel('com.ilike.i_like/shortcuts');
-  final result = await channel.invokeMapMethod<String, dynamic>('getNowPlaying');
-
-  if (result?['error'] == 'permission_denied') {
-    if (!context.mounted) return;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.notificationPermissionTitle),
-        content: Text(l10n.notificationPermissionBody),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              const MethodChannel('com.ilike.i_like/shortcuts')
-                  .invokeMethod('openNotificationSettings');
-            },
-            child: Text(l10n.openSettings),
-          ),
-        ],
-      ),
-    );
-    return;
-  }
-
-  if (!context.mounted) return;
-
-  final title = result?['title'] as String?;
-  if (title == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.nothingPlaying)),
-    );
-    return;
-  }
-
-  context.push('/add', extra: PrefillData(title: title, tags: ['series']));
 }
 
 Future<void> handleBarcode(BuildContext context, String barcode) async {
@@ -319,6 +215,8 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
           tags: info.tags,
           sourceUrl: 'https://openlibrary.org/isbn/$barcode',
           barcode: barcode,
+          creator: info.creator,
+          year: info.year,
         ));
       }
       return;
@@ -336,6 +234,7 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
           tags: info.tags,
           sourceUrl: 'https://world.openfoodfacts.org/product/$barcode',
           barcode: barcode,
+          creator: info.creator,
         ));
       }
       return;
@@ -355,6 +254,8 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
           tags: bggResult.tags,
           sourceUrl: bggResult.sourceUrl,
           barcode: barcode,
+          creator: bggResult.creator.isNotEmpty ? bggResult.creator : info.creator,
+          year: bggResult.year,
         ));
         return;
       }
@@ -365,6 +266,7 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
           imageUrl: info.imageUrl,
           tags: info.tags,
           barcode: barcode,
+          creator: info.creator,
         ));
       }
       return;
@@ -378,7 +280,7 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
 }
 
 /// Try to find a board game on Wikipedia by title and fetch its image
-Future<({String title, String imageUrl, List<String> tags, String sourceUrl})?> _tryBoardGameLookup(String title) async {
+Future<LookupInfo?> _tryBoardGameLookup(String title) async {
   try {
     final results = await ApiService.searchBoardGames(title);
     if (results.isEmpty) return null;
@@ -418,15 +320,25 @@ void _showUrlDialog(BuildContext context) {
             final url = urlController.text.trim();
             if (isValidUrl(url)) {
               Navigator.pop(ctx);
-              final metadata = await fetchUrlMetadata(url);
-              final title = metadata.title ?? extractDomain(url) ?? url;
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const PopScope(
+                  canPop: false,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+              final resolved = await resolveUrl(url);
+              final metadata = await fetchUrlMetadata(resolved);
+              final title = metadata.title ?? extractDomain(resolved) ?? resolved;
               if (context.mounted) {
+                Navigator.pop(context); // dismiss loading
                 context.push('/add', extra: PrefillData(
                   title: title,
                   imageUrl: metadata.imageUrl ?? '',
-                  sourceUrl: url,
-                  notes: metadata.description ?? '',
-                  tags: ['url'],
+                  sourceUrl: resolved,
+                  tags: tagsFromUrl(resolved, title: metadata.title, description: metadata.description),
+                  creator: metadata.creator ?? '',
                 ));
               }
             }
@@ -452,6 +364,8 @@ void _showApiSearchDialog(BuildContext context, String type, String tmdbApiKey) 
           imageUrl: info.imageUrl,
           tags: info.tags,
           sourceUrl: info.sourceUrl,
+          creator: info.creator,
+          year: info.year,
         ));
       },
     ),
@@ -462,7 +376,7 @@ class _ApiSearchDialog extends StatefulWidget {
   final String type;
   final TextEditingController searchController;
   final String tmdbApiKey;
-  final void Function(({String title, String imageUrl, List<String> tags, String sourceUrl})) onSelected;
+  final void Function(LookupInfo) onSelected;
 
   const _ApiSearchDialog({
     required this.type,
@@ -511,17 +425,16 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
 
   Future<void> _selectResult(Map<String, dynamic> result) async {
     if (widget.type == 'boardgame') {
-      // Wikipedia search returns title, fetch details for image
       Navigator.pop(context);
       final pageTitle = result['title'] as String? ?? '';
-      if (pageTitle.isNotEmpty) {
-        final details = await ApiService.getBoardGameDetails(pageTitle);
-        if (details != null) {
-          widget.onSelected(ApiService.extractBoardGameInfo(details));
-          return;
-        }
-      }
-      widget.onSelected((title: pageTitle, imageUrl: '', tags: ['game'], sourceUrl: ''));
+      final listImage = result['image'] as String? ?? '';
+      // Details add designer and year; the list thumbnail is the fallback image.
+      final details = pageTitle.isEmpty ? null : await ApiService.getBoardGameDetails(pageTitle);
+      widget.onSelected(ApiService.extractBoardGameInfo({
+        'name': pageTitle,
+        ...?details,
+        if ((details?['image'] as String? ?? '').isEmpty) 'image': listImage,
+      }));
       return;
     }
 
@@ -529,18 +442,39 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       'tmdb' => ApiService.extractTmdbInfo(result),
       'place' => ApiService.extractPlaceInfo(result),
       'book' => ApiService.extractBookInfo(result),
-      _ => (title: 'Unknown', imageUrl: '', tags: <String>[], sourceUrl: ''),
+      _ => (title: 'Unknown', imageUrl: '', tags: <String>[], sourceUrl: '', creator: '', year: ''),
     };
     widget.onSelected(info);
     Navigator.pop(context);
   }
+
+  /// Thumbnail for the result list: Wikipedia page image or Open Library cover.
+  String? _resultImage(Map<String, dynamic> result) {
+    switch (widget.type) {
+      case 'boardgame':
+        final image = result['image'] as String? ?? '';
+        return image.isEmpty ? '' : image;
+      case 'book':
+        final cover = result['cover_i'];
+        return cover == null ? '' : 'https://covers.openlibrary.org/b/id/$cover-M.jpg';
+      default:
+        return null;
+    }
+  }
+
+  Widget _thumbPlaceholder(BuildContext context) => Container(
+        width: 48,
+        height: 56,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Icon(Icons.image_outlined, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      );
 
   String _resultTitle(Map<String, dynamic> result) {
     return switch (widget.type) {
       'tmdb' => (result['title'] ?? result['name'] ?? 'Unknown') as String,
       'place' => result['display_name'] as String? ?? 'Unknown',
       'book' => result['title'] as String? ?? 'Unknown',
-      'boardgame' => result['title'] as String? ?? 'Unknown',
+      'boardgame' => ApiService.cleanGameTitle(result['title'] as String? ?? 'Unknown'),
       _ => 'Unknown',
     };
   }
@@ -560,7 +494,12 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       case 'boardgame':
         // Wikipedia search results have a snippet
         final snippet = (result['snippet'] as String? ?? '')
-            .replaceAll(RegExp(r'<[^>]*>'), ''); // strip HTML
+            .replaceAll(RegExp(r'<[^>]*>'), '') // strip HTML
+            .replaceAll('&quot;', '"')
+            .replaceAll('&#039;', "'")
+            .replaceAll('&lt;', '<')
+            .replaceAll('&gt;', '>')
+            .replaceAll('&amp;', '&');
         return snippet.isNotEmpty ? snippet : null;
       default:
         return null;
@@ -605,14 +544,28 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
                     itemCount: _results.length,
                     itemBuilder: (context, index) {
                       final result = _results[index];
+                      final image = _resultImage(result);
                       return ListTile(
+                        leading: image == null
+                            ? null
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: image,
+                                  width: 48,
+                                  height: 56,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, _, _) => _thumbPlaceholder(context),
+                                  placeholder: (_, _) => _thumbPlaceholder(context),
+                                ),
+                              ),
                         title: Text(
                           _resultTitle(result),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: _resultSubtitle(result) != null
-                            ? Text(_resultSubtitle(result)!)
+                            ? Text(_resultSubtitle(result)!, maxLines: 2, overflow: TextOverflow.ellipsis)
                             : null,
                         onTap: () => _selectResult(result),
                         dense: true,

@@ -123,7 +123,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchBoardGame => 'Brettspiel';
 
   @override
-  String get searchBoardGameSubtitle => 'BoardGameGeek durchsuchen';
+  String get searchBoardGameSubtitle => 'Über Wikipedia finden';
 
   @override
   String get searchBoardGames => 'Brettspiele suchen';
@@ -379,12 +379,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String homeSummary(int count, int loved) {
-    return '$count Dinge bewertet – $loved davon liebst du.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dinge bewertet',
+      one: '1 Ding bewertet',
+    );
+    return '$_temp0 – $loved davon liebst du.';
   }
 
   @override
   String homeSummaryShort(int count) {
-    return '$count Dinge bewertet';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dinge bewertet',
+      one: '1 Ding bewertet',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -445,7 +457,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String ratingsCount(int count) {
-    return '$count Bewertungen';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bewertungen',
+      one: '1 Bewertung',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -520,4 +538,36 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get version => 'Version';
+
+  @override
+  String get addPhoto => 'Foto hinzufügen';
+
+  @override
+  String get changePhoto => 'Foto ändern';
+
+  @override
+  String get takePhoto => 'Foto aufnehmen';
+
+  @override
+  String get chooseFromGallery => 'Aus Galerie wählen';
+
+  @override
+  String get removePhoto => 'Foto entfernen';
+
+  @override
+  String get photoError => 'Das Foto konnte nicht geladen werden.';
+
+  @override
+  String get creatorLabel => 'Von';
+
+  @override
+  String get creatorHint => 'Autor, Hersteller, Marke …';
+
+  @override
+  String get yearLabel => 'Jahr';
+
+  @override
+  String byCreator(String creator) {
+    return 'von $creator';
+  }
 }

@@ -111,6 +111,28 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _creatorMeta = const VerificationMeta(
+    'creator',
+  );
+  @override
+  late final GeneratedColumn<String> creator = GeneratedColumn<String>(
+    'creator',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<String> year = GeneratedColumn<String>(
+    'year',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -146,6 +168,8 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
     sourceUrl,
     barcode,
     localImagePath,
+    creator,
+    year,
     createdAt,
     updatedAt,
   ];
@@ -219,6 +243,18 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
         ),
       );
     }
+    if (data.containsKey('creator')) {
+      context.handle(
+        _creatorMeta,
+        creator.isAcceptableOrUnknown(data['creator']!, _creatorMeta),
+      );
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -276,6 +312,14 @@ class $RatingsTable extends Ratings with TableInfo<$RatingsTable, Rating> {
         DriftSqlType.string,
         data['${effectivePrefix}local_image_path'],
       )!,
+      creator: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator'],
+      )!,
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}year'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -310,6 +354,12 @@ class Rating extends DataClass implements Insertable<Rating> {
   /// over [imageUrl] so the image remains available even after the remote URL
   /// goes stale.
   final String localImagePath;
+
+  /// Author, manufacturer, brand or designer – whoever made the item.
+  final String creator;
+
+  /// Release or publication year as entered/fetched, e.g. "1995". Empty if unknown.
+  final String year;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Rating({
@@ -322,6 +372,8 @@ class Rating extends DataClass implements Insertable<Rating> {
     required this.sourceUrl,
     required this.barcode,
     required this.localImagePath,
+    required this.creator,
+    required this.year,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -337,6 +389,8 @@ class Rating extends DataClass implements Insertable<Rating> {
     map['source_url'] = Variable<String>(sourceUrl);
     map['barcode'] = Variable<String>(barcode);
     map['local_image_path'] = Variable<String>(localImagePath);
+    map['creator'] = Variable<String>(creator);
+    map['year'] = Variable<String>(year);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -353,6 +407,8 @@ class Rating extends DataClass implements Insertable<Rating> {
       sourceUrl: Value(sourceUrl),
       barcode: Value(barcode),
       localImagePath: Value(localImagePath),
+      creator: Value(creator),
+      year: Value(year),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -373,6 +429,8 @@ class Rating extends DataClass implements Insertable<Rating> {
       sourceUrl: serializer.fromJson<String>(json['sourceUrl']),
       barcode: serializer.fromJson<String>(json['barcode']),
       localImagePath: serializer.fromJson<String>(json['localImagePath']),
+      creator: serializer.fromJson<String>(json['creator']),
+      year: serializer.fromJson<String>(json['year']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -390,6 +448,8 @@ class Rating extends DataClass implements Insertable<Rating> {
       'sourceUrl': serializer.toJson<String>(sourceUrl),
       'barcode': serializer.toJson<String>(barcode),
       'localImagePath': serializer.toJson<String>(localImagePath),
+      'creator': serializer.toJson<String>(creator),
+      'year': serializer.toJson<String>(year),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -405,6 +465,8 @@ class Rating extends DataClass implements Insertable<Rating> {
     String? sourceUrl,
     String? barcode,
     String? localImagePath,
+    String? creator,
+    String? year,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Rating(
@@ -417,6 +479,8 @@ class Rating extends DataClass implements Insertable<Rating> {
     sourceUrl: sourceUrl ?? this.sourceUrl,
     barcode: barcode ?? this.barcode,
     localImagePath: localImagePath ?? this.localImagePath,
+    creator: creator ?? this.creator,
+    year: year ?? this.year,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -433,6 +497,8 @@ class Rating extends DataClass implements Insertable<Rating> {
       localImagePath: data.localImagePath.present
           ? data.localImagePath.value
           : this.localImagePath,
+      creator: data.creator.present ? data.creator.value : this.creator,
+      year: data.year.present ? data.year.value : this.year,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -450,6 +516,8 @@ class Rating extends DataClass implements Insertable<Rating> {
           ..write('sourceUrl: $sourceUrl, ')
           ..write('barcode: $barcode, ')
           ..write('localImagePath: $localImagePath, ')
+          ..write('creator: $creator, ')
+          ..write('year: $year, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -467,6 +535,8 @@ class Rating extends DataClass implements Insertable<Rating> {
     sourceUrl,
     barcode,
     localImagePath,
+    creator,
+    year,
     createdAt,
     updatedAt,
   );
@@ -483,6 +553,8 @@ class Rating extends DataClass implements Insertable<Rating> {
           other.sourceUrl == this.sourceUrl &&
           other.barcode == this.barcode &&
           other.localImagePath == this.localImagePath &&
+          other.creator == this.creator &&
+          other.year == this.year &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -497,6 +569,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
   final Value<String> sourceUrl;
   final Value<String> barcode;
   final Value<String> localImagePath;
+  final Value<String> creator;
+  final Value<String> year;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const RatingsCompanion({
@@ -509,6 +583,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     this.sourceUrl = const Value.absent(),
     this.barcode = const Value.absent(),
     this.localImagePath = const Value.absent(),
+    this.creator = const Value.absent(),
+    this.year = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -522,6 +598,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     this.sourceUrl = const Value.absent(),
     this.barcode = const Value.absent(),
     this.localImagePath = const Value.absent(),
+    this.creator = const Value.absent(),
+    this.year = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : title = Value(title),
@@ -536,6 +614,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     Expression<String>? sourceUrl,
     Expression<String>? barcode,
     Expression<String>? localImagePath,
+    Expression<String>? creator,
+    Expression<String>? year,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -549,6 +629,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
       if (sourceUrl != null) 'source_url': sourceUrl,
       if (barcode != null) 'barcode': barcode,
       if (localImagePath != null) 'local_image_path': localImagePath,
+      if (creator != null) 'creator': creator,
+      if (year != null) 'year': year,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -564,6 +646,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     Value<String>? sourceUrl,
     Value<String>? barcode,
     Value<String>? localImagePath,
+    Value<String>? creator,
+    Value<String>? year,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -577,6 +661,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
       sourceUrl: sourceUrl ?? this.sourceUrl,
       barcode: barcode ?? this.barcode,
       localImagePath: localImagePath ?? this.localImagePath,
+      creator: creator ?? this.creator,
+      year: year ?? this.year,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -612,6 +698,12 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
     if (localImagePath.present) {
       map['local_image_path'] = Variable<String>(localImagePath.value);
     }
+    if (creator.present) {
+      map['creator'] = Variable<String>(creator.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<String>(year.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -633,6 +725,8 @@ class RatingsCompanion extends UpdateCompanion<Rating> {
           ..write('sourceUrl: $sourceUrl, ')
           ..write('barcode: $barcode, ')
           ..write('localImagePath: $localImagePath, ')
+          ..write('creator: $creator, ')
+          ..write('year: $year, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -662,6 +756,8 @@ typedef $$RatingsTableCreateCompanionBuilder =
       Value<String> sourceUrl,
       Value<String> barcode,
       Value<String> localImagePath,
+      Value<String> creator,
+      Value<String> year,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -676,6 +772,8 @@ typedef $$RatingsTableUpdateCompanionBuilder =
       Value<String> sourceUrl,
       Value<String> barcode,
       Value<String> localImagePath,
+      Value<String> creator,
+      Value<String> year,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -731,6 +829,16 @@ class $$RatingsTableFilterComposer
 
   ColumnFilters<String> get localImagePath => $composableBuilder(
     column: $table.localImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creator => $composableBuilder(
+    column: $table.creator,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get year => $composableBuilder(
+    column: $table.year,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -799,6 +907,16 @@ class $$RatingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get creator => $composableBuilder(
+    column: $table.creator,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -848,6 +966,12 @@ class $$RatingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get creator =>
+      $composableBuilder(column: $table.creator, builder: (column) => column);
+
+  GeneratedColumn<String> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -892,6 +1016,8 @@ class $$RatingsTableTableManager
                 Value<String> sourceUrl = const Value.absent(),
                 Value<String> barcode = const Value.absent(),
                 Value<String> localImagePath = const Value.absent(),
+                Value<String> creator = const Value.absent(),
+                Value<String> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RatingsCompanion(
@@ -904,6 +1030,8 @@ class $$RatingsTableTableManager
                 sourceUrl: sourceUrl,
                 barcode: barcode,
                 localImagePath: localImagePath,
+                creator: creator,
+                year: year,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -918,6 +1046,8 @@ class $$RatingsTableTableManager
                 Value<String> sourceUrl = const Value.absent(),
                 Value<String> barcode = const Value.absent(),
                 Value<String> localImagePath = const Value.absent(),
+                Value<String> creator = const Value.absent(),
+                Value<String> year = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RatingsCompanion.insert(
@@ -930,6 +1060,8 @@ class $$RatingsTableTableManager
                 sourceUrl: sourceUrl,
                 barcode: barcode,
                 localImagePath: localImagePath,
+                creator: creator,
+                year: year,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

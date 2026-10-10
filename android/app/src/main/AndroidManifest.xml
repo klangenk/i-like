@@ -1,6 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="I Like"
         android:name="${applicationName}"
@@ -33,14 +31,6 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
-        <service
-            android:name=".NowPlayingService"
-            android:exported="true"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
-            </intent-filter>
-        </service>
         <service
             android:name=".QuickAddTileService"
             android:exported="true"

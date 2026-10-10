@@ -8,6 +8,8 @@ class PrefillData {
   final String barcode;
   final String sourceUrl;
   final String notes;
+  final String creator;
+  final String year;
 
   const PrefillData({
     this.title = '',
@@ -16,6 +18,8 @@ class PrefillData {
     this.barcode = '',
     this.sourceUrl = '',
     this.notes = '',
+    this.creator = '',
+    this.year = '',
   });
 }
 
@@ -25,8 +29,14 @@ class AddRatingState {
   final List<String> tags;
   final String notes;
   final String imageUrl;
+
+  /// Photo the user took or picked, already copied into app storage.
+  /// Takes precedence over [imageUrl] when set.
+  final String localImagePath;
   final String sourceUrl;
   final String barcode;
+  final String creator;
+  final String year;
   final bool isLoading;
 
   const AddRatingState({
@@ -35,8 +45,11 @@ class AddRatingState {
     this.tags = const [],
     this.notes = '',
     this.imageUrl = '',
+    this.localImagePath = '',
     this.sourceUrl = '',
     this.barcode = '',
+    this.creator = '',
+    this.year = '',
     this.isLoading = false,
   });
 
@@ -46,8 +59,11 @@ class AddRatingState {
     List<String>? tags,
     String? notes,
     String? imageUrl,
+    String? localImagePath,
     String? sourceUrl,
     String? barcode,
+    String? creator,
+    String? year,
     bool? isLoading,
   }) {
     return AddRatingState(
@@ -56,8 +72,11 @@ class AddRatingState {
       tags: tags ?? this.tags,
       notes: notes ?? this.notes,
       imageUrl: imageUrl ?? this.imageUrl,
+      localImagePath: localImagePath ?? this.localImagePath,
       sourceUrl: sourceUrl ?? this.sourceUrl,
       barcode: barcode ?? this.barcode,
+      creator: creator ?? this.creator,
+      year: year ?? this.year,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -70,7 +89,11 @@ class AddRatingNotifier extends StateNotifier<AddRatingState> {
   void setScore(double score) => state = state.copyWith(score: score);
   void setNotes(String notes) => state = state.copyWith(notes: notes);
   void setImageUrl(String url) => state = state.copyWith(imageUrl: url);
+  void setLocalImage(String path) => state = state.copyWith(localImagePath: path);
+  void clearImage() => state = state.copyWith(imageUrl: '', localImagePath: '');
   void setSourceUrl(String url) => state = state.copyWith(sourceUrl: url);
+  void setCreator(String creator) => state = state.copyWith(creator: creator);
+  void setYear(String year) => state = state.copyWith(year: year);
   void setBarcode(String barcode) => state = state.copyWith(barcode: barcode);
   void setLoading(bool loading) => state = state.copyWith(isLoading: loading);
 
@@ -92,6 +115,8 @@ class AddRatingNotifier extends StateNotifier<AddRatingState> {
     List<String> tags = const [],
     String barcode = '',
     String sourceUrl = '',
+    String creator = '',
+    String year = '',
   }) {
     state = AddRatingState(
       title: title,
@@ -99,6 +124,8 @@ class AddRatingNotifier extends StateNotifier<AddRatingState> {
       tags: tags,
       barcode: barcode,
       sourceUrl: sourceUrl,
+      creator: creator,
+      year: year,
     );
   }
 }
