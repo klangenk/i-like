@@ -1,0 +1,4 @@
+• Eigene Fotos für Bewertungen – mit Titel- und Kategorie-Vorschlägen aus dem Foto
+• Autor, Hersteller und Jahr zu jeder Bewertung
+• Link-Import funktioniert jetzt auch mit Amazon
+• Brettspiele mit Bildern, Suchergebnisse mit Vorschaubildern

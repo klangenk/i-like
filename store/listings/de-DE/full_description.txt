@@ -1,0 +1,25 @@
+I Like ist dein persönliches Gedächtnis für alles, was dir gefällt – und für alles, was du nie wieder brauchst.
+
+Deine Bewertungen gehören dir: Alles bleibt auf deinem Gerät. Kein Konto, keine Cloud, keine Werbung, kein Tracking.
+
+Ob Café, Pizza, Buch, Brettspiel oder ein Produkt aus dem Supermarkt: Mit I Like hältst du in Sekunden fest, wie du etwas fandest. Statt Sternen bewertest du in Worten – Nope, Naja, Okay, Gut oder Liebe. So weißt du beim nächsten Einkauf oder Restaurantbesuch sofort, was sich lohnt.
+
+SO SCHNELL GEHT'S
+• Barcode scannen – Produkt- und Buchdaten werden automatisch geladen
+• Link teilen – direkt aus dem Browser oder aus Shops wie Amazon
+• Bücher (Open Library) und Brettspiele finden, mit Cover direkt in der Trefferliste
+• Eigenes Foto aufnehmen – die App schlägt Titel und Kategorie vor; die Texterkennung läuft direkt auf deinem Gerät
+• Oder einfach selbst eintragen
+
+ALLES IM BLICK
+• Fotoraster mit all deinen Bewertungen
+• Nach Stufe filtern: nur deine Lieblinge – oder alles, was „Nope“ war
+• Autor, Hersteller oder Marke und Jahr zu jeder Bewertung
+• Sortieren nach Datum, Bewertung oder Name
+• Suche über Titel, Hersteller, Kategorien und Notizen
+• Deine Bilanz: So verteilen sich deine Bewertungen
+
+DEINE DATEN
+• Alle Bewertungen und Fotos bleiben auf deinem Gerät
+• Export als JSON oder CSV, Import aus JSON
+• Mit hellem und dunklem Design, auf Deutsch und Englisch

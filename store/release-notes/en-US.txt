@@ -1,0 +1,4 @@
+• Your own photos for ratings – with title and category suggestions from the photo
+• Author, maker and year for every rating
+• Link import now works with Amazon too
+• Board games with images, search results with thumbnails

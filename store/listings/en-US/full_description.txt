@@ -1,0 +1,25 @@
+I Like is your personal memory for everything you love – and everything you never want again.
+
+Your ratings belong to you: everything stays on your device. No account, no cloud, no ads, no tracking.
+
+Whether it's a café, a pizza, a book, a board game or something from the supermarket: with I Like you capture in seconds what you thought of it. Instead of stars you rate in words – Nope, Meh, Okay, Good or Love. So next time you shop or eat out, you know right away what's worth it.
+
+QUICK TO ADD
+• Scan a barcode – product and book details load automatically
+• Share a link – straight from your browser or shops like Amazon
+• Find books (Open Library) and board games, with covers right in the results
+• Take your own photo – the app suggests a title and category; text recognition runs on your device
+• Or simply enter it yourself
+
+EVERYTHING AT A GLANCE
+• Photo grid of all your ratings
+• Filter by level: just your favourites – or everything that was "Nope"
+• Author, maker or brand and year for every rating
+• Sort by date, rating or name
+• Search across titles, makers, categories and notes
+• Your balance: how your ratings are spread
+
+YOUR DATA
+• All ratings and photos stay on your device
+• Export as JSON or CSV, import from JSON
+• Light and dark mode, in German and English
