@@ -26,6 +26,9 @@ Diese App wird privat betrieben. Bei Fragen zum Datenschutz wende dich an den En
 - **Wann:** Nur wenn du aktiv „Aus Galerie wählen“ antippst; die App sieht dabei nur das Foto, das du auswählst
 - **Gespeichert:** Eine Kopie des gewählten Fotos wird lokal in der App gespeichert und nicht übertragen
 
+### Texterkennung auf dem Gerät
+Wenn du ein Foto hinzufügst, schlägt die App einen Titel und eine Kategorie vor. Dafür liest sie den Text auf dem Foto und erkennt grob, was abgebildet ist. Das geschieht vollständig auf deinem Gerät mit [Google ML Kit](https://developers.google.com/ml-kit) – Fotos und erkannte Texte verlassen dein Gerät nicht.
+
 ---
 
 ## 4. Externe Dienste
@@ -61,7 +64,9 @@ Wenn du Bewertungen als JSON oder CSV exportierst, erstellst du eine Datei auf d
 Die App enthält keinerlei:
 - Analyse- oder Tracking-SDKs (z. B. Firebase, Crashlytics, Sentry)
 - Werbung
-- Drittanbieter-SDKs, die Nutzungsdaten sammeln
+- Drittanbieter-SDKs, die dein Verhalten verfolgen
+
+**Ausnahme Google ML Kit:** Die Bibliothek für die Texterkennung übermittelt laut Google anonyme Nutzungs- und Leistungsdaten an Google (z. B. Gerätetyp, App-Version und wie oft die Erkennung genutzt wird), um die Bibliothek zu verbessern. Fotos, erkannte Texte und deine Bewertungen gehören nicht dazu. Details: [ML Kit – Datenoffenlegung](https://developers.google.com/ml-kit/android-data-disclosure).
 
 ---
 

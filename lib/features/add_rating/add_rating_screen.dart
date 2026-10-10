@@ -11,6 +11,8 @@ import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
 import '../../shared/widgets/round_icon_button.dart';
+import '../../core/utils/photo_insights.dart';
+import '../../core/utils/tag_l10n.dart';
 import '../../shared/widgets/photo_picker.dart';
 import 'widgets/level_picker.dart';
 import 'widgets/tag_input.dart';
@@ -66,6 +68,23 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
   bool _saved = false;
   String _pickedPath = '';
 
+  /// On-device suggestions (title candidates, categories) for the picked photo.
+  PhotoInsights? _insights;
+  bool _analyzing = false;
+
+  Future<void> _analyze(String path) async {
+    setState(() {
+      _analyzing = true;
+      _insights = null;
+    });
+    final insights = await analyzePhoto(path);
+    if (!mounted || path != _pickedPath) return;
+    setState(() {
+      _analyzing = false;
+      _insights = insights;
+    });
+  }
+
   Future<void> _pickPhoto(AddRatingState state) async {
     final pick = await pickRatingPhoto(
       context,
@@ -79,9 +98,14 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       case PhotoPicked(:final localPath):
         _pickedPath = localPath;
         notifier.setLocalImage(localPath);
+        _analyze(localPath);
       case PhotoRemoved():
         _pickedPath = '';
         notifier.clearImage();
+        setState(() {
+          _insights = null;
+          _analyzing = false;
+        });
     }
   }
 
@@ -220,6 +244,19 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                       ],
                     ),
                   ),
+                  if (_analyzing || !(_insights?.isEmpty ?? true)) ...[
+                    const SizedBox(height: 10),
+                    _PhotoSuggestions(
+                      analyzing: _analyzing,
+                      insights: _insights,
+                      selectedTags: state.tags,
+                      onTitle: (title) {
+                        _titleController.text = title;
+                        notifier.setTitle(title);
+                      },
+                      onTag: notifier.addTag,
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -342,6 +379,79 @@ class _PhotoSlot extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Suggestions from the photo": tap a title candidate to use it, tap a
+/// category to add it.
+class _PhotoSuggestions extends StatelessWidget {
+  final bool analyzing;
+  final PhotoInsights? insights;
+  final List<String> selectedTags;
+  final ValueChanged<String> onTitle;
+  final ValueChanged<String> onTag;
+
+  const _PhotoSuggestions({
+    required this.analyzing,
+    required this.insights,
+    required this.selectedTags,
+    required this.onTitle,
+    required this.onTag,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final tags = (insights?.tags ?? const []).where((t) => !selectedTags.contains(t)).toList();
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        border: Border.all(color: scheme.outline, width: 1.5),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome_outlined, size: 16, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 6),
+              Text(
+                analyzing ? l10n.analyzingPhoto : l10n.photoSuggestions,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              if (analyzing) ...[
+                const SizedBox(width: 8),
+                const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+              ],
+            ],
+          ),
+          if (!analyzing) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final title in insights?.titles ?? const <String>[])
+                  ActionChip(
+                    avatar: const Icon(Icons.title_rounded, size: 16),
+                    label: Text(title),
+                    onPressed: () => onTitle(title),
+                  ),
+                for (final tag in tags)
+                  ActionChip(
+                    avatar: const Icon(Icons.add_rounded, size: 16),
+                    label: Text(localizedTagName(tag, l10n)),
+                    onPressed: () => onTag(tag),
+                  ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -267,5 +267,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "photoSuggestions": "Suggestions from the photo",
+  "analyzingPhoto": "Reading photo …"
 }

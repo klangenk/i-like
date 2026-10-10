@@ -1123,6 +1123,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'by {creator}'**
   String byCreator(String creator);
+
+  /// No description provided for @photoSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions from the photo'**
+  String get photoSuggestions;
+
+  /// No description provided for @analyzingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading photo …'**
+  String get analyzingPhoto;
 }
 
 class _AppLocalizationsDelegate

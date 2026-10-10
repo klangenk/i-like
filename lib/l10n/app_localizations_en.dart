@@ -570,4 +570,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String byCreator(String creator) {
     return 'by $creator';
   }
+
+  @override
+  String get photoSuggestions => 'Suggestions from the photo';
+
+  @override
+  String get analyzingPhoto => 'Reading photo …';
 }

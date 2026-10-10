@@ -170,5 +170,7 @@
   "creatorLabel": "Von",
   "creatorHint": "Autor, Hersteller, Marke …",
   "yearLabel": "Jahr",
-  "byCreator": "von {creator}"
+  "byCreator": "von {creator}",
+  "photoSuggestions": "Vorschläge aus dem Foto",
+  "analyzingPhoto": "Foto wird gelesen …"
 }

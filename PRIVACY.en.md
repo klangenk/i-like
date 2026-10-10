@@ -26,6 +26,9 @@ This app is operated privately. If you have any questions about privacy, please 
 - **When:** Only when you actively tap "Choose from gallery"; the app only sees the photo you select
 - **Stored:** A copy of the selected photo is stored locally in the app and is not transmitted
 
+### On-device text recognition
+When you add a photo, the app suggests a title and a category. To do so it reads the text in the photo and roughly recognises what it shows. This happens entirely on your device using [Google ML Kit](https://developers.google.com/ml-kit) – photos and recognised text never leave your device.
+
 ---
 
 ## 4. External services
@@ -61,7 +64,9 @@ When you export ratings as JSON or CSV, you create a file on your device that yo
 The app contains no:
 - Analytics or tracking SDKs (e.g. Firebase, Crashlytics, Sentry)
 - Advertising
-- Third-party SDKs that collect usage data
+- Third-party SDKs that track your behaviour
+
+**Exception Google ML Kit:** According to Google, the text recognition library sends anonymous usage and performance data to Google (e.g. device type, app version and how often recognition is used) to improve the library. This does not include photos, recognised text or your ratings. Details: [ML Kit – data disclosure](https://developers.google.com/ml-kit/android-data-disclosure).
 
 ---
 
