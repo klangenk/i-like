@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/database/app_database.dart';
 import '../../core/utils/barcode_helper.dart';
 import '../../core/utils/image_store.dart';
+import '../../core/utils/review_prompt.dart';
+import '../settings/settings_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
@@ -121,14 +123,15 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     super.dispose();
   }
 
-  Future<void> _saveRating() async {
+  /// Saves the rating; with [toTry] without a level, on the "to try" list.
+  Future<void> _saveRating({bool toTry = false}) async {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.read(addRatingProvider);
     if (state.title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseEnterTitle)));
       return;
     }
-    if (state.score == 0) {
+    if (state.score == 0 && !toTry) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseGiveRating)));
       return;
     }
@@ -139,10 +142,11 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     _saved = true;
 
     final dao = ref.read(ratingsDaoProvider);
+    final prefs = ref.read(sharedPreferencesProvider);
     await dao.insertRating(
       RatingsCompanion(
         title: Value(state.title),
-        score: Value(state.score),
+        score: Value(toTry ? 0 : state.score),
         tags: Value(state.tags.join(', ')),
         notes: Value(state.notes),
         imageUrl: Value(state.imageUrl),
@@ -156,6 +160,10 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
 
     if (mounted) {
       context.pop();
+    }
+    if (!toTry) {
+      final rated = (await dao.getAll()).where((r) => !isToTry(r)).length;
+      await maybeAskForReview(prefs, rated);
     }
   }
 
@@ -199,7 +207,22 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: FilledButton(onPressed: _saveRating, child: Text(l10n.save)),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
+                        onPressed: () => _saveRating(toTry: true),
+                        icon: const Icon(Icons.bookmark_border_rounded),
+                        label: Text(l10n.saveToTry),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton(onPressed: _saveRating, child: Text(l10n.save)),
+                    ),
+                  ],
+                ),
               ),
             ),
       body: state.isLoading

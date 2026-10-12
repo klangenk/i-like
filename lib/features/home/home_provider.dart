@@ -28,7 +28,38 @@ final searchQueryProvider = StateProvider<String>((ref) => '');
 final searchExpandedProvider = StateProvider<bool>((ref) => false);
 
 // Selected tag filter
-final selectedTagFilterProvider = StateProvider<String?>((ref) => null);
+/// A [StateController] that saves every change, so view settings survive
+/// restarts. Used like a StateProvider: `ref.read(p.notifier).state = x`.
+class PersistedController<T> extends StateController<T> {
+  final void Function(T value) _save;
+
+  PersistedController(super.initial, this._save);
+
+  @override
+  set state(T value) {
+    super.state = value;
+    _save(value);
+  }
+}
+
+// Category filter, remembered across restarts like sort order and grouping
+final selectedTagFilterProvider = StateNotifierProvider<PersistedController<String?>, String?>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return PersistedController(
+    prefs.getString(_tagFilterKey),
+    (tag) => tag == null ? prefs.remove(_tagFilterKey) : prefs.setString(_tagFilterKey, tag),
+  );
+});
+
+const _tagFilterKey = 'view_tag_filter';
+const _sortKey = 'view_sort';
+const _groupKey = 'view_group_by_tag';
+
+// Only the "to try" list: saved things without a level yet
+final toTryOnlyProvider = StateProvider<bool>((ref) => false);
+
+/// Saved to try later, not rated yet.
+bool isToTry(Rating r) => RatingLevel.fromScore(r.score) == null;
 
 // Word-level filter (null = all levels)
 final levelFilterProvider = StateProvider<RatingLevel?>((ref) => null);
@@ -46,10 +77,23 @@ void dismissShareTip(WidgetRef ref) {
 }
 
 // Sort option
-final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest);
+final sortOptionProvider = StateNotifierProvider<PersistedController<SortOption>, SortOption>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final saved = prefs.getString(_sortKey);
+  return PersistedController(
+    SortOption.values.firstWhere((o) => o.name == saved, orElse: () => SortOption.newest),
+    (sort) => prefs.setString(_sortKey, sort.name),
+  );
+});
 
 // Show the list in one section per category
-final groupByTagProvider = StateProvider<bool>((ref) => false);
+final groupByTagProvider = StateNotifierProvider<PersistedController<bool>, bool>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return PersistedController(
+    prefs.getBool(_groupKey) ?? false,
+    (grouped) => prefs.setBool(_groupKey, grouped),
+  );
+});
 
 /// Splits already sorted ratings into one section per category; a rating
 /// with several categories appears in each of them, like in the filter.
@@ -87,6 +131,7 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
   final query = ref.watch(searchQueryProvider).trim().toLowerCase();
   final selectedTag = ref.watch(selectedTagFilterProvider);
   final level = ref.watch(levelFilterProvider);
+  final toTryOnly = ref.watch(toTryOnlyProvider);
   final sort = ref.watch(sortOptionProvider);
 
   return ratingsAsync.whenData((ratings) {
@@ -111,6 +156,9 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
       }).toList();
     }
 
+    // Once the last thing to try is rated, its chip is gone: show everything
+    if (toTryOnly && ratings.any(isToTry)) filtered = filtered.where(isToTry).toList();
+
     if (level != null) {
       filtered = filtered.where((r) => RatingLevel.fromScore(r.score) == level).toList();
     }
@@ -120,10 +168,11 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
         filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       case SortOption.oldest:
         filtered.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      // Things still to try have no level: last in both directions
       case SortOption.highest:
-        filtered.sort((a, b) => b.score.compareTo(a.score));
+        filtered.sort((a, b) => _toTryLast(a, b) ?? b.score.compareTo(a.score));
       case SortOption.lowest:
-        filtered.sort((a, b) => a.score.compareTo(b.score));
+        filtered.sort((a, b) => _toTryLast(a, b) ?? a.score.compareTo(b.score));
       case SortOption.az:
         filtered.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       case SortOption.za:
@@ -145,6 +194,11 @@ final tagUsageProvider = Provider<Map<String, int>>((ref) {
   }
   return counts;
 });
+
+int? _toTryLast(Rating a, Rating b) {
+  if (isToTry(a) == isToTry(b)) return null;
+  return isToTry(a) ? 1 : -1;
+}
 
 // All unique tags from ratings
 final allTagsProvider = Provider<AsyncValue<List<String>>>((ref) {

@@ -61,6 +61,8 @@ Die App kann Text und URLs empfangen, die du aus anderen Apps heraus teilst (z. 
 
 Wenn du Bewertungen als JSON oder CSV exportierst, erstellst du eine Datei auf deinem Gerät, die du anschließend selbst teilen oder speichern kannst. Die App selbst überträgt diese Datei nicht.
 
+**Sicherung im Google-Konto (optional, nur Android):** Standardmäßig ausgeschaltet. Schaltest du sie in den Einstellungen ein, legt die App eine Kopie deiner Bewertungen und Fotos in einem Ordner ab, den die Android-Sicherung (Auto Backup) verschlüsselt in **deinem eigenen Google-Konto** speichert, sofern die Gerätesicherung auf deinem Handy aktiv ist. Beim Einrichten eines neuen Handys stellt Android sie wieder her. Wir haben keinen Zugriff auf diese Sicherung; es gelten die [Datenschutzbestimmungen von Google](https://policies.google.com/privacy). Schaltest du die Sicherung aus, löscht die App die Kopie, und bei der nächsten Gerätesicherung wird nichts mehr von I Like gespeichert.
+
 ---
 
 ## 7. Keine Tracker, keine Werbung, keine Analyse

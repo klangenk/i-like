@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +75,7 @@ Future<void> shoot(WidgetTester tester, Widget home, String name,
   await tester.pumpWidget(ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
-      groupByTagProvider.overrideWith((ref) => grouped),
+      groupByTagProvider.overrideWith((ref) => PersistedController(grouped, (_) {})),
       ratingsProvider.overrideWith((ref) => Stream.value(ratings)),
       ratingDetailProvider.overrideWith((ref, id) => Stream.value(ratings.firstWhere((x) => x.id == id))),
     ],

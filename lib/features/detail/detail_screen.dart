@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../core/database/app_database.dart';
 import '../../core/utils/image_store.dart';
 import '../../core/utils/url_helper.dart';
@@ -15,6 +14,7 @@ import '../../shared/widgets/rating_image.dart';
 import '../../shared/widgets/round_icon_button.dart';
 import '../home/home_provider.dart';
 import 'detail_provider.dart';
+import 'share_card.dart';
 import '../add_rating/widgets/level_picker.dart';
 import '../add_rating/widgets/tag_input.dart';
 
@@ -147,7 +147,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     }
   }
 
-  void _shareRating(Rating rating) {
+  Future<void> _shareRating(Rating rating) async {
     final l10n = AppLocalizations.of(context)!;
     final level = RatingLevel.fromScore(rating.score);
     final buffer = StringBuffer();
@@ -157,8 +157,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     if (rating.creator.isNotEmpty) {
       buffer.writeln(l10n.byCreator(rating.creator));
     }
-    if (rating.tags.isNotEmpty) {
-      buffer.writeln('Tags: ${rating.tags}');
+    final tags = rating.tags
+        .split(',')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty && t != 'url')
+        .map((t) => localizedTagName(t, l10n));
+    if (tags.isNotEmpty) {
+      buffer.writeln(tags.join(', '));
     }
     if (rating.notes.isNotEmpty) {
       buffer.writeln(rating.notes);
@@ -166,7 +171,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     if (rating.sourceUrl.isNotEmpty) {
       buffer.writeln(rating.sourceUrl);
     }
-    Share.share(buffer.toString());
+    await shareRatingCard(context, rating, buffer.toString().trim());
   }
 
   @override
@@ -202,7 +207,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                       )
                     : FilledButton(
                         onPressed: () => _startEditing(rating),
-                        child: Text(l10n.editRating),
+                        child: Text(
+                          RatingLevel.fromScore(rating.score) == null
+                              ? l10n.rateNow
+                              : l10n.editRating,
+                        ),
                       ),
               ),
             ),
@@ -309,11 +318,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                           ),
                         ),
                       ),
-                    if (level != null && !_isEditing)
+                    if (!_isEditing)
                       Positioned(
                         left: 14,
                         bottom: 14,
-                        child: LevelBadge(level: level, large: true),
+                        child: RatingBadge(rating: rating, large: true),
                       ),
                   ],
                 ),
@@ -409,7 +418,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                       minLines: 2,
                     ),
                   ] else ...[
-                    if (level != null) LevelScale(level: level),
+                    if (level != null)
+                      LevelScale(level: level)
+                    else
+                      Text(
+                        l10n.notTriedYet,
+                        style: TextStyle(fontSize: 16, height: 1.4, color: scheme.onSurfaceVariant),
+                      ),
                     if (rating.notes.isNotEmpty) ...[
                       const SizedBox(height: 22),
                       Text(rating.notes, style: const TextStyle(fontSize: 16, height: 1.45)),

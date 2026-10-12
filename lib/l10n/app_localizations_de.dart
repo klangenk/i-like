@@ -505,6 +505,37 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zeitschriften lassen sich nicht automatisch nachschlagen. Fotografiere das Titelblatt – die App schlägt den Titel vor.';
 
   @override
+  String get knownBarcodeTitle => 'Schon bewertet';
+
+  @override
+  String get rateAgain => 'Nochmal bewerten';
+
+  @override
+  String get toTry => 'Probieren';
+
+  @override
+  String get saveToTry => 'Später';
+
+  @override
+  String toTryCount(int count) {
+    return '$count zum Probieren';
+  }
+
+  @override
+  String get notTriedYet =>
+      'Noch nicht ausprobiert. Bewerte es, sobald du es kennst.';
+
+  @override
+  String get rateNow => 'Jetzt bewerten';
+
+  @override
+  String get backupTitle => 'Im Google-Konto sichern';
+
+  @override
+  String get backupSubtitle =>
+      'Verschlüsselt über die Android-Sicherung – für ein neues Handy. Nur, wenn du es einschaltest.';
+
+  @override
   String get webSearch => 'Im Web suchen';
 
   @override

@@ -14,12 +14,16 @@ import 'features/add_rating/add_rating_provider.dart';
 import 'features/add_rating/quick_add_sheet.dart';
 import 'features/home/home_provider.dart';
 import 'features/settings/settings_provider.dart';
+import 'core/backup/backup_service.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = AppDatabase();
   final prefs = await SharedPreferences.getInstance();
+  // A backup Android restored on a new phone becomes the database again.
+  final restoredFrom = await BackupService.restoreIfNeeded(prefs);
+  final database = AppDatabase();
+  if (restoredFrom != null) await BackupService.fixPhotoPaths(database, restoredFrom);
 
   runApp(
     ProviderScope(
@@ -47,6 +51,11 @@ class _ILikeAppState extends State<ILikeApp> {
   @override
   void initState() {
     super.initState();
+
+    // Keep the optional backup copy current while the app runs
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ProviderScope.containerOf(context).read(backupSchedulerProvider);
+    });
 
     // Handle shared content when app is already running
     _shareSubscription = ReceiveSharingIntent.instance

@@ -7,7 +7,9 @@ import '../../core/utils/api_service.dart';
 import '../../core/utils/barcode_helper.dart';
 import '../../core/utils/url_helper.dart';
 import '../../l10n/app_localizations.dart';
+import '../home/home_provider.dart';
 import 'add_rating_provider.dart';
+import 'known_barcode_sheet.dart';
 
 void showQuickAddSheet(BuildContext context) {
   showModalBottomSheet(
@@ -210,6 +212,14 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
   }
 
   // Show loading indicator while fetching metadata
+  // Already rated? In the shop that's the answer the user is after.
+  final known = await ProviderScope.containerOf(context).read(ratingsDaoProvider).getByBarcode(barcode);
+  if (!context.mounted) return;
+  if (known.isNotEmpty) {
+    final rateAgain = await showKnownBarcodeSheet(context, known);
+    if (!rateAgain || !context.mounted) return;
+  }
+
   // No service knows magazine codes: skip the lookups and ask for a photo.
   if (isMagazineBarcode(barcode)) {
     context.push('/add', extra: PrefillData(tags: tags, barcode: barcode, notFound: true));

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
-import '../../../core/theme/rating_level.dart';
 import '../../../core/utils/date_label.dart';
 import '../../../core/utils/tag_l10n.dart';
 import '../../../l10n/app_localizations.dart';
@@ -45,7 +44,6 @@ class RatingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final level = RatingLevel.fromScore(rating.score);
     final firstTag = rating.tags
         .split(',')
         .map((t) => t.trim())
@@ -82,7 +80,7 @@ class RatingCard extends StatelessWidget {
                     child: Icon(Icons.image_outlined, size: 36, color: placeholderIcon),
                   ),
                 ),
-                if (level != null) Positioned(left: 8, bottom: 8, child: LevelBadge(level: level)),
+                Positioned(left: 8, bottom: 8, child: RatingBadge(rating: rating)),
               ],
             ),
           ),

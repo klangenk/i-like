@@ -61,6 +61,8 @@ The app can receive text and URLs that you share from other apps (e.g. "Share" i
 
 When you export ratings as JSON or CSV, you create a file on your device that you can then share or save yourself. The app itself does not transmit this file.
 
+**Backup to your Google account (optional, Android only):** Off by default. If you turn it on in the settings, the app keeps a copy of your ratings and photos in a folder that Android's backup (Auto Backup) stores encrypted in **your own Google account**, provided device backup is on for your phone. Android restores it when you set up a new phone. We have no access to this backup; [Google's privacy policy](https://policies.google.com/privacy) applies. If you turn backup off, the app deletes the copy, and the next device backup stores nothing from I Like.
+
 ---
 
 ## 7. No trackers, no ads, no analytics

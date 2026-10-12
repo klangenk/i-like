@@ -1,2 +1,5 @@
-• Magazines are recognised by their barcode: category "Magazine" and a hint to photograph the cover
-• New welcome screen and a tip about sharing from other apps
+• Already rated? When you scan, the app shows your verdict right away
+• New "to try" list: save things now, rate them later
+• Share ratings as an image card
+• Optional: backup to your Google account (Settings)
+• Sort order, grouping and category filter are remembered

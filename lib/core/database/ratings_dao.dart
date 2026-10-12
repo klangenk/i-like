@@ -17,6 +17,12 @@ class RatingsDao {
   Future<Rating> getById(int id) =>
       (db.select(db.ratings)..where((t) => t.id.equals(id))).getSingle();
 
+  /// Ratings saved with this barcode, newest first.
+  Future<List<Rating>> getByBarcode(String barcode) => (db.select(db.ratings)
+        ..where((t) => t.barcode.equals(barcode))
+        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+      .get();
+
   Stream<Rating> watchById(int id) =>
       (db.select(db.ratings)..where((t) => t.id.equals(id))).watchSingle();
 

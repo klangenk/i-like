@@ -109,6 +109,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final showShareTip = allRatings.isNotEmpty && !ref.watch(shareTipDismissedProvider);
     final ratingsAsync = ref.watch(filteredRatingsProvider);
     final grouped = ref.watch(groupByTagProvider);
+    final rated = allRatings.where((r) => !isToTry(r)).length;
+    final toTryCount = allRatings.length - rated;
+    final toTryOnly = ref.watch(toTryOnlyProvider) && toTryCount > 0;
     final loved = allRatings
         .where((r) => RatingLevel.fromScore(r.score) == RatingLevel.liebe)
         .length;
@@ -161,9 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    loved > 0
-                        ? l10n.homeSummary(allRatings.length, loved)
-                        : l10n.homeSummaryShort(allRatings.length),
+                    loved > 0 ? l10n.homeSummary(rated, loved) : l10n.homeSummaryShort(rated),
                     style: TextStyle(fontSize: 16, color: AppColors.muted(context)),
                   ),
                 ),
@@ -194,20 +195,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
                 sliver: SliverToBoxAdapter(child: ShareTip(onDismiss: () => dismissShareTip(ref))),
               ),
-            if (allRatings.isNotEmpty && tagFilter != null)
+            if (allRatings.isNotEmpty && (tagFilter != null || toTryCount > 0))
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                 sliver: SliverToBoxAdapter(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: InputChip(
-                      label: Text(localizedTagName(tagFilter, l10n)),
-                      selected: true,
-                      showCheckmark: false,
-                      onPressed: () => showSortSheet(context, ref),
-                      onDeleted: () => ref.read(selectedTagFilterProvider.notifier).state = null,
-                      deleteButtonTooltipMessage: l10n.close,
-                    ),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (toTryCount > 0)
+                        FilterChip(
+                          avatar: const Icon(Icons.bookmark_rounded, size: 18),
+                          label: Text(l10n.toTryCount(toTryCount)),
+                          selected: toTryOnly,
+                          showCheckmark: false,
+                          onSelected: (v) => ref.read(toTryOnlyProvider.notifier).state = v,
+                        ),
+                      if (tagFilter != null)
+                        InputChip(
+                          label: Text(localizedTagName(tagFilter, l10n)),
+                          selected: true,
+                          showCheckmark: false,
+                          onPressed: () => showSortSheet(context, ref),
+                          onDeleted: () =>
+                              ref.read(selectedTagFilterProvider.notifier).state = null,
+                          deleteButtonTooltipMessage: l10n.close,
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -238,7 +252,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
                 // A filtered list is one category already; sections would only
                 // repeat the other categories of the same items.
-                if (!grouped || tagFilter != null) {
+                if (!grouped || tagFilter != null || toTryOnly) {
                   return [_grid(ratings, const EdgeInsets.fromLTRB(20, 18, 20, 112))];
                 }
                 final sections = groupByTag(ratings);

@@ -15,6 +15,8 @@ import '../../shared/widgets/round_icon_button.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
 import 'export_import_service.dart';
+import 'settings_provider.dart';
+import '../../core/backup/backup_service.dart';
 
 final _packageInfoProvider = FutureProvider<PackageInfo>((ref) => PackageInfo.fromPlatform());
 
@@ -50,7 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 20),
 
           if (ratings.isNotEmpty) ...[
-            _BalanceCard(ratings: ratings),
+            _BalanceCard(ratings: ratings.where((r) => !isToTry(r)).toList()),
             const SizedBox(height: 24),
           ],
 
@@ -70,6 +72,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l10n.importRatings,
             onTap: _handleImport,
           ),
+          if (BackupService.supported)
+            _SettingsRow(
+              icon: Icons.cloud_outlined,
+              title: l10n.backupTitle,
+              subtitle: l10n.backupSubtitle,
+              trailing: Switch(
+                value: ref.watch(backupEnabledProvider),
+                onChanged: _setBackup,
+              ),
+              onTap: () => _setBackup(!ref.read(backupEnabledProvider)),
+            ),
           const SizedBox(height: 24),
 
           _SectionLabel(l10n.aboutTitle),
@@ -91,6 +104,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _setBackup(bool on) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    final db = ref.read(databaseProvider);
+    ref.read(backupEnabledProvider.notifier).state = on;
+    await prefs.setBool(BackupService.enabledKey, on);
+    try {
+      on ? await BackupService.snapshot(db) : await BackupService.clear();
+    } catch (_) {}
   }
 
   Future<void> _handleExport() async {
@@ -286,12 +309,14 @@ class _SectionLabel extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
 
   const _SettingsRow({
     required this.icon,
     required this.title,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
@@ -321,6 +346,11 @@ class _SettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 8),
+                      child: Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+                    ),
                 ],
               ),
             ),

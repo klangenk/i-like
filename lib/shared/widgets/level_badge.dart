@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/database/app_database.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/rating_level.dart';
 import '../../l10n/app_localizations.dart';
@@ -39,6 +40,57 @@ class LevelBadge extends StatelessWidget {
               fontSize: large ? 20 : 13,
               fontWeight: large ? FontWeight.w900 : FontWeight.w800,
               color: level.strong(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The rating's level pill, or the "to try" pill while it has no level yet.
+class RatingBadge extends StatelessWidget {
+  final Rating rating;
+  final bool large;
+
+  const RatingBadge({super.key, required this.rating, this.large = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final level = RatingLevel.fromScore(rating.score);
+    return level == null ? ToTryBadge(large: large) : LevelBadge(level: level, large: large);
+  }
+}
+
+/// Pill for things on the "to try" list, which have no level yet.
+class ToTryBadge extends StatelessWidget {
+  final bool large;
+
+  const ToTryBadge({super.key, this.large = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: large ? 44 : 28,
+      padding: EdgeInsets.only(left: large ? 12 : 8, right: large ? 18 : 11),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: scheme.onSurface, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.bookmark_rounded, size: large ? 20 : 14, color: scheme.onSurface),
+          SizedBox(width: large ? 6 : 4),
+          Text(
+            l10n.toTry,
+            style: TextStyle(
+              fontSize: large ? 20 : 13,
+              fontWeight: large ? FontWeight.w900 : FontWeight.w800,
+              color: scheme.onSurface,
             ),
           ),
         ],

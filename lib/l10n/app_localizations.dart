@@ -992,6 +992,60 @@ abstract class AppLocalizations {
   /// **'Magazines can\'t be looked up automatically. Take a photo of the cover – the app suggests the title.'**
   String get magazineNotFound;
 
+  /// No description provided for @knownBarcodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already rated'**
+  String get knownBarcodeTitle;
+
+  /// No description provided for @rateAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate it again'**
+  String get rateAgain;
+
+  /// No description provided for @toTry.
+  ///
+  /// In en, this message translates to:
+  /// **'To try'**
+  String get toTry;
+
+  /// No description provided for @saveToTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get saveToTry;
+
+  /// No description provided for @toTryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to try'**
+  String toTryCount(int count);
+
+  /// No description provided for @notTriedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tried yet. Rate it once you know it.'**
+  String get notTriedYet;
+
+  /// No description provided for @rateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate it now'**
+  String get rateNow;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up to your Google account'**
+  String get backupTitle;
+
+  /// No description provided for @backupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted via Android backup – for a new phone. Only if you turn it on.'**
+  String get backupSubtitle;
+
   /// No description provided for @webSearch.
   ///
   /// In en, this message translates to:

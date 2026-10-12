@@ -1,8 +1,8 @@
 I Like ist dein persönliches Gedächtnis für alles, was dir gefällt – und für alles, was du nie wieder brauchst.
 
-Deine Bewertungen gehören dir: Alles bleibt auf deinem Gerät. Kein Konto, keine Cloud, keine Werbung, kein Tracking.
+Deine Bewertungen gehören dir: Alles bleibt auf deinem Gerät. Kein Konto, keine Werbung, kein Tracking.
 
-Ob Café, Pizza, Buch, Brettspiel oder ein Produkt aus dem Supermarkt: Mit I Like hältst du in Sekunden fest, wie du etwas fandest. Statt Sternen bewertest du in Worten – Nope, Naja, Okay, Gut oder Liebe. So weißt du beim nächsten Einkauf oder Restaurantbesuch sofort, was sich lohnt.
+Ob Café, Pizza, Buch, Brettspiel oder ein Produkt aus dem Supermarkt: Mit I Like hältst du in Sekunden fest, wie du etwas fandest. Statt Sternen bewertest du in Worten – Nope, Naja, Okay, Gut oder Liebe. So weißt du beim nächsten Einkauf oder Restaurantbesuch sofort, was sich lohnt: Scannst du etwas, das du schon bewertet hast, zeigt dir die App direkt dein Urteil.
 
 SO SCHNELL GEHT'S
 • Barcode scannen – Produkt- und Buchdaten werden automatisch geladen
@@ -10,16 +10,19 @@ SO SCHNELL GEHT'S
 • Bücher (Open Library) und Brettspiele finden, mit Cover direkt in der Trefferliste
 • Eigenes Foto aufnehmen – die App schlägt Titel und Kategorie vor; die Texterkennung läuft direkt auf deinem Gerät
 • Oder einfach selbst eintragen
+• Noch nicht probiert? Auf die Liste „Zum Probieren“ – und später bewerten
 
 ALLES IM BLICK
 • Fotoraster mit all deinen Bewertungen
 • Nach Stufe filtern: nur deine Lieblinge – oder alles, was „Nope“ war
 • Autor, Hersteller oder Marke und Jahr zu jeder Bewertung
-• Sortieren nach Datum, Bewertung oder Name
+• Sortieren nach Datum, Bewertung oder Name, gruppieren und filtern nach Kategorie – auch mit eigenen Kategorien
+• Bewertungen als Bildkarte mit Freunden teilen
 • Suche über Titel, Hersteller, Kategorien und Notizen
 • Deine Bilanz: So verteilen sich deine Bewertungen
 
 DEINE DATEN
 • Alle Bewertungen und Fotos bleiben auf deinem Gerät
+• Optional: verschlüsselte Sicherung in deinem eigenen Google-Konto, für ein neues Handy
 • Export als JSON oder CSV, Import aus JSON
 • Mit hellem und dunklem Design, auf Deutsch und Englisch

@@ -505,6 +505,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Magazines can\'t be looked up automatically. Take a photo of the cover – the app suggests the title.';
 
   @override
+  String get knownBarcodeTitle => 'Already rated';
+
+  @override
+  String get rateAgain => 'Rate it again';
+
+  @override
+  String get toTry => 'To try';
+
+  @override
+  String get saveToTry => 'Later';
+
+  @override
+  String toTryCount(int count) {
+    return '$count to try';
+  }
+
+  @override
+  String get notTriedYet => 'Not tried yet. Rate it once you know it.';
+
+  @override
+  String get rateNow => 'Rate it now';
+
+  @override
+  String get backupTitle => 'Back up to your Google account';
+
+  @override
+  String get backupSubtitle =>
+      'Encrypted via Android backup – for a new phone. Only if you turn it on.';
+
+  @override
   String get webSearch => 'Search the web';
 
   @override

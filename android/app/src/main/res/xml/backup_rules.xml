@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup up to Android 11: only the folder the app fills when the user
+     turns backup on in its settings (BackupService). Everything else stays on
+     the device. -->
+<full-backup-content>
+    <include domain="file" path="ilike_backup/" />
+</full-backup-content>
