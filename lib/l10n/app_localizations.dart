@@ -908,6 +908,12 @@ abstract class AppLocalizations {
   /// **'Reverse alphabetical'**
   String get sortZAHint;
 
+  /// No description provided for @amazonStickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s an Amazon warehouse label, not a product code. Scan the barcode on the packaging instead – it\'s often under the sticker.'**
+  String get amazonStickerHint;
+
   /// No description provided for @webSearch.
   ///
   /// In en, this message translates to:

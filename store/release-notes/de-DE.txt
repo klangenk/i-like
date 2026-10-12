@@ -1,2 +1,2 @@
-• Gruppierte Liste: Einträge erscheinen in jeder ihrer Kategorien
-• Tippe auf eine Kategorie-Überschrift, um nur diese Kategorie zu sehen
+• Deutlich mehr Bücher per Barcode: Bücher, die Open Library nicht kennt, kommen jetzt aus der Deutschen Nationalbibliothek – mit Cover
+• Amazon-Lageretiketten werden erkannt, mit Hinweis auf den richtigen Barcode

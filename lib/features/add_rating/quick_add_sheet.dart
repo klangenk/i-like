@@ -64,7 +64,11 @@ class _QuickAddSheetContent extends ConsumerWidget {
                             color: AppColors.raspberry,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 26),
+                          child: const Icon(
+                            Icons.qr_code_scanner_rounded,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -81,7 +85,10 @@ class _QuickAddSheetContent extends ConsumerWidget {
                               ),
                               Text(
                                 l10n.scanBarcodeSubtitle,
-                                style: TextStyle(fontSize: 14, color: scheme.surface.withAlpha(190)),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: scheme.surface.withAlpha(190),
+                                ),
                               ),
                             ],
                           ),
@@ -192,32 +199,62 @@ class _SourceTile extends StatelessWidget {
 Future<void> handleBarcode(BuildContext context, String barcode) async {
   final tags = tagsFromBarcode(barcode);
 
+  // Amazon warehouse stickers (FNSKU) cover the real barcode and are known
+  // to no database, so say so instead of opening an empty rating.
+  if (isAmazonFnsku(barcode)) {
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.amazonStickerHint), duration: const Duration(seconds: 6)),
+    );
+    return;
+  }
+
   // Show loading indicator while fetching metadata
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const PopScope(
-      canPop: false,
-      child: Center(child: CircularProgressIndicator()),
-    ),
+    builder: (_) =>
+        const PopScope(canPop: false, child: Center(child: CircularProgressIndicator())),
   );
 
   if (barcode.startsWith('978') || barcode.startsWith('979')) {
     // ISBN — look up as book
     final data = await ApiService.lookupIsbn(barcode);
+    final dnb = data == null ? await ApiService.lookupIsbnDnb(barcode) : null;
+    if (dnb != null) {
+      if (context.mounted) {
+        Navigator.pop(context); // dismiss loading
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: dnb.title,
+            imageUrl: dnb.imageUrl,
+            tags: dnb.tags,
+            sourceUrl: dnb.sourceUrl,
+            barcode: barcode,
+            creator: dnb.creator,
+            year: dnb.year,
+          ),
+        );
+      }
+      return;
+    }
     if (data != null) {
       final info = ApiService.extractBookInfo(data);
       if (context.mounted) {
         Navigator.pop(context); // dismiss loading
-        context.push('/add', extra: PrefillData(
-          title: info.title,
-          imageUrl: info.imageUrl,
-          tags: info.tags,
-          sourceUrl: 'https://openlibrary.org/isbn/$barcode',
-          barcode: barcode,
-          creator: info.creator,
-          year: info.year,
-        ));
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: info.title,
+            imageUrl: info.imageUrl,
+            tags: info.tags,
+            sourceUrl: 'https://openlibrary.org/isbn/$barcode',
+            barcode: barcode,
+            creator: info.creator,
+            year: info.year,
+          ),
+        );
       }
       return;
     }
@@ -228,14 +265,17 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
       final info = ApiService.extractProductInfo(data);
       if (context.mounted) {
         Navigator.pop(context); // dismiss loading
-        context.push('/add', extra: PrefillData(
-          title: info.title,
-          imageUrl: info.imageUrl,
-          tags: info.tags,
-          sourceUrl: 'https://world.openfoodfacts.org/product/$barcode',
-          barcode: barcode,
-          creator: info.creator,
-        ));
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: info.title,
+            imageUrl: info.imageUrl,
+            tags: info.tags,
+            sourceUrl: 'https://world.openfoodfacts.org/product/$barcode',
+            barcode: barcode,
+            creator: info.creator,
+          ),
+        );
       }
       return;
     }
@@ -248,26 +288,32 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
       final bggResult = await _tryBoardGameLookup(info.title);
       if (bggResult != null && context.mounted) {
         Navigator.pop(context); // dismiss loading
-        context.push('/add', extra: PrefillData(
-          title: bggResult.title,
-          imageUrl: bggResult.imageUrl,
-          tags: bggResult.tags,
-          sourceUrl: bggResult.sourceUrl,
-          barcode: barcode,
-          creator: bggResult.creator.isNotEmpty ? bggResult.creator : info.creator,
-          year: bggResult.year,
-        ));
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: bggResult.title,
+            imageUrl: bggResult.imageUrl,
+            tags: bggResult.tags,
+            sourceUrl: bggResult.sourceUrl,
+            barcode: barcode,
+            creator: bggResult.creator.isNotEmpty ? bggResult.creator : info.creator,
+            year: bggResult.year,
+          ),
+        );
         return;
       }
       if (context.mounted) {
         Navigator.pop(context); // dismiss loading
-        context.push('/add', extra: PrefillData(
-          title: info.title,
-          imageUrl: info.imageUrl,
-          tags: info.tags,
-          barcode: barcode,
-          creator: info.creator,
-        ));
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: info.title,
+            imageUrl: info.imageUrl,
+            tags: info.tags,
+            barcode: barcode,
+            creator: info.creator,
+          ),
+        );
       }
       return;
     }
@@ -275,7 +321,10 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
 
   if (context.mounted) {
     Navigator.pop(context); // dismiss loading
-    context.push('/add', extra: PrefillData(tags: tags, barcode: barcode));
+    context.push(
+      '/add',
+      extra: PrefillData(tags: tags, barcode: barcode),
+    );
   }
 }
 
@@ -311,10 +360,7 @@ void _showUrlDialog(BuildContext context) {
         keyboardType: TextInputType.url,
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
         TextButton(
           onPressed: () async {
             final url = urlController.text.trim();
@@ -333,13 +379,20 @@ void _showUrlDialog(BuildContext context) {
               final title = metadata.title ?? extractDomain(resolved) ?? resolved;
               if (context.mounted) {
                 Navigator.pop(context); // dismiss loading
-                context.push('/add', extra: PrefillData(
-                  title: title,
-                  imageUrl: metadata.imageUrl ?? '',
-                  sourceUrl: resolved,
-                  tags: tagsFromUrl(resolved, title: metadata.title, description: metadata.description),
-                  creator: metadata.creator ?? '',
-                ));
+                context.push(
+                  '/add',
+                  extra: PrefillData(
+                    title: title,
+                    imageUrl: metadata.imageUrl ?? '',
+                    sourceUrl: resolved,
+                    tags: tagsFromUrl(
+                      resolved,
+                      title: metadata.title,
+                      description: metadata.description,
+                    ),
+                    creator: metadata.creator ?? '',
+                  ),
+                );
               }
             }
           },
@@ -359,14 +412,17 @@ void _showApiSearchDialog(BuildContext context, String type, String tmdbApiKey) 
       searchController: searchController,
       tmdbApiKey: tmdbApiKey,
       onSelected: (info) {
-        context.push('/add', extra: PrefillData(
-          title: info.title,
-          imageUrl: info.imageUrl,
-          tags: info.tags,
-          sourceUrl: info.sourceUrl,
-          creator: info.creator,
-          year: info.year,
-        ));
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: info.title,
+            imageUrl: info.imageUrl,
+            tags: info.tags,
+            sourceUrl: info.sourceUrl,
+            creator: info.creator,
+            year: info.year,
+          ),
+        );
       },
     ),
   );
@@ -430,11 +486,13 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
       final listImage = result['image'] as String? ?? '';
       // Details add designer and year; the list thumbnail is the fallback image.
       final details = pageTitle.isEmpty ? null : await ApiService.getBoardGameDetails(pageTitle);
-      widget.onSelected(ApiService.extractBoardGameInfo({
-        'name': pageTitle,
-        ...?details,
-        if ((details?['image'] as String? ?? '').isEmpty) 'image': listImage,
-      }));
+      widget.onSelected(
+        ApiService.extractBoardGameInfo({
+          'name': pageTitle,
+          ...?details,
+          if ((details?['image'] as String? ?? '').isEmpty) 'image': listImage,
+        }),
+      );
       return;
     }
 
@@ -463,11 +521,15 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
   }
 
   Widget _thumbPlaceholder(BuildContext context) => Container(
-        width: 48,
-        height: 56,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: Icon(Icons.image_outlined, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
-      );
+    width: 48,
+    height: 56,
+    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    child: Icon(
+      Icons.image_outlined,
+      size: 20,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    ),
+  );
 
   String _resultTitle(Map<String, dynamic> result) {
     return switch (widget.type) {
@@ -533,10 +595,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
               ),
               const SizedBox(height: 8),
               if (_loading)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                )
+                const Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())
               else
                 Flexible(
                   child: ListView.builder(
@@ -565,7 +624,11 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: _resultSubtitle(result) != null
-                            ? Text(_resultSubtitle(result)!, maxLines: 2, overflow: TextOverflow.ellipsis)
+                            ? Text(
+                                _resultSubtitle(result)!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              )
                             : null,
                         onTap: () => _selectResult(result),
                         dense: true,

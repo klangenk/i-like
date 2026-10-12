@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/"><version>1.1</version><numberOfRecords>1</numberOfRecords><records><record><recordSchema>oai_dc</recordSchema><recordPacking>xml</recordPacking><recordData><dc xmlns:dnb="http://d-nb.de/standards/dnbterms" xmlns="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:title>Auf Kosten der Mütter : warum finanzielle Selbstbestimmung für Frauen mit Familie so wichtig ist / Dr. Birgit Happel</dc:title>
+  <dc:creator>Happel, Birgit [Verfasser]</dc:creator>
+  <dc:publisher>München : Kösel</dc:publisher>
+  <dc:date>2023</dc:date>
+  <dc:language>ger</dc:language>
+  <dc:identifier xmlns:tel="http://krait.kb.nl/coop/tel/handbook/telterms.html" xsi:type="tel:ISBN">978-3-466-31193-4 Broschur : circa EUR 18.00 (DE), circa EUR 18.50 (AT), circa CHF 25.27, circa CHF 25.90 (freier Preis)</dc:identifier>
+  <dc:identifier xmlns:tel="http://krait.kb.nl/coop/tel/handbook/telterms.html" xsi:type="tel:ISBN">3-466-31193-4</dc:identifier>
+  <dc:identifier xsi:type="dnb:IDN">1272086178</dc:identifier>
+  <dc:subject>330 Wirtschaft</dc:subject>
+  <dc:format>253 Seiten</dc:format>
+  <dc:relation>http://d-nb.info/128194758X</dc:relation>
+</dc></recordData><recordPosition>1</recordPosition></record></records><echoedSearchRetrieveRequest><version>1.1</version><query>num=9783466311934</query><xQuery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/><maximumRecords>1</maximumRecords><recordSchema>oai_dc</recordSchema></echoedSearchRetrieveRequest></searchRetrieveResponse>

@@ -39,6 +39,80 @@ class ApiService {
     return null;
   }
 
+  // --- Deutsche Nationalbibliothek ---
+
+  /// ISBN lookup in the German National Library, which knows German books
+  /// that Open Library lacks. Covers come from the publishers' catalogue (MVB).
+  static Future<LookupInfo?> lookupIsbnDnb(String isbn) async {
+    try {
+      final response = await http.get(
+        Uri.https('services.dnb.de', '/sru/dnb', {
+          'version': '1.1',
+          'operation': 'searchRetrieve',
+          'query': 'num=$isbn',
+          'recordSchema': 'oai_dc',
+          'maximumRecords': '1',
+        }),
+      );
+      if (response.statusCode != 200) return null;
+      final info = parseDnbRecord(utf8.decode(response.bodyBytes));
+      if (info == null) return null;
+
+      final cover = 'https://portal.dnb.de/opac/mvb/cover?isbn=$isbn';
+      final hasCover = (await http.head(Uri.parse(cover))).statusCode == 200;
+      return (
+        title: info.title,
+        imageUrl: hasCover ? cover : '',
+        tags: const ['book'],
+        sourceUrl: 'https://portal.dnb.de/opac.htm?method=simpleSearch&query=$isbn',
+        creator: info.creator,
+        year: info.year,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Title, authors and year from a DNB Dublin Core record, or null.
+  /// DNB titles carry the whole title statement, e.g.
+  /// "[Saturday requiem] ; Böser Samstag : Psychothriller / Nicci French ; …".
+  static ({String title, String creator, String year})? parseDnbRecord(String xml) {
+    String unescape(String s) => s
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&apos;', "'")
+        .replaceAll('&amp;', '&');
+    List<String> field(String name) => [
+      for (final m in RegExp('<dc:$name[^>]*>([^<]*)</dc:$name>').allMatches(xml))
+        unescape(m.group(1)!.trim()),
+    ];
+
+    final rawTitle = field('title').firstOrNull;
+    if (rawTitle == null || rawTitle.isEmpty) return null;
+    var title = rawTitle.split(' / ').first.replaceAll(RegExp(r'\[[^\]]*\]\s*;?\s*'), '');
+    title = title.split(' : ').first.trim();
+    if (title.isEmpty) return null;
+
+    final creators = field('creator');
+    final authors = creators.where((c) => c.contains('[Verfasser]')).toList();
+    final names = [
+      for (final c in authors.isNotEmpty ? authors : creators.take(1))
+        _personName(c.replaceAll(RegExp(r'\s*\[[^\]]*\]'), '')),
+    ];
+    return (
+      title: title,
+      creator: names.take(2).join(', '),
+      year: yearFrom(field('date').firstOrNull),
+    );
+  }
+
+  /// "French, Nicci" -> "Nicci French".
+  static String _personName(String name) {
+    final parts = name.split(', ');
+    return parts.length == 2 ? '${parts[1]} ${parts[0]}'.trim() : name.trim();
+  }
+
   static Future<List<Map<String, dynamic>>> searchBooks(String query) async {
     try {
       final response = await http.get(
@@ -57,9 +131,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> lookupBarcode(String barcode) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_openFoodFactsBase/product/$barcode.json'),
-      );
+      final response = await http.get(Uri.parse('$_openFoodFactsBase/product/$barcode.json'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         if (data['status'] == 1) {
@@ -72,8 +144,7 @@ class ApiService {
 
   // --- TMDB ---
 
-  static Future<List<Map<String, dynamic>>> searchMovies(
-      String query, String apiKey) async {
+  static Future<List<Map<String, dynamic>>> searchMovies(String query, String apiKey) async {
     if (apiKey.isEmpty) return [];
     try {
       final response = await http.get(
@@ -90,8 +161,7 @@ class ApiService {
     return [];
   }
 
-  static Future<List<Map<String, dynamic>>> searchTv(
-      String query, String apiKey) async {
+  static Future<List<Map<String, dynamic>>> searchTv(String query, String apiKey) async {
     if (apiKey.isEmpty) return [];
     try {
       final response = await http.get(
@@ -109,8 +179,7 @@ class ApiService {
   }
 
   /// Search both movies and TV shows at once
-  static Future<List<Map<String, dynamic>>> searchTmdb(
-      String query, String apiKey) async {
+  static Future<List<Map<String, dynamic>>> searchTmdb(String query, String apiKey) async {
     if (apiKey.isEmpty) return [];
     try {
       final response = await http.get(
@@ -151,16 +220,16 @@ class ApiService {
 
   // --- Info Extractors ---
 
-  static LookupInfo extractBookInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractBookInfo(Map<String, dynamic> data) {
     // Handles both ISBN lookups (jscmd=data) and search results (search.json).
     final title = data['title'] as String? ?? 'Unknown Book';
     final cover = data['cover'] as Map<String, dynamic>?;
     final coverId = data['cover_i'];
-    final imageUrl = cover?['medium'] as String? ??
+    final imageUrl =
+        cover?['medium'] as String? ??
         (coverId != null ? 'https://covers.openlibrary.org/b/id/$coverId-L.jpg' : '');
-    final sourceUrl = (data['url'] as String?) ??
-        (data['key'] != null ? '$_openLibraryBase${data['key']}' : '');
+    final sourceUrl =
+        (data['url'] as String?) ?? (data['key'] != null ? '$_openLibraryBase${data['key']}' : '');
     final authors = [
       for (final a in data['authors'] as List<dynamic>? ?? const [])
         if (a is Map && a['name'] is String) a['name'] as String,
@@ -176,8 +245,7 @@ class ApiService {
     );
   }
 
-  static LookupInfo extractProductInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractProductInfo(Map<String, dynamic> data) {
     final title = data['product_name'] as String? ?? 'Unknown Product';
     final imageUrl = data['image_url'] as String? ?? '';
     final brand = (data['brands'] as String? ?? '').split(',').first.trim();
@@ -191,13 +259,11 @@ class ApiService {
     );
   }
 
-  static LookupInfo extractTmdbInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractTmdbInfo(Map<String, dynamic> data) {
     final mediaType = data['media_type'] as String? ?? 'movie';
     final title = (data['title'] ?? data['name'] ?? 'Unknown') as String;
     final posterPath = data['poster_path'] as String?;
-    final imageUrl =
-        posterPath != null ? 'https://image.tmdb.org/t/p/w342$posterPath' : '';
+    final imageUrl = posterPath != null ? 'https://image.tmdb.org/t/p/w342$posterPath' : '';
     final tag = mediaType == 'tv' ? 'series' : 'movie';
     final id = data['id'];
     final sourceUrl = id != null
@@ -213,24 +279,28 @@ class ApiService {
     );
   }
 
-  static LookupInfo extractPlaceInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractPlaceInfo(Map<String, dynamic> data) {
     final title = data['display_name'] as String? ?? 'Unknown Place';
     final osmType = data['osm_type'] as String? ?? '';
     final osmId = data['osm_id'];
     final sourceUrl = (osmType.isNotEmpty && osmId != null)
         ? 'https://www.openstreetmap.org/$osmType/$osmId'
         : '';
-    return (title: title, imageUrl: '', tags: ['place'], sourceUrl: sourceUrl, creator: '', year: '');
+    return (
+      title: title,
+      imageUrl: '',
+      tags: ['place'],
+      sourceUrl: sourceUrl,
+      creator: '',
+      year: '',
+    );
   }
 
   /// Reverse geocode coordinates to a place name
   static Future<Map<String, dynamic>?> reverseGeocode(double lat, double lon) async {
     try {
       final response = await http.get(
-        Uri.parse(
-          '$_nominatimBase/reverse?lat=$lat&lon=$lon&format=json&addressdetails=1',
-        ),
+        Uri.parse('$_nominatimBase/reverse?lat=$lat&lon=$lon&format=json&addressdetails=1'),
         headers: {'User-Agent': 'ILikeApp/1.0'},
       );
       if (response.statusCode == 200) {
@@ -241,9 +311,14 @@ class ApiService {
   }
 
   /// Find nearby POIs (restaurants, shops, cafes, etc.) using Overpass API
-  static Future<List<Map<String, dynamic>>> nearbyPois(double lat, double lon, {int radiusMeters = 200}) async {
+  static Future<List<Map<String, dynamic>>> nearbyPois(
+    double lat,
+    double lon, {
+    int radiusMeters = 200,
+  }) async {
     try {
-      final query = '''
+      final query =
+          '''
 [out:json][timeout:10];
 (
   node["name"]["amenity"](around:$radiusMeters,$lat,$lon);
@@ -306,11 +381,11 @@ out body;
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
-        final pages = (data['query']?['pages'] as Map<String, dynamic>? ?? {})
-            .values
-            .cast<Map<String, dynamic>>()
-            .toList()
-          ..sort((a, b) => (a['index'] as int? ?? 0).compareTo(b['index'] as int? ?? 0));
+        final pages =
+            (data['query']?['pages'] as Map<String, dynamic>? ?? {}).values
+                .cast<Map<String, dynamic>>()
+                .toList()
+              ..sort((a, b) => (a['index'] as int? ?? 0).compareTo(b['index'] as int? ?? 0));
         return [
           for (final page in pages)
             {
@@ -391,8 +466,7 @@ out body;
     return v.length > 80 ? '${v.substring(0, 77)}…' : v;
   }
 
-  static LookupInfo extractBoardGameInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractBoardGameInfo(Map<String, dynamic> data) {
     final pageTitle = data['name'] as String? ?? 'Unknown Game';
     final imageUrl = data['image'] as String? ?? '';
     final sourceUrl = pageTitle.isNotEmpty
@@ -428,8 +502,7 @@ out body;
     return null;
   }
 
-  static LookupInfo extractGeneralProductInfo(
-      Map<String, dynamic> data) {
+  static LookupInfo extractGeneralProductInfo(Map<String, dynamic> data) {
     final title = data['title'] as String? ?? 'Unknown Product';
     final images = data['images'] as List<dynamic>? ?? [];
     final imageUrl = images.isNotEmpty ? images.first as String : '';

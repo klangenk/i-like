@@ -40,6 +40,7 @@ Wenn du bestimmte Funktionen nutzt, werden Anfragen an folgende externe Dienste 
 | Produktsuche via Barcode (Lebensmittel) | [Open Food Facts](https://world.openfoodfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
 | Produktsuche via Barcode (allgemein) | [UPC Item DB](https://www.upcitemdb.com) | [upcitemdb.com/privacy](https://www.upcitemdb.com/privacy) |
 | Buchsuche & ISBN-Lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
+| ISBN-Lookup (wenn Open Library das Buch nicht kennt), inkl. Cover | [Deutsche Nationalbibliothek](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |
 | Brettspielsuche (inkl. Bilder) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
 | Details zu einem Link (Titel, Bild) | Die jeweils aufgerufene Website, z. B. Amazon | Abhängig von der Website |
 | „Im Web suchen" auf der Detailseite (öffnet deinen Browser mit dem Titel als Suchbegriff) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |

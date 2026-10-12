@@ -453,6 +453,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortZAHint => 'Reverse alphabetical';
 
   @override
+  String get amazonStickerHint =>
+      'That\'s an Amazon warehouse label, not a product code. Scan the barcode on the packaging instead – it\'s often under the sticker.';
+
+  @override
   String get webSearch => 'Search the web';
 
   @override

@@ -135,6 +135,7 @@
   "sortLowestHint": "Was du nie wieder willst",
   "sortAZHint": "Alphabetisch",
   "sortZAHint": "Alphabetisch rückwärts",
+  "amazonStickerHint": "Das ist ein Amazon-Lageretikett, kein Produktcode. Scanne stattdessen den Barcode auf der Verpackung – er liegt oft unter dem Aufkleber.",
   "webSearch": "Im Web suchen",
   "groupByCategory": "Nach Kategorie gruppieren",
   "groupByCategoryHint": "Ein Abschnitt pro Kategorie",

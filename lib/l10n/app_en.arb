@@ -218,6 +218,7 @@
   "sortLowestHint": "What you never want again",
   "sortAZHint": "Alphabetical",
   "sortZAHint": "Reverse alphabetical",
+  "amazonStickerHint": "That's an Amazon warehouse label, not a product code. Scan the barcode on the packaging instead – it's often under the sticker.",
   "webSearch": "Search the web",
   "groupByCategory": "Group by category",
   "groupByCategoryHint": "One section per category",

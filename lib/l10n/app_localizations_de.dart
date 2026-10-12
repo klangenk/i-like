@@ -453,6 +453,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sortZAHint => 'Alphabetisch rückwärts';
 
   @override
+  String get amazonStickerHint =>
+      'Das ist ein Amazon-Lageretikett, kein Produktcode. Scanne stattdessen den Barcode auf der Verpackung – er liegt oft unter dem Aufkleber.';
+
+  @override
   String get webSearch => 'Im Web suchen';
 
   @override

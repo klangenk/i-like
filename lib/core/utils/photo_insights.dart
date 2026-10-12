@@ -82,24 +82,61 @@ String? _cleanLine(String raw) {
   // SHOUTED PACKAGING TEXT -> Title Case
   final isUpper = line == line.toUpperCase() && line != line.toLowerCase();
   if (!isUpper) return line;
-  return line
-      .split(' ')
-      .map((w) => w.isEmpty ? w : w[0] + w.substring(1).toLowerCase())
-      .join(' ');
+  return line.split(' ').map((w) => w.isEmpty ? w : w[0] + w.substring(1).toLowerCase()).join(' ');
 }
 
 /// Maps ML Kit's generic image labels onto the app's categories.
 List<String> tagsFromLabels(Iterable<String> labels) {
   const mapping = {
-    'food': ['Food', 'Dish', 'Cuisine', 'Pizza', 'Fruit', 'Vegetable', 'Bread', 'Cake',
-        'Baked goods', 'Dessert', 'Snack', 'Meal', 'Drink', 'Coffee', 'Cup', 'Juice'],
+    'food': [
+      'Food',
+      'Dish',
+      'Cuisine',
+      'Pizza',
+      'Fruit',
+      'Vegetable',
+      'Bread',
+      'Cake',
+      'Baked goods',
+      'Dessert',
+      'Snack',
+      'Meal',
+      'Drink',
+      'Coffee',
+      'Cup',
+      'Juice',
+    ],
     'book': ['Book', 'Publication', 'Novel', 'Comics', 'Paper'],
     'game': ['Toy', 'Board game', 'Game', 'Lego', 'Jigsaw puzzle', 'Dice', 'Playing card'],
     'music': ['Musical instrument', 'Guitar', 'Piano', 'Vinyl'],
-    'place': ['Restaurant', 'Building', 'Tower', 'Bridge', 'Beach', 'Mountain',
-        'Park', 'Church', 'Castle', 'Skyscraper'],
-    'product': ['Mobile phone', 'Computer', 'Laptop', 'Gadget', 'Headphones', 'Television',
-        'Camera', 'Bottle', 'Shoe', 'Bag', 'Watch', 'Sunglasses', 'Jacket', 'Clothing'],
+    'place': [
+      'Restaurant',
+      'Building',
+      'Tower',
+      'Bridge',
+      'Beach',
+      'Mountain',
+      'Park',
+      'Church',
+      'Castle',
+      'Skyscraper',
+    ],
+    'product': [
+      'Mobile phone',
+      'Computer',
+      'Laptop',
+      'Gadget',
+      'Headphones',
+      'Television',
+      'Camera',
+      'Bottle',
+      'Shoe',
+      'Bag',
+      'Watch',
+      'Sunglasses',
+      'Jacket',
+      'Clothing',
+    ],
   };
   final result = <String>[];
   for (final label in labels) {

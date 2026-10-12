@@ -40,6 +40,7 @@ When you use certain features, requests are sent to the following external servi
 | Product lookup via barcode (food) | [Open Food Facts](https://world.openfoodfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
 | Product lookup via barcode (general) | [UPC Item DB](https://www.upcitemdb.com) | [upcitemdb.com/privacy](https://www.upcitemdb.com/privacy) |
 | Book search & ISBN lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
+| ISBN lookup (when Open Library doesn't know the book), incl. cover | [German National Library (DNB)](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |
 | Board game search (incl. images) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
 | Details for a link (title, image) | The website you open, e.g. Amazon | Depends on the website |
 | "Search the web" on the detail page (opens your browser with the title as the search term) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |
