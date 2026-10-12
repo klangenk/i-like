@@ -1,3 +1,2 @@
-• Eigene Kategorien behalten ihre Groß- und Kleinschreibung
-• Neuer Knopf zum Übernehmen einer eigenen Kategorie
-• Eigene Kategorien werden bei neuen Bewertungen zuerst vorgeschlagen
+• Geteilte Shop-Links liefern genauere Titel und die Marke (z. B. REWE, Lidl)
+• Seiten mit Bot-Schutz werden zuverlässiger erkannt

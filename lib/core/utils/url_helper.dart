@@ -66,9 +66,15 @@ bool isValidUrl(String text) {
 
 /// Clean up a page title by removing common site-name suffixes
 /// e.g. '"One Piece" ansehen | Netflix' → 'One Piece'
-String cleanPageTitle(String title) {
-  // Remove trailing " | Site Name" or " - Site Name"
-  var cleaned = title.replaceAll(RegExp(r'\s*[|\-–—]\s*[^|\-–—]+$'), '').trim();
+String cleanPageTitle(String title, {String? url}) {
+  // Remove trailing " | Site Name" or " - Site Name". With the page address
+  // known, only when that part names the site: "Pullover »Jogi Löw - Kollektion«"
+  // keeps its "- Kollektion«", "… - Lidl" loses "- Lidl".
+  final site = _siteName(url);
+  var cleaned = title.replaceAllMapped(RegExp(r'\s*[|\-–—]\s*([^|\-–—]+)$'), (m) {
+    if (site == null || m[1]!.toLowerCase().contains(site)) return '';
+    return m[0]!;
+  }).trim();
   // Remove trailing ": Site Name" (e.g. "Product: Amazon.de")
   cleaned = cleaned
       .replaceAll(RegExp(r'\s*:\s*(Amazon|Netflix|eBay|Google)[.\w]*$', caseSensitive: false), '')
@@ -80,20 +86,25 @@ String cleanPageTitle(String title) {
         '',
       )
       .trim();
-  // Remove any kind of quotes (including stray single quotes at start or end)
-  cleaned = cleaned
-      .replaceAll(
-        RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'),
-        '',
-      )
-      .trim();
-  cleaned = cleaned
-      .replaceAll(
-        RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'),
-        '',
-      )
-      .trim();
+  // Remove quotes around the whole title, but keep quotes inside it
+  // (»Jogi Löw - Kollektion« must keep its closing «).
+  final quoted = RegExp(
+    r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+(.*?)[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$',
+  ).firstMatch(cleaned);
+  if (quoted != null &&
+      !RegExp(
+        r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]',
+      ).hasMatch(quoted[1]!)) {
+    cleaned = quoted[1]!.trim();
+  }
   return cleaned.isEmpty ? title : cleaned;
+}
+
+/// "https://www.lidl.de/p/…" -> "lidl", or null.
+String? _siteName(String? url) {
+  final host = url == null ? '' : Uri.tryParse(url)?.host ?? '';
+  final parts = host.replaceFirst(RegExp(r'^www\.'), '').split('.');
+  return parts.length < 2 ? null : parts[parts.length - 2].toLowerCase();
 }
 
 /// Detect tags based on the URL domain and optional metadata
@@ -168,7 +179,7 @@ String? extractTitleFromSharedText(String text) {
   before = before
       .replaceAll(
         RegExp(
-          r'^(Angebot:\s*|Schau dir das an:?\s*|Schau mal( hier)?[,:!]?\s*|Check this out:?\s*|'
+          r'^((Top\s+)?Angebot( für dich)?( bei [^:]+)?:\s*|Schau dir das an:?\s*|Schau mal( hier)?[,:!]?\s*|Check this out:?\s*|'
           r'Hast du schon\s+|Ich habe .* gefunden:?\s*|'
           r'I found this:?\s*|Look at this:?\s*)',
           caseSensitive: false,
@@ -270,20 +281,32 @@ Future<UrlMetadata?> _fetchMicrolinkMetadata(String url) async {
     final title = cleanShopTitle(data['title'] as String? ?? '');
     if (title.isEmpty || isBlockPageTitle(title)) return null;
     final image = data['image'];
+    // Shops put the brand into the author field ("Nutella"); skip the shop itself.
+    final author = (data['author'] as String? ?? '').trim();
+    final site = (data['publisher'] as String? ?? '').toLowerCase().split('.').first;
+    final isShop = author.isEmpty || (site.isNotEmpty && author.toLowerCase().contains(site));
     return (
       title: title,
       description: data['description'] as String?,
       imageUrl: image is Map ? image['url'] as String? : null,
-      creator: null,
+      creator: isShop ? null : author,
     );
   } catch (_) {
     return null;
   }
 }
 
-/// "Legami Gelstift kaufen" -> "Legami Gelstift": shop titles end in a call to buy.
+/// Shop titles end in a call to buy:
+/// "Legami Gelstift kaufen" -> "Legami Gelstift",
+/// "Nutella 750g bei REWE online bestellen! REWE.de" -> "Nutella 750g".
 String cleanShopTitle(String title) => title
-    .replaceAll(RegExp(r'\s+(online\s+)?(kaufen|bestellen|buy online|buy)\s*$', caseSensitive: false), '')
+    .replaceAll(
+      RegExp(
+        r'\s+((bei|auf|at|on)\s+\S+\s+)?(online\s+)?(kaufen|bestellen|shoppen|buy online|buy)\b.*$',
+        caseSensitive: false,
+      ),
+      '',
+    )
     .trim();
 
 /// Titles of bot-protection and error pages (Cloudflare, Akamai, captchas, …)
@@ -311,6 +334,15 @@ Future<UrlMetadata> _fetchUrlMetadata(String url) async {
   final resolvedUrl = await resolveUrl(url);
   final host = Uri.tryParse(resolvedUrl)?.host.toLowerCase() ?? '';
   if (host.contains('amazon.')) return _fetchAmazonMetadata(resolvedUrl);
+  // Read the page ourselves first: unlike the preview package we see the
+  // status, and shops behind bot protection answer 403 with a generic page
+  // whose title is the shop's name ("REWE Onlineshop: Lebensmittel & mehr").
+  try {
+    final direct = await _fetchMetaFromHtml(resolvedUrl);
+    if ((direct.title ?? '').isNotEmpty && (direct.imageUrl ?? '').isNotEmpty) return direct;
+  } on _PageBlocked {
+    return (title: null, description: null, imageUrl: null, creator: null);
+  } catch (_) {}
   try {
     final metadata = await AnyLinkPreview.getMetadata(link: resolvedUrl);
     final hasImage = metadata?.image != null && metadata!.image!.isNotEmpty;
@@ -425,6 +457,66 @@ String? _extractAmazonAsin(String url) {
 }
 
 /// Directly fetch HTML and extract metadata
+/// The first schema.org Product in the page's JSON-LD blocks, or null.
+({String name, String? brand, String? image})? _jsonLdProduct(String html) {
+  final blocks = RegExp(
+    r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>',
+    caseSensitive: false,
+    dotAll: true,
+  ).allMatches(html);
+  for (final block in blocks) {
+    Object? data;
+    try {
+      data = json.decode(block[1]!.trim());
+    } catch (_) {
+      continue;
+    }
+    final product = _findProduct(data);
+    if (product == null) continue;
+    final name = _unescapeHtml((product['name'] as Object?)?.toString().trim() ?? '');
+    if (name.isEmpty) continue;
+    final brand = product['brand'];
+    final brandName = brand is Map ? brand['name']?.toString() : brand?.toString();
+    final image = product['image'];
+    final imageUrl = switch (image) {
+      String s => s,
+      List l when l.isNotEmpty => l.first is Map ? l.first['url']?.toString() : l.first.toString(),
+      Map m => m['url']?.toString(),
+      _ => null,
+    };
+    return (
+      name: name,
+      brand: (brandName ?? '').trim().isEmpty ? null : _unescapeHtml(brandName!.trim()),
+      image: (imageUrl ?? '').isEmpty ? null : imageUrl,
+    );
+  }
+  return null;
+}
+
+Map<String, dynamic>? _findProduct(Object? data) {
+  if (data is List) {
+    for (final item in data) {
+      final found = _findProduct(item);
+      if (found != null) return found;
+    }
+  } else if (data is Map<String, dynamic>) {
+    final type = data['@type'];
+    if (type == 'Product' || (type is List && type.contains('Product'))) return data;
+    return _findProduct(data['@graph']);
+  }
+  return null;
+}
+
+String _unescapeHtml(String s) => s
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
+
+/// The site refused the app (bot protection, rate limit).
+class _PageBlocked implements Exception {}
+
 Future<UrlMetadata> _fetchMetaFromHtml(String url) async {
   final client = HttpClient();
   try {
@@ -439,12 +531,26 @@ Future<UrlMetadata> _fetchMetaFromHtml(String url) async {
     request.headers.set('Accept-Encoding', 'gzip, deflate');
 
     final response = await request.close().timeout(const Duration(seconds: 10));
+    if (const {401, 403, 429, 503}.contains(response.statusCode)) throw _PageBlocked();
     if (response.statusCode != 200) {
       return (title: null, description: null, imageUrl: null, creator: null);
     }
 
     final bytes = await consolidateHttpClientResponseBytes(response);
     final html = utf8.decode(bytes, allowMalformed: true);
+
+    // Shops describe products as schema.org data: exact name and brand,
+    // unlike og:title ("STRENESSE | Herren Kaschmirpullover … - Lidl").
+    final product = _jsonLdProduct(html);
+    if (product != null) {
+      return (
+        title: product.name,
+        description: _extractMeta(html, 'og:description'),
+        imageUrl:
+            product.image ?? _extractMeta(html, 'og:image') ?? _extractProductImage(html, url),
+        creator: product.brand ?? _extractBrand(html, url),
+      );
+    }
 
     final ogImage = _extractMeta(html, 'og:image');
     final ogTitle = _extractMeta(html, 'og:title');

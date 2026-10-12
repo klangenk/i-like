@@ -1,3 +1,2 @@
-• Your own categories keep their capitalisation
-• New button to add your own category
-• Your own categories are suggested first in new ratings
+• Shared shop links bring more accurate titles and the brand (e.g. REWE, Lidl)
+• Pages behind bot protection are recognised more reliably

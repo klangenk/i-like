@@ -96,15 +96,19 @@ class Play:
         print(f"  → version code {version_code}")
         return version_code
 
-    def set_track(self, track: str, version_code: int, name: str, notes: dict[str, str]):
+    def set_track(self, track: str, version_code: int, name: str, notes: dict[str, str],
+                  draft: bool = False):
         release = {
             "name": name,
             "versionCodes": [str(version_code)],
-            "status": "completed",
+            # A "draft app" (never rolled out beyond internal testing) only
+            # accepts draft releases on other tracks; roll those out in Play Console.
+            "status": "draft" if draft else "completed",
             "releaseNotes": [{"language": lang, "text": text} for lang, text in notes.items()],
         }
         self._check(self.s.put(self._url(f"/tracks/{track}"), json={"track": track, "releases": [release]}))
-        print(f"Track '{track}': release '{name}' with version code {version_code}")
+        print(f"Track '{track}': release '{name}' with version code {version_code}"
+              + (" (draft)" if draft else ""))
 
     def update_listing(self, lang: str, listing: dict):
         self._check(self.s.put(self._url(f"/listings/{lang}"), json={"language": lang, **listing}))
@@ -185,6 +189,8 @@ def main():
     ap.add_argument("--track", default="internal", help="internal, alpha, beta or production")
     ap.add_argument("--listings", action="store_true", help="update texts from store/listings")
     ap.add_argument("--images", action="store_true", help="replace graphics from store/listings/*/images")
+    ap.add_argument("--draft", action="store_true",
+                    help="create the release as a draft (needed for a first release beyond internal testing)")
     ap.add_argument("--commit", action="store_true", help="publish; without it the edit is only validated")
     args = ap.parse_args()
 
@@ -211,7 +217,7 @@ def main():
                 p.stem: p.read_text(encoding="utf-8").strip()
                 for p in sorted((STORE / "release-notes").glob("*.txt"))
             }
-            play.set_track(args.track, version_code, version_from_pubspec(), notes)
+            play.set_track(args.track, version_code, version_from_pubspec(), notes, draft=args.draft)
         if args.listings:
             for lang_dir in langs:
                 play.update_listing(lang_dir.name, read_listing(lang_dir))

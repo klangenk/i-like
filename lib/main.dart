@@ -137,7 +137,7 @@ class _ILikeAppState extends State<ILikeApp> {
     }
 
     // Update title if metadata has a better one
-    final metaTitle = cleanPageTitle(metadata.title ?? '');
+    final metaTitle = cleanPageTitle(metadata.title ?? '', url: url);
     if (_isMeaningfulTitle(metaTitle)) {
       notifier.setTitle(metaTitle);
     } else if (sharedTitle == null && metaTitle.isNotEmpty) {

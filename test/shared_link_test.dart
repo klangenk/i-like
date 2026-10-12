@@ -33,5 +33,25 @@ void main() {
     );
     expect(cleanShopTitle('Böser Samstag online bestellen'), 'Böser Samstag');
     expect(cleanShopTitle('Ich kaufe'), 'Ich kaufe');
+    expect(cleanShopTitle('Nutella 750g bei REWE online bestellen! REWE.de'), 'Nutella 750g');
+  });
+
+  test('page titles lose the site name but keep inner dashes and quotes', () {
+    const lidl = 'https://www.lidl.de/p/x/p100411005';
+    expect(
+      cleanPageTitle('Herren Kaschmirpullover »Jogi Löw - Kollektion« - Lidl', url: lidl),
+      'Herren Kaschmirpullover »Jogi Löw - Kollektion«',
+    );
+    expect(cleanPageTitle('„Böser Samstag"'), 'Böser Samstag');
+    expect(cleanPageTitle('Dune | Goodreads', url: 'https://www.goodreads.com/book/1'), 'Dune');
+  });
+
+  test('a shop offer phrase is not part of the title', () {
+    expect(
+      extractTitleFromSharedText(
+        'Top Angebot für dich bei Lidl: Herren Kaschmirpullover »Jogi Löw - Kollektion«! https://www.lidl.de/p/x',
+      ),
+      startsWith('Herren Kaschmirpullover'),
+    );
   });
 }
