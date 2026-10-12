@@ -13,6 +13,7 @@ import 'add_rating_provider.dart';
 import '../../shared/widgets/round_icon_button.dart';
 import '../../core/utils/photo_insights.dart';
 import '../../core/utils/tag_l10n.dart';
+import '../../core/utils/url_helper.dart';
 import '../../shared/widgets/photo_picker.dart';
 import 'widgets/level_picker.dart';
 import 'widgets/tag_input.dart';
@@ -243,6 +244,10 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                       ],
                     ),
                   ),
+                  if ((widget.prefill?.notFound ?? false) && state.title.trim().isEmpty) ...[
+                    const SizedBox(height: 10),
+                    _BarcodeNotFound(barcode: widget.prefill!.barcode),
+                  ],
                   if (_analyzing || !(_insights?.isEmpty ?? true)) ...[
                     const SizedBox(height: 10),
                     _PhotoSuggestions(
@@ -389,6 +394,56 @@ class _PhotoSlot extends StatelessWidget {
 
 /// "Suggestions from the photo": tap a title candidate to use it, tap a
 /// category to add it.
+/// Shown after a scan that no service knew: says so and offers a web search
+/// for the number, which usually finds the product.
+class _BarcodeNotFound extends StatelessWidget {
+  final String barcode;
+
+  const _BarcodeNotFound({required this.barcode});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 6),
+      decoration: BoxDecoration(
+        border: Border.all(color: scheme.outline, width: 1.5),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(Icons.search_off_rounded, size: 18, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.barcodeNotFound(barcode),
+                  style: const TextStyle(fontSize: 15, height: 1.35),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => openUrl(webSearchUrl(barcode, '')),
+              icon: const Icon(Icons.north_east_rounded, size: 16),
+              label: Text(l10n.searchBarcodeOnline),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PhotoSuggestions extends StatelessWidget {
   final bool analyzing;
   final PhotoInsights? insights;

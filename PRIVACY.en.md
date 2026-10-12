@@ -38,6 +38,7 @@ When you use certain features, requests are sent to the following external servi
 | Feature | Service | Privacy policy |
 |---|---|---|
 | Product lookup via barcode (food) | [Open Food Facts](https://world.openfoodfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
+| Product lookup via barcode (cosmetics, household) | [Open Beauty Facts](https://world.openbeautyfacts.org), [Open Products Facts](https://world.openproductsfacts.org) | [openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) |
 | Product lookup via barcode (general) | [UPC Item DB](https://www.upcitemdb.com) | [upcitemdb.com/privacy](https://www.upcitemdb.com/privacy) |
 | Book search & ISBN lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
 | ISBN lookup (when Open Library doesn't know the book), incl. cover | [German National Library (DNB)](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |

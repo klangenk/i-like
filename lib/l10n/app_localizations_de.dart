@@ -457,6 +457,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das ist ein Amazon-Lageretikett, kein Produktcode. Scanne stattdessen den Barcode auf der Verpackung – er liegt oft unter dem Aufkleber.';
 
   @override
+  String barcodeNotFound(String barcode) {
+    return 'Zum Barcode $barcode haben wir nichts gefunden. Trag es einfach selbst ein.';
+  }
+
+  @override
+  String get searchBarcodeOnline => 'Barcode googeln';
+
+  @override
   String get webSearch => 'Im Web suchen';
 
   @override

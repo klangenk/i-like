@@ -17,7 +17,6 @@ String yearFrom(Object? value) =>
 
 class ApiService {
   static const _openLibraryBase = 'https://openlibrary.org';
-  static const _openFoodFactsBase = 'https://world.openfoodfacts.org/api/v0';
   static const _tmdbBase = 'https://api.themoviedb.org/3';
   static const _nominatimBase = 'https://nominatim.openstreetmap.org';
 
@@ -127,16 +126,46 @@ class ApiService {
     return [];
   }
 
-  // --- OpenFoodFacts ---
+  // --- Open Food / Beauty / Products Facts ---
 
-  static Future<Map<String, dynamic>?> lookupBarcode(String barcode) async {
+  /// The Open*Facts databases share one API: food first, then cosmetics
+  /// (sunscreen, shampoo, …), then everything else.
+  static const _openFactsHosts = [
+    'world.openfoodfacts.org',
+    'world.openbeautyfacts.org',
+    'world.openproductsfacts.org',
+  ];
+
+  /// Looks the barcode up in all Open*Facts databases at once and returns the
+  /// hit from the first one in [_openFactsHosts] order, or null.
+  static Future<LookupInfo?> lookupOpenFacts(String barcode) async {
+    final hits = await Future.wait(_openFactsHosts.map((host) => _openFactsProduct(host, barcode)));
+    for (final (i, product) in hits.indexed) {
+      if (product == null) continue;
+      final host = _openFactsHosts[i];
+      final info = extractProductInfo(product, food: i == 0);
+      if (info.title.isEmpty) continue;
+      return (
+        title: info.title,
+        imageUrl: info.imageUrl,
+        tags: info.tags,
+        sourceUrl: 'https://$host/product/$barcode',
+        creator: info.creator,
+        year: '',
+      );
+    }
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> _openFactsProduct(String host, String barcode) async {
     try {
-      final response = await http.get(Uri.parse('$_openFoodFactsBase/product/$barcode.json'));
+      final response = await http.get(
+        Uri.https(host, '/api/v0/product/$barcode.json'),
+        headers: const {'User-Agent': 'ILike/1.0 (de.langenk.ilike)'},
+      );
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        if (data['status'] == 1) {
-          return data['product'] as Map<String, dynamic>;
-        }
+        final data = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        if (data['status'] == 1) return data['product'] as Map<String, dynamic>;
       }
     } catch (_) {}
     return null;
@@ -245,14 +274,18 @@ class ApiService {
     );
   }
 
-  static LookupInfo extractProductInfo(Map<String, dynamic> data) {
-    final title = data['product_name'] as String? ?? 'Unknown Product';
+  static LookupInfo extractProductInfo(Map<String, dynamic> data, {bool food = true}) {
+    final title = [
+      data['product_name_de'],
+      data['product_name'],
+      data['generic_name'],
+    ].whereType<String>().map((s) => s.trim()).firstWhere((s) => s.isNotEmpty, orElse: () => '');
     final imageUrl = data['image_url'] as String? ?? '';
     final brand = (data['brands'] as String? ?? '').split(',').first.trim();
     return (
       title: title,
       imageUrl: imageUrl,
-      tags: ['product', 'food'],
+      tags: food ? const ['product', 'food'] : const ['product'],
       sourceUrl: '',
       creator: brand,
       year: '',

@@ -11,6 +11,9 @@ class PrefillData {
   final String creator;
   final String year;
 
+  /// A scanned [barcode] that no lookup service knew.
+  final bool notFound;
+
   const PrefillData({
     this.title = '',
     this.imageUrl = '',
@@ -20,6 +23,7 @@ class PrefillData {
     this.notes = '',
     this.creator = '',
     this.year = '',
+    this.notFound = false,
   });
 }
 
@@ -130,7 +134,8 @@ class AddRatingNotifier extends StateNotifier<AddRatingState> {
   }
 }
 
-final addRatingProvider =
-    StateNotifierProvider.autoDispose<AddRatingNotifier, AddRatingState>((ref) {
+final addRatingProvider = StateNotifierProvider.autoDispose<AddRatingNotifier, AddRatingState>((
+  ref,
+) {
   return AddRatingNotifier();
 });

@@ -1,2 +1,2 @@
-• Many more books by barcode: books Open Library doesn't know now come from the German National Library, with cover
-• Amazon warehouse labels are recognised, with a hint to scan the real barcode
+• Unknown barcode? The app now tells you, with a button to search it on Google
+• Cosmetics and household items by barcode (Open Beauty Facts, Open Products Facts)

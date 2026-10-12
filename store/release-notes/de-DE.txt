@@ -1,2 +1,2 @@
-• Deutlich mehr Bücher per Barcode: Bücher, die Open Library nicht kennt, kommen jetzt aus der Deutschen Nationalbibliothek – mit Cover
-• Amazon-Lageretiketten werden erkannt, mit Hinweis auf den richtigen Barcode
+• Unbekannter Barcode? Die App sagt es jetzt – mit einem Knopf, um den Barcode zu googeln
+• Kosmetik und Haushaltsartikel per Barcode (Open Beauty Facts, Open Products Facts)

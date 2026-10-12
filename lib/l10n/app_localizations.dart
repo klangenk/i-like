@@ -914,6 +914,18 @@ abstract class AppLocalizations {
   /// **'That\'s an Amazon warehouse label, not a product code. Scan the barcode on the packaging instead – it\'s often under the sticker.'**
   String get amazonStickerHint;
 
+  /// No description provided for @barcodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find anything for barcode {barcode}. Just enter it yourself.'**
+  String barcodeNotFound(String barcode);
+
+  /// No description provided for @searchBarcodeOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Search barcode on Google'**
+  String get searchBarcodeOnline;
+
   /// No description provided for @webSearch.
   ///
   /// In en, this message translates to:

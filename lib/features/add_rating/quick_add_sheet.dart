@@ -259,10 +259,9 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
       return;
     }
   } else {
-    // Try OpenFoodFacts first (food products)
-    final data = await ApiService.lookupBarcode(barcode);
-    if (data != null) {
-      final info = ApiService.extractProductInfo(data);
+    // Open Food/Beauty/Products Facts (food, cosmetics, household items)
+    final info = await ApiService.lookupOpenFacts(barcode);
+    if (info != null) {
       if (context.mounted) {
         Navigator.pop(context); // dismiss loading
         context.push(
@@ -271,7 +270,7 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
             title: info.title,
             imageUrl: info.imageUrl,
             tags: info.tags,
-            sourceUrl: 'https://world.openfoodfacts.org/product/$barcode',
+            sourceUrl: info.sourceUrl,
             barcode: barcode,
             creator: info.creator,
           ),
@@ -323,7 +322,7 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
     Navigator.pop(context); // dismiss loading
     context.push(
       '/add',
-      extra: PrefillData(tags: tags, barcode: barcode),
+      extra: PrefillData(tags: tags, barcode: barcode, notFound: true),
     );
   }
 }

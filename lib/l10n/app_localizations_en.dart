@@ -457,6 +457,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'That\'s an Amazon warehouse label, not a product code. Scan the barcode on the packaging instead – it\'s often under the sticker.';
 
   @override
+  String barcodeNotFound(String barcode) {
+    return 'We couldn\'t find anything for barcode $barcode. Just enter it yourself.';
+  }
+
+  @override
+  String get searchBarcodeOnline => 'Search barcode on Google';
+
+  @override
   String get webSearch => 'Search the web';
 
   @override
