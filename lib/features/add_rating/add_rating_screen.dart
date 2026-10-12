@@ -123,15 +123,11 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.read(addRatingProvider);
     if (state.title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseEnterTitle)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseEnterTitle)));
       return;
     }
     if (state.score == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseGiveRating)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseGiveRating)));
       return;
     }
 
@@ -141,18 +137,20 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     _saved = true;
 
     final dao = ref.read(ratingsDaoProvider);
-    await dao.insertRating(RatingsCompanion(
-      title: Value(state.title),
-      score: Value(state.score),
-      tags: Value(state.tags.join(', ')),
-      notes: Value(state.notes),
-      imageUrl: Value(state.imageUrl),
-      sourceUrl: Value(state.sourceUrl),
-      barcode: Value(state.barcode),
-      creator: Value(state.creator.trim()),
-      year: Value(state.year.trim()),
-      localImagePath: Value(localImagePath ?? ''),
-    ));
+    await dao.insertRating(
+      RatingsCompanion(
+        title: Value(state.title),
+        score: Value(state.score),
+        tags: Value(state.tags.join(', ')),
+        notes: Value(state.notes),
+        imageUrl: Value(state.imageUrl),
+        sourceUrl: Value(state.sourceUrl),
+        barcode: Value(state.barcode),
+        creator: Value(state.creator.trim()),
+        year: Value(tagsHaveYear(state.tags) ? state.year.trim() : ''),
+        localImagePath: Value(localImagePath ?? ''),
+      ),
+    );
 
     if (mounted) {
       context.pop();
@@ -164,15 +162,16 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(addRatingProvider);
     final notifier = ref.read(addRatingProvider.notifier);
+    final showYear = tagsHaveYear(state.tags);
 
     // Sync title controller when provider updates asynchronously (e.g. metadata fetch)
     if (state.title != _lastProviderTitle && state.title != _titleController.text) {
       _lastProviderTitle = state.title;
-    // Same for the creator, which shared links may fill in after a fetch
-    if (state.creator != _lastProviderCreator && state.creator != _creatorController.text) {
-      _creatorController.text = state.creator;
-    }
-    _lastProviderCreator = state.creator;
+      // Same for the creator, which shared links may fill in after a fetch
+      if (state.creator != _lastProviderCreator && state.creator != _creatorController.text) {
+        _creatorController.text = state.creator;
+      }
+      _lastProviderCreator = state.creator;
       _titleController.text = state.title;
     }
     _lastProviderTitle = state.title;
@@ -198,10 +197,7 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: FilledButton(
-                  onPressed: _saveRating,
-                  child: Text(l10n.save),
-                ),
+                child: FilledButton(onPressed: _saveRating, child: Text(l10n.save)),
               ),
             ),
       body: state.isLoading
@@ -232,7 +228,10 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                             decoration: InputDecoration(
                               hintText: l10n.titleHint,
                               fillColor: Colors.transparent,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 10,
+                              ),
                               focusedBorder: InputBorder.none,
                             ),
                             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
@@ -257,7 +256,15 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                       onTag: notifier.addTag,
                     ),
                   ],
+                  const SizedBox(height: 24),
+                  Text(l10n.category.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
                   const SizedBox(height: 10),
+                  TagInput(
+                    tags: state.tags,
+                    onTagAdded: notifier.addTag,
+                    onTagRemoved: notifier.removeTag,
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
@@ -273,41 +280,31 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                           textCapitalization: TextCapitalization.words,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          controller: _yearController,
-                          decoration: InputDecoration(
-                            labelText: l10n.yearLabel,
-                            hintText: '2026',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            counterText: '',
+                      if (showYear) ...[
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _yearController,
+                            decoration: InputDecoration(
+                              labelText: l10n.yearLabel,
+                              hintText: '2026',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              counterText: '',
+                            ),
+                            keyboardType: TextInputType.number,
+                            maxLength: 4,
+                            onChanged: notifier.setYear,
                           ),
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                          onChanged: notifier.setYear,
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 24),
 
                   Text(l10n.howWasIt, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 18),
-                  LevelPicker(
-                    score: state.score,
-                    onChanged: notifier.setScore,
-                  ),
+                  LevelPicker(score: state.score, onChanged: notifier.setScore),
                   const SizedBox(height: 28),
-
-                  Text(l10n.category.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
-                  const SizedBox(height: 10),
-                  TagInput(
-                    tags: state.tags,
-                    onTagAdded: notifier.addTag,
-                    onTagRemoved: notifier.removeTag,
-                  ),
-                  const SizedBox(height: 24),
 
                   Text(l10n.notes.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
                   const SizedBox(height: 10),
@@ -359,12 +356,18 @@ class _PhotoSlot extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: localImagePath.isNotEmpty
-                    ? Image.file(File(localImagePath), fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => placeholder)
+                    ? Image.file(
+                        File(localImagePath),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => placeholder,
+                      )
                     : imageUrl.isNotEmpty
-                        ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover,
-                            errorWidget: (_, _, _) => placeholder)
-                        : placeholder,
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => placeholder,
+                      )
+                    : placeholder,
               ),
               if (hasImage)
                 Positioned(
@@ -426,7 +429,11 @@ class _PhotoSuggestions extends StatelessWidget {
               ),
               if (analyzing) ...[
                 const SizedBox(width: 8),
-                const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               ],
             ],
           ),

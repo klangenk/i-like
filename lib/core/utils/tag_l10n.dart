@@ -19,3 +19,17 @@ String localizedTagName(String tagKey, AppLocalizations l10n) {
     _ => tagKey,
   };
 }
+
+/// Categories where a year (release, publication) means nothing.
+const _undatedTags = {'food', 'place', 'product'};
+
+/// Tags that say nothing about the kind of thing.
+const _neutralTags = {'url', 'other'};
+
+/// Whether the year field fits these tags. It is hidden only when the rating
+/// is clearly food, a place or a product; books, films, games, music and
+/// custom tags (wine vintages, …) keep it.
+bool tagsHaveYear(Iterable<String> tags) {
+  final kinds = tags.where((t) => !_neutralTags.contains(t)).toList();
+  return kinds.isEmpty || kinds.any((t) => !_undatedTags.contains(t));
+}

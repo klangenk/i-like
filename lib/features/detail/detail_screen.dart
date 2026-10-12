@@ -68,11 +68,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       _editScore = rating.score;
       _editImageUrl = rating.imageUrl;
       _editLocalPath = rating.localImagePath;
-      _editTags = rating.tags
-          .split(',')
-          .map((t) => t.trim())
-          .where((t) => t.isNotEmpty)
-          .toList();
+      _editTags = rating.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
     });
   }
 
@@ -86,7 +82,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       imageUrl: _editImageUrl,
       localImagePath: _editLocalPath,
       creator: _creatorController.text.trim(),
-      year: _yearController.text.trim(),
+      year: tagsHaveYear(_editTags) ? _yearController.text.trim() : '',
       updatedAt: DateTime.now(),
     );
     await dao.updateRating(updated);
@@ -134,10 +130,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         title: Text(l10n.deleteRating),
         content: Text(l10n.deleteConfirm),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
@@ -158,9 +151,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final level = RatingLevel.fromScore(rating.score);
     final buffer = StringBuffer();
-    buffer.writeln(level == null
-        ? rating.title
-        : '${rating.title} – ${level.word(l10n)} (${level.value}/5)');
+    buffer.writeln(
+      level == null ? rating.title : '${rating.title} – ${level.word(l10n)} (${level.value}/5)',
+    );
     if (rating.creator.isNotEmpty) {
       buffer.writeln(l10n.byCreator(rating.creator));
     }
@@ -225,11 +218,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final level = RatingLevel.fromScore(rating.score);
-    final tags = rating.tags
-        .split(',')
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+    final tags = rating.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
     final meta = [
       ...tags.map((t) => localizedTagName(t, l10n)),
       l10n.ratedOn(longDateLabel(context, rating.createdAt)),
@@ -252,7 +241,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   fit: StackFit.expand,
                   children: [
                     RatingImage(
-                      key: ValueKey(_isEditing ? '$_editLocalPath|$_editImageUrl' : rating.localImagePath),
+                      key: ValueKey(
+                        _isEditing ? '$_editLocalPath|$_editImageUrl' : rating.localImagePath,
+                      ),
                       imageUrl: _isEditing ? _editImageUrl : rating.imageUrl,
                       localImagePath: _isEditing ? _editLocalPath : rating.localImagePath,
                       fit: BoxFit.cover,
@@ -260,11 +251,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                       placeholder: Container(
                         color: scheme.surfaceContainerHighest,
                         alignment: Alignment.center,
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 56,
-                          color: scheme.onSurfaceVariant,
-                        ),
+                        child: Icon(Icons.image_outlined, size: 56, color: scheme.onSurfaceVariant),
                       ),
                     ),
                     Positioned(
@@ -363,6 +350,19 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   const SizedBox(height: 20),
 
                   if (_isEditing) ...[
+                    Text(
+                      l10n.category.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const SizedBox(height: 10),
+                    TagInput(
+                      tags: _editTags,
+                      onTagAdded: (tag) => setState(() {
+                        if (!_editTags.contains(tag)) _editTags.add(tag);
+                      }),
+                      onTagRemoved: (tag) => setState(() => _editTags.remove(tag)),
+                    ),
+                    const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
@@ -377,35 +377,27 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                             textCapitalization: TextCapitalization.words,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _yearController,
-                            decoration: InputDecoration(
-                              labelText: l10n.yearLabel,
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              counterText: '',
+                        if (tagsHaveYear(_editTags)) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _yearController,
+                              decoration: InputDecoration(
+                                labelText: l10n.yearLabel,
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                counterText: '',
+                              ),
+                              keyboardType: TextInputType.number,
+                              maxLength: 4,
                             ),
-                            keyboardType: TextInputType.number,
-                            maxLength: 4,
                           ),
-                        ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 24),
                     LevelPicker(
                       score: _editScore,
                       onChanged: (s) => setState(() => _editScore = s),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(l10n.category.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
-                    const SizedBox(height: 10),
-                    TagInput(
-                      tags: _editTags,
-                      onTagAdded: (tag) => setState(() {
-                        if (!_editTags.contains(tag)) _editTags.add(tag);
-                      }),
-                      onTagRemoved: (tag) => setState(() => _editTags.remove(tag)),
                     ),
                     const SizedBox(height: 24),
                     Text(l10n.notes.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
@@ -500,7 +492,9 @@ class _InfoRow extends StatelessWidget {
               style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(width: 16),
-            Expanded(child: Align(alignment: Alignment.centerRight, child: child)),
+            Expanded(
+              child: Align(alignment: Alignment.centerRight, child: child),
+            ),
           ],
         ),
       ),

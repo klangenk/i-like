@@ -251,7 +251,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tagUrl => 'URL';
 
   @override
-  String get tagFood => 'Essen';
+  String get tagFood => 'Essen & Trinken';
 
   @override
   String get tagMusic => 'Musik';

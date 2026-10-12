@@ -1,4 +1,2 @@
-• Your own photos for ratings – with title and category suggestions from the photo
-• Author, maker and year for every rating
-• Link import now works with Amazon too
-• Board games with images, search results with thumbnails
+• Pick the category first: the year field only shows where it fits (not for food & drink, places and products)
+• "Food" is now "Food & drink"

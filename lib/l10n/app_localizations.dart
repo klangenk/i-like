@@ -557,7 +557,7 @@ abstract class AppLocalizations {
   /// No description provided for @tagFood.
   ///
   /// In en, this message translates to:
-  /// **'Food'**
+  /// **'Food & drink'**
   String get tagFood;
 
   /// No description provided for @tagMusic.
