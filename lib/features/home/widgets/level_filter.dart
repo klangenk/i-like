@@ -40,7 +40,9 @@ class LevelFilter extends ConsumerWidget {
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isSelected && !isDark
-                    ? const [BoxShadow(color: Color(0x241C1B22), blurRadius: 4, offset: Offset(0, 1))]
+                    ? const [
+                        BoxShadow(color: Color(0x241C1B22), blurRadius: 4, offset: Offset(0, 1)),
+                      ]
                     : null,
               ),
               child: Column(

@@ -403,7 +403,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get sort => 'Sort';
+  String get sort => 'Sort & filter';
 
   @override
   String get showResults => 'Show';
@@ -451,6 +451,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortZAHint => 'Reverse alphabetical';
+
+  @override
+  String get groupByCategory => 'Group by category';
+
+  @override
+  String get groupByCategoryHint => 'One section per category';
+
+  @override
+  String get noCategory => 'No category';
 
   @override
   String get yourBalance => 'Your balance';

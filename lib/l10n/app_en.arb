@@ -195,7 +195,7 @@
     }
   },
   "search": "Search",
-  "sort": "Sort",
+  "sort": "Sort & filter",
   "showResults": "Show",
   "newRating": "New rating",
   "whatToRate": "What do you want to rate?",
@@ -218,6 +218,9 @@
   "sortLowestHint": "What you never want again",
   "sortAZHint": "Alphabetical",
   "sortZAHint": "Reverse alphabetical",
+  "groupByCategory": "Group by category",
+  "groupByCategoryHint": "One section per category",
+  "noCategory": "No category",
   "yourBalance": "Your balance",
   "ratingsCount": "{count, plural, =1{1 rating} other{{count} ratings}}",
   "@ratingsCount": {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/rating_level.dart';
+import '../../../core/utils/tag_l10n.dart';
 import '../../../l10n/app_localizations.dart';
 import '../home_provider.dart';
 
@@ -23,7 +24,7 @@ void showSortSheet(BuildContext context, WidgetRef ref) {
     context: context,
     isScrollControlled: true,
     builder: (ctx) => SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -42,6 +43,31 @@ void showSortSheet(BuildContext context, WidgetRef ref) {
                   Navigator.pop(ctx);
                 },
               ),
+            const Divider(height: 24),
+            Consumer(
+              builder: (context, ref, _) {
+                final grouped = ref.watch(groupByTagProvider);
+                return SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  title: Text(
+                    l10n.groupByCategory,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    l10n.groupByCategoryHint,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  activeTrackColor: AppColors.raspberry,
+                  value: grouped,
+                  onChanged: (v) => ref.read(groupByTagProvider.notifier).state = v,
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+            Text(l10n.category.toUpperCase(), style: Theme.of(ctx).textTheme.labelSmall),
+            const SizedBox(height: 10),
+            _CategoryChoices(onSelected: () => Navigator.pop(ctx)),
           ],
         ),
       ),
@@ -91,7 +117,10 @@ class _SortOptionTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        Text(
+                          label,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
                         Text(hint, style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
@@ -116,6 +145,48 @@ class _SortOptionTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "All" plus every category in use; picking one filters the list.
+class _CategoryChoices extends ConsumerWidget {
+  final VoidCallback onSelected;
+
+  const _CategoryChoices({required this.onSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(selectedTagFilterProvider);
+    final tags =
+        (ref.watch(allTagsProvider).valueOrNull ?? const <String>[])
+            .where((t) => t != 'url')
+            .toList()
+          ..sort(
+            (a, b) => localizedTagName(
+              a,
+              l10n,
+            ).toLowerCase().compareTo(localizedTagName(b, l10n).toLowerCase()),
+          );
+
+    Widget choice(String? tag, String label) => ChoiceChip(
+      label: Text(label),
+      selected: selected == tag,
+      showCheckmark: false,
+      onSelected: (_) {
+        ref.read(selectedTagFilterProvider.notifier).state = tag;
+        onSelected();
+      },
+    );
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        choice(null, l10n.filterAll),
+        for (final tag in tags) choice(tag, localizedTagName(tag, l10n)),
+      ],
     );
   }
 }

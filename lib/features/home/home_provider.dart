@@ -35,6 +35,32 @@ final levelFilterProvider = StateProvider<RatingLevel?>((ref) => null);
 // Sort option
 final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest);
 
+// Show the list in one section per category
+final groupByTagProvider = StateProvider<bool>((ref) => false);
+
+/// Splits already sorted ratings into sections by their first category.
+/// `url` only says where a rating came from, so it never forms a section of
+/// its own; ratings without a category end up in a last section (tag null).
+/// Biggest sections come first, the order inside a section is kept.
+List<({String? tag, List<Rating> ratings})> groupByTag(List<Rating> ratings) {
+  final groups = <String?, List<Rating>>{};
+  for (final r in ratings) {
+    final tags = r.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty && t != 'url');
+    groups.putIfAbsent(tags.firstOrNull, () => []).add(r);
+  }
+  final sections =
+      [
+        for (final e in groups.entries)
+          if (e.key != null) (tag: e.key, ratings: e.value),
+      ]..sort((a, b) {
+        final bySize = b.ratings.length.compareTo(a.ratings.length);
+        return bySize != 0 ? bySize : a.tag!.toLowerCase().compareTo(b.tag!.toLowerCase());
+      });
+  final untagged = groups[null];
+  if (untagged != null) sections.add((tag: null, ratings: untagged));
+  return sections;
+}
+
 // Filtered and sorted ratings
 final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
   final ratingsAsync = ref.watch(ratingsProvider);
@@ -47,12 +73,15 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
     var filtered = ratings.toList();
 
     if (query.isNotEmpty) {
-      filtered = filtered.where((r) =>
-        r.title.toLowerCase().contains(query) ||
-        r.creator.toLowerCase().contains(query) ||
-        r.tags.toLowerCase().contains(query) ||
-        r.notes.toLowerCase().contains(query)
-      ).toList();
+      filtered = filtered
+          .where(
+            (r) =>
+                r.title.toLowerCase().contains(query) ||
+                r.creator.toLowerCase().contains(query) ||
+                r.tags.toLowerCase().contains(query) ||
+                r.notes.toLowerCase().contains(query),
+          )
+          .toList();
     }
 
     if (selectedTag != null) {
@@ -92,9 +121,7 @@ final allTagsProvider = Provider<AsyncValue<List<String>>>((ref) {
     final tags = <String>{};
     for (final rating in ratings) {
       if (rating.tags.isNotEmpty) {
-        tags.addAll(
-          rating.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty),
-        );
+        tags.addAll(rating.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty));
       }
     }
     return tags.toList()..sort();

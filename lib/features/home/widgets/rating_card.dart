@@ -15,11 +15,7 @@ class RatingCard extends StatelessWidget {
   final Rating rating;
   final VoidCallback? onDelete;
 
-  const RatingCard({
-    super.key,
-    required this.rating,
-    this.onDelete,
-  });
+  const RatingCard({super.key, required this.rating, this.onDelete});
 
   Future<void> _confirmDelete(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -86,8 +82,7 @@ class RatingCard extends StatelessWidget {
                     child: Icon(Icons.image_outlined, size: 36, color: placeholderIcon),
                   ),
                 ),
-                if (level != null)
-                  Positioned(left: 8, bottom: 8, child: LevelBadge(level: level)),
+                if (level != null) Positioned(left: 8, bottom: 8, child: LevelBadge(level: level)),
               ],
             ),
           ),

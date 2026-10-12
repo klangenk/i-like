@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quick_actions/quick_actions.dart';
+import '../../core/database/app_database.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/rating_level.dart';
 import '../../core/utils/image_store.dart';
+import '../../core/utils/tag_l10n.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/round_icon_button.dart';
 import '../add_rating/quick_add_sheet.dart';
@@ -51,16 +53,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
     actions.setShortcutItems(const [
-      ShortcutItem(
-        type: 'scan',
-        localizedTitle: 'Scan Barcode',
-        icon: 'ic_scanner',
-      ),
-      ShortcutItem(
-        type: 'manual',
-        localizedTitle: 'Manual Entry',
-        icon: 'ic_edit',
-      ),
+      ShortcutItem(type: 'scan', localizedTitle: 'Scan Barcode', icon: 'ic_scanner'),
+      ShortcutItem(type: 'manual', localizedTitle: 'Manual Entry', icon: 'ic_edit'),
     ]);
   }
 
@@ -73,14 +67,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.read(searchExpandedProvider.notifier).state = !expanded;
   }
 
+  Widget _grid(List<Rating> ratings, EdgeInsets padding) {
+    return SliverPadding(
+      padding: padding,
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 18,
+          crossAxisSpacing: 12,
+          mainAxisExtent: 262,
+        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final rating = ratings[index];
+          return RatingCard(
+            rating: rating,
+            onDelete: () {
+              ImageStore.delete(rating.localImagePath);
+              ref.read(ratingsDaoProvider).deleteRating(rating.id);
+            },
+          );
+        }, childCount: ratings.length),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final query = ref.watch(searchQueryProvider);
     final searchExpanded = ref.watch(searchExpandedProvider);
     final levelFilter = ref.watch(levelFilterProvider);
+    final tagFilter = ref.watch(selectedTagFilterProvider);
+    final narrowed = levelFilter != null || tagFilter != null;
     final allRatings = ref.watch(ratingsProvider).valueOrNull ?? const [];
     final ratingsAsync = ref.watch(filteredRatingsProvider);
+    final grouped = ref.watch(groupByTagProvider);
     final loved = allRatings
         .where((r) => RatingLevel.fromScore(r.score) == RatingLevel.liebe)
         .length;
@@ -102,21 +123,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               sliver: SliverToBoxAdapter(
                 child: Row(
                   children: [
-                    Text(
-                      l10n.homeTitle,
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
+                    Text(l10n.homeTitle, style: Theme.of(context).textTheme.headlineLarge),
                     const SizedBox(width: 8),
-                    const Icon(
-                      Icons.favorite_rounded,
-                      color: AppColors.heart,
-                      size: 28,
-                    ),
+                    const Icon(Icons.favorite_rounded, color: AppColors.heart, size: 28),
                     const Spacer(),
                     RoundIconButton(
-                      icon: searchExpanded
-                          ? Icons.close_rounded
-                          : Icons.search_rounded,
+                      icon: searchExpanded ? Icons.close_rounded : Icons.search_rounded,
                       tooltip: searchExpanded ? l10n.close : l10n.search,
                       onPressed: _toggleSearch,
                     ),
@@ -144,10 +156,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     loved > 0
                         ? l10n.homeSummary(allRatings.length, loved)
                         : l10n.homeSummaryShort(allRatings.length),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.muted(context),
-                    ),
+                    style: TextStyle(fontSize: 16, color: AppColors.muted(context)),
                   ),
                 ),
               ),
@@ -163,8 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       hintText: l10n.searchHint,
                       prefixIcon: const Icon(Icons.search_rounded),
                     ),
-                    onChanged: (v) =>
-                        ref.read(searchQueryProvider.notifier).state = v,
+                    onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
                   ),
                 ),
               ),
@@ -173,10 +181,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
                 sliver: SliverToBoxAdapter(child: LevelFilter()),
               ),
+            if (allRatings.isNotEmpty && tagFilter != null)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: InputChip(
+                      label: Text(localizedTagName(tagFilter, l10n)),
+                      selected: true,
+                      showCheckmark: false,
+                      onPressed: () => showSortSheet(context, ref),
+                      onDeleted: () => ref.read(selectedTagFilterProvider.notifier).state = null,
+                      deleteButtonTooltipMessage: l10n.close,
+                    ),
+                  ),
+                ),
+              ),
             ...ratingsAsync.when(
               data: (ratings) {
                 if (ratings.isEmpty) {
-                  final filtering = query.isNotEmpty || levelFilter != null;
+                  final filtering = query.isNotEmpty || narrowed;
                   return [
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -186,12 +211,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             : Icons.favorite_border_rounded,
                         title: query.isNotEmpty
                             ? l10n.noResults
-                            : levelFilter != null
+                            : narrowed
                             ? l10n.nothingInLevel
                             : l10n.noRatingsYet,
                         subtitle: query.isNotEmpty
                             ? l10n.tryDifferentSearch
-                            : levelFilter != null
+                            : narrowed
                             ? l10n.nothingInLevelSubtitle
                             : l10n.onboardingSubtitle,
                         action: filtering
@@ -201,9 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   backgroundColor: AppColors.raspberry,
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(0, 56),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 28,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 28),
                                 ),
                                 icon: const Icon(Icons.add_rounded),
                                 label: Text(l10n.getStarted),
@@ -213,31 +236,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ];
                 }
+                if (!grouped) {
+                  return [_grid(ratings, const EdgeInsets.fromLTRB(20, 18, 20, 112))];
+                }
+                final sections = groupByTag(ratings);
                 return [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 112),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 18,
-                            crossAxisSpacing: 12,
-                            mainAxisExtent: 262,
-                          ),
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final rating = ratings[index];
-                        return RatingCard(
-                          rating: rating,
-                          onDelete: () {
-                            ImageStore.delete(rating.localImagePath);
-                            ref
-                                .read(ratingsDaoProvider)
-                                .deleteRating(rating.id);
-                          },
-                        );
-                      }, childCount: ratings.length),
+                  for (final (i, section) in sections.indexed) ...[
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(20, i == 0 ? 22 : 30, 20, 0),
+                      sliver: SliverToBoxAdapter(
+                        child: _SectionHeader(
+                          title: section.tag == null
+                              ? l10n.noCategory
+                              : localizedTagName(section.tag!, l10n),
+                          count: section.ratings.length,
+                        ),
+                      ),
                     ),
-                  ),
+                    _grid(
+                      section.ratings,
+                      EdgeInsets.fromLTRB(20, 14, 20, i == sections.length - 1 ? 112 : 0),
+                    ),
+                  ],
                 ];
               },
               loading: () => [
@@ -249,14 +269,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (error, _) => [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(
-                    child: Text(l10n.errorPrefix(error.toString())),
-                  ),
+                  child: Center(child: Text(l10n.errorPrefix(error.toString()))),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Category name with its count, above each section of the grouped list.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final int count;
+
+  const _SectionHeader({required this.title, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      header: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Flexible(child: Text(title, style: Theme.of(context).textTheme.headlineSmall)),
+          const SizedBox(width: 8),
+          Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.muted(context),
+            ),
+          ),
+        ],
       ),
     );
   }

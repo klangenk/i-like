@@ -1,2 +1,2 @@
-• Pick the category first: the year field only shows where it fits (not for food & drink, places and products)
-• "Food" is now "Food & drink"
+• Group the list by category (under "Sort & filter")
+• Filter by category

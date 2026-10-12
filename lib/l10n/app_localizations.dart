@@ -815,7 +815,7 @@ abstract class AppLocalizations {
   /// No description provided for @sort.
   ///
   /// In en, this message translates to:
-  /// **'Sort'**
+  /// **'Sort & filter'**
   String get sort;
 
   /// No description provided for @showResults.
@@ -907,6 +907,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reverse alphabetical'**
   String get sortZAHint;
+
+  /// No description provided for @groupByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by category'**
+  String get groupByCategory;
+
+  /// No description provided for @groupByCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One section per category'**
+  String get groupByCategoryHint;
+
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No category'**
+  String get noCategory;
 
   /// No description provided for @yourBalance.
   ///

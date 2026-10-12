@@ -1,2 +1,2 @@
-• Kategorie zuerst wählen: das Jahresfeld erscheint nur, wo es passt (nicht bei Essen & Trinken, Orten und Produkten)
-• „Essen" heißt jetzt „Essen & Trinken"
+• Liste nach Kategorie gruppieren (unter „Sortieren & filtern")
+• Nach Kategorie filtern
