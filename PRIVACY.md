@@ -42,6 +42,7 @@ Wenn du bestimmte Funktionen nutzt, werden Anfragen an folgende externe Dienste 
 | Buchsuche & ISBN-Lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
 | Brettspielsuche (inkl. Bilder) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
 | Details zu einem Link (Titel, Bild) | Die jeweils aufgerufene Website, z. B. Amazon | Abhängig von der Website |
+| „Im Web suchen" auf der Detailseite (öffnet deinen Browser mit dem Titel als Suchbegriff) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |
 
 Alle Anfragen erfolgen nur dann, wenn du die entsprechende Funktion aktiv verwendest.
 

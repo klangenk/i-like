@@ -52,6 +52,12 @@ Future<void> openUrl(String url) async {
   }
 }
 
+/// Google search for a rated thing; the maker/author makes the hit precise.
+String webSearchUrl(String title, String creator) {
+  final query = [title, creator].map((s) => s.trim()).where((s) => s.isNotEmpty).join(' ');
+  return Uri.https('www.google.com', '/search', {'q': query}).toString();
+}
+
 bool isValidUrl(String text) {
   final uri = Uri.tryParse(text);
   return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
@@ -63,19 +69,37 @@ String cleanPageTitle(String title) {
   // Remove trailing " | Site Name" or " - Site Name"
   var cleaned = title.replaceAll(RegExp(r'\s*[|\-–—]\s*[^|\-–—]+$'), '').trim();
   // Remove trailing ": Site Name" (e.g. "Product: Amazon.de")
-  cleaned = cleaned.replaceAll(RegExp(r'\s*:\s*(Amazon|Netflix|eBay|Google)[.\w]*$', caseSensitive: false), '').trim();
+  cleaned = cleaned
+      .replaceAll(RegExp(r'\s*:\s*(Amazon|Netflix|eBay|Google)[.\w]*$', caseSensitive: false), '')
+      .trim();
   // Remove action words like "ansehen", "watch", "streamen"
-  cleaned = cleaned.replaceAll(RegExp(r'\s+(ansehen|streamen|watch|stream|jetzt\s+\w+)$', caseSensitive: false), '').trim();
+  cleaned = cleaned
+      .replaceAll(
+        RegExp(r'\s+(ansehen|streamen|watch|stream|jetzt\s+\w+)$', caseSensitive: false),
+        '',
+      )
+      .trim();
   // Remove any kind of quotes (including stray single quotes at start or end)
-  cleaned = cleaned.replaceAll(RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'), '').trim();
-  cleaned = cleaned.replaceAll(RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'), '').trim();
+  cleaned = cleaned
+      .replaceAll(
+        RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'),
+        '',
+      )
+      .trim();
+  cleaned = cleaned
+      .replaceAll(
+        RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'),
+        '',
+      )
+      .trim();
   return cleaned.isEmpty ? title : cleaned;
 }
 
 /// Detect tags based on the URL domain and optional metadata
 List<String> tagsFromUrl(String url, {String? title, String? description, String? sharedText}) {
   final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
-  final isStreaming = host.contains('netflix.com') ||
+  final isStreaming =
+      host.contains('netflix.com') ||
       host.contains('disneyplus.com') ||
       host.contains('primevideo.com') ||
       (host.contains('amazon') && url.contains('/video/'));
@@ -96,13 +120,23 @@ List<String> tagsFromUrl(String url, {String? title, String? description, String
 String _movieOrSeries(String? title, String? description, String? sharedText) {
   final text = '${title ?? ''} ${description ?? ''} ${sharedText ?? ''}'.toLowerCase();
   const seriesHints = [
-    'series', 'serie', 'season', 'staffel', 'episode', 'episodes', 'folge',
-    'folgen', 'tv show', 'tv-show', 'miniseries', 'miniserie', 'seasons',
-    'staffeln', 'episoden',
+    'series',
+    'serie',
+    'season',
+    'staffel',
+    'episode',
+    'episodes',
+    'folge',
+    'folgen',
+    'tv show',
+    'tv-show',
+    'miniseries',
+    'miniserie',
+    'seasons',
+    'staffeln',
+    'episoden',
   ];
-  const movieHints = [
-    'film', 'movie', 'kino', 'spielfilm', 'kinofilm',
-  ];
+  const movieHints = ['film', 'movie', 'kino', 'spielfilm', 'kinofilm'];
   for (final hint in seriesHints) {
     if (text.contains(hint)) return 'series';
   }
@@ -130,26 +164,56 @@ String? extractTitleFromSharedText(String text) {
   if (before.isEmpty) return null;
 
   // Remove common share prefixes (German & English)
-  before = before.replaceAll(RegExp(
-    r'^(Angebot:\s*|Schau dir das an:?\s*|Check this out:?\s*|'
-    r'Hast du schon\s+|Ich habe .* gefunden:?\s*|'
-    r'I found this:?\s*|Look at this:?\s*)',
-    caseSensitive: false,
-  ), '').trim();
+  before = before
+      .replaceAll(
+        RegExp(
+          r'^(Angebot:\s*|Schau dir das an:?\s*|Check this out:?\s*|'
+          r'Hast du schon\s+|Ich habe .* gefunden:?\s*|'
+          r'I found this:?\s*|Look at this:?\s*)',
+          caseSensitive: false,
+        ),
+        '',
+      )
+      .trim();
 
   // Remove surrounding quotes
-  before = before.replaceAll(RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'), '').trim();
-  before = before.replaceAll(RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'), '').trim();
+  before = before
+      .replaceAll(
+        RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'),
+        '',
+      )
+      .trim();
+  before = before
+      .replaceAll(
+        RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'),
+        '',
+      )
+      .trim();
 
   // Remove trailing action phrases
-  before = before.replaceAll(RegExp(
-    r'\s*(auf Netflix gesehen\??|on Netflix\??|bei Amazon\??|ansehen|streamen|watch|stream)\s*$',
-    caseSensitive: false,
-  ), '').trim();
+  before = before
+      .replaceAll(
+        RegExp(
+          r'\s*(auf Netflix gesehen\??|on Netflix\??|bei Amazon\??|ansehen|streamen|watch|stream)\s*$',
+          caseSensitive: false,
+        ),
+        '',
+      )
+      .trim();
 
   // Remove surrounding quotes again after stripping phrases
-  before = before.replaceAll(RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'), '').trim();
-  before = before.replaceAll(RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'), '').trim();
+  before = before
+      .replaceAll(
+        RegExp(r'^[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+'),
+        '',
+      )
+      .trim();
+  before = before
+      .replaceAll(
+        RegExp(r'[\u201E\u201C\u201D\u201F\u0022\u201A\u2018\u2019\u00AB\u00BB„"""\u275D\u275E]+$'),
+        '',
+      )
+      .trim();
 
   return before.isEmpty ? null : before;
 }
@@ -164,8 +228,7 @@ String? extractDomain(String url) {
 typedef UrlMetadata = ({String? title, String? description, String? imageUrl, String? creator});
 
 /// Fetch metadata (title, description, image) from a URL
-Future<UrlMetadata> fetchUrlMetadata(
-    String url) async {
+Future<UrlMetadata> fetchUrlMetadata(String url) async {
   // Resolve shortened URLs first
   final resolvedUrl = await resolveUrl(url);
   final host = Uri.tryParse(resolvedUrl)?.host.toLowerCase() ?? '';
@@ -209,8 +272,7 @@ Future<UrlMetadata> fetchUrlMetadata(
 
 /// Amazon serves link-preview bots a generic "Amazon.de" page, so read the
 /// product page directly and fall back to data encoded in the URL itself.
-Future<UrlMetadata> _fetchAmazonMetadata(
-    String url) async {
+Future<UrlMetadata> _fetchAmazonMetadata(String url) async {
   String? title;
   String? imageUrl;
   String? creator;
@@ -249,10 +311,9 @@ String? _titleFromAmazonSlug(String url) {
   final segments = Uri.tryParse(url)?.pathSegments ?? const [];
   final dp = segments.indexOf('dp');
   if (dp < 1) return null;
-  final words = Uri.decodeComponent(segments[dp - 1])
-      .split('-')
-      .where((w) => w.isNotEmpty && !RegExp(r'^\d{8,}$').hasMatch(w))
-      .toList();
+  final words = Uri.decodeComponent(
+    segments[dp - 1],
+  ).split('-').where((w) => w.isNotEmpty && !RegExp(r'^\d{8,}$').hasMatch(w)).toList();
   return words.isEmpty ? null : words.join(' ');
 }
 
@@ -286,14 +347,15 @@ String? _extractAmazonAsin(String url) {
 }
 
 /// Directly fetch HTML and extract metadata
-Future<UrlMetadata> _fetchMetaFromHtml(
-    String url) async {
+Future<UrlMetadata> _fetchMetaFromHtml(String url) async {
   final client = HttpClient();
   try {
     client.connectionTimeout = const Duration(seconds: 10);
     final request = await client.getUrl(Uri.parse(url));
-    request.headers.set('User-Agent',
-        'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
+    request.headers.set(
+      'User-Agent',
+      'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    );
     request.headers.set('Accept', 'text/html');
     request.headers.set('Accept-Language', 'de-DE,de;q=0.9,en;q=0.8');
     request.headers.set('Accept-Encoding', 'gzip, deflate');
@@ -311,9 +373,13 @@ Future<UrlMetadata> _fetchMetaFromHtml(
     final ogDesc = _extractMeta(html, 'og:description');
 
     // Also try name="title" and name="description" (used by Amazon)
-    final metaTitle = ogTitle ??
+    final metaTitle =
+        ogTitle ??
         _extractMeta(html, 'title') ??
-        RegExp(r'<title[^>]*>([^<]+)</title>', caseSensitive: false).firstMatch(html)?.group(1)?.trim();
+        RegExp(
+          r'<title[^>]*>([^<]+)</title>',
+          caseSensitive: false,
+        ).firstMatch(html)?.group(1)?.trim();
     final metaDesc = ogDesc ?? _extractMeta(html, 'description');
 
     // If no og:image, try to find product images in the HTML (Amazon, etc.)

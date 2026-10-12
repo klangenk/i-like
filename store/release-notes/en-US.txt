@@ -1,2 +1,1 @@
-• Group the list by category (under "Sort & filter")
-• Filter by category
+• On the detail page: "Search the web" opens a Google search for the title and maker

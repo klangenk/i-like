@@ -218,6 +218,7 @@
   "sortLowestHint": "What you never want again",
   "sortAZHint": "Alphabetical",
   "sortZAHint": "Reverse alphabetical",
+  "webSearch": "Search the web",
   "groupByCategory": "Group by category",
   "groupByCategoryHint": "One section per category",
   "noCategory": "No category",

@@ -908,6 +908,12 @@ abstract class AppLocalizations {
   /// **'Reverse alphabetical'**
   String get sortZAHint;
 
+  /// No description provided for @webSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the web'**
+  String get webSearch;
+
   /// No description provided for @groupByCategory.
   ///
   /// In en, this message translates to:

@@ -453,6 +453,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sortZAHint => 'Alphabetisch rückwärts';
 
   @override
+  String get webSearch => 'Im Web suchen';
+
+  @override
   String get groupByCategory => 'Nach Kategorie gruppieren';
 
   @override

@@ -1,2 +1,1 @@
-• Liste nach Kategorie gruppieren (unter „Sortieren & filtern")
-• Nach Kategorie filtern
+• Auf der Detailseite: „Im Web suchen" öffnet eine Google-Suche nach Titel und Hersteller

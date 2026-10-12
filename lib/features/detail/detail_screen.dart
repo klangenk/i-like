@@ -414,35 +414,23 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                       const SizedBox(height: 22),
                       Text(rating.notes, style: const TextStyle(fontSize: 16, height: 1.45)),
                     ],
-                    if (rating.sourceUrl.isNotEmpty || rating.barcode.isNotEmpty) ...[
-                      const SizedBox(height: 18),
-                      const Divider(),
-                    ],
-                    if (rating.sourceUrl.isNotEmpty)
+                    const SizedBox(height: 18),
+                    const Divider(),
+                    if (rating.sourceUrl.isNotEmpty) ...[
                       _InfoRow(
                         label: l10n.source,
                         onTap: () => openUrl(rating.sourceUrl),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                extractDomain(rating.sourceUrl) ?? rating.sourceUrl,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: scheme.tertiary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(Icons.north_east_rounded, size: 15, color: scheme.tertiary),
-                          ],
-                        ),
+                        child: _LinkText(extractDomain(rating.sourceUrl) ?? rating.sourceUrl),
                       ),
-                    if (rating.sourceUrl.isNotEmpty && rating.barcode.isNotEmpty) const Divider(),
-                    if (rating.barcode.isNotEmpty)
+                      const Divider(),
+                    ],
+                    _InfoRow(
+                      label: l10n.webSearch,
+                      onTap: () => openUrl(webSearchUrl(rating.title, rating.creator)),
+                      child: const _LinkText('Google'),
+                    ),
+                    if (rating.barcode.isNotEmpty) ...[
+                      const Divider(),
                       _InfoRow(
                         label: l10n.barcodeLabel,
                         child: Text(
@@ -454,6 +442,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                           ),
                         ),
                       ),
+                    ],
                     if (rating.updatedAt != rating.createdAt) ...[
                       const SizedBox(height: 12),
                       Text(
@@ -468,6 +457,32 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Tappable value in an info row: accent text with an outward arrow.
+class _LinkText extends StatelessWidget {
+  final String text;
+
+  const _LinkText(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.tertiary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Icon(Icons.north_east_rounded, size: 15, color: color),
+      ],
     );
   }
 }
