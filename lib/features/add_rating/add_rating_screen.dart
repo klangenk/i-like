@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/database/app_database.dart';
+import '../../core/utils/barcode_helper.dart';
 import '../../core/utils/image_store.dart';
 import '../../l10n/app_localizations.dart';
 import '../home/home_provider.dart';
@@ -247,7 +248,9 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                   if ((widget.prefill?.notFound ?? false) && state.title.trim().isEmpty) ...[
                     const SizedBox(height: 10),
                     _LookupFailedNote(
-                      message: l10n.barcodeNotFound(widget.prefill!.barcode),
+                      message: isMagazineBarcode(widget.prefill!.barcode)
+                          ? l10n.magazineNotFound
+                          : l10n.barcodeNotFound(widget.prefill!.barcode),
                       searchLabel: l10n.searchBarcodeOnline,
                       searchUrl: webSearchUrl(widget.prefill!.barcode, ''),
                     ),

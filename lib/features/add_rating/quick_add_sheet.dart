@@ -210,6 +210,12 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
   }
 
   // Show loading indicator while fetching metadata
+  // No service knows magazine codes: skip the lookups and ask for a photo.
+  if (isMagazineBarcode(barcode)) {
+    context.push('/add', extra: PrefillData(tags: tags, barcode: barcode, notFound: true));
+    return;
+  }
+
   showDialog(
     context: context,
     barrierDismissible: false,

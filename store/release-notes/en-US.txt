@@ -1,2 +1,2 @@
-• New welcome screen: shows how to add things – scan, share from any app, photo
-• One-time tip that you can share links from any app with I Like
+• Magazines are recognised by their barcode: category "Magazine" and a hint to photograph the cover
+• New welcome screen and a tip about sharing from other apps

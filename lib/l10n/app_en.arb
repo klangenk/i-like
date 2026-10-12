@@ -233,6 +233,7 @@
   "welcomeManualTitle": "Photo or type it in",
   "welcomeManualText": "Take a photo – the app suggests a title. Or just type it.",
   "shareTip": "Tip: In any app, tap \"Share\" → I Like to rate it right away.",
+  "magazineNotFound": "Magazines can't be looked up automatically. Take a photo of the cover – the app suggests the title.",
   "webSearch": "Search the web",
   "groupByCategory": "Group by category",
   "groupByCategoryHint": "One section per category",

@@ -501,6 +501,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tipp: In jeder App „Teilen\" → I Like, und du kannst es sofort bewerten.';
 
   @override
+  String get magazineNotFound =>
+      'Zeitschriften lassen sich nicht automatisch nachschlagen. Fotografiere das Titelblatt – die App schlägt den Titel vor.';
+
+  @override
   String get webSearch => 'Im Web suchen';
 
   @override

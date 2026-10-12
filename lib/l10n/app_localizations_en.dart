@@ -501,6 +501,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tip: In any app, tap \"Share\" → I Like to rate it right away.';
 
   @override
+  String get magazineNotFound =>
+      'Magazines can\'t be looked up automatically. Take a photo of the cover – the app suggests the title.';
+
+  @override
   String get webSearch => 'Search the web';
 
   @override

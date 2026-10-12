@@ -31,4 +31,11 @@ void main() {
     expect(isAmazonFnsku('X001KYHKNN'), isTrue);
     expect(isAmazonFnsku('9783466311934'), isFalse);
   });
+
+  test('magazine codes are recognised', () {
+    expect(isMagazineBarcode('4197083105909'), isTrue); // German press code
+    expect(isMagazineBarcode('9770000000000'), isTrue); // ISSN
+    expect(isMagazineBarcode('4260401414349'), isFalse); // sunscreen
+    expect(tagsFromBarcode('4197083105909'), ['magazine']);
+  });
 }

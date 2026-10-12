@@ -986,6 +986,12 @@ abstract class AppLocalizations {
   /// **'Tip: In any app, tap \"Share\" → I Like to rate it right away.'**
   String get shareTip;
 
+  /// No description provided for @magazineNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Magazines can\'t be looked up automatically. Take a photo of the cover – the app suggests the title.'**
+  String get magazineNotFound;
+
   /// No description provided for @webSearch.
   ///
   /// In en, this message translates to:

@@ -1,2 +1,2 @@
-• Neuer Willkommensbildschirm: zeigt, wie du etwas hinzufügst – Scannen, aus jeder App teilen, Foto
-• Einmaliger Tipp, dass du Links aus jeder App mit I Like teilen kannst
+• Zeitschriften werden am Barcode erkannt: Kategorie „Zeitschrift" und ein Hinweis, das Titelblatt zu fotografieren
+• Neuer Willkommensbildschirm und Tipp zum Teilen aus anderen Apps
