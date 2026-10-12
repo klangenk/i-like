@@ -1,2 +1,3 @@
-• Shared links from shops with bot protection (e.g. Thalia) now bring title and image
-• If a link can't be read at all, the app tells you, with a button to search it on Google
+• Your own categories keep their capitalisation
+• New button to add your own category
+• Your own categories are suggested first in new ratings

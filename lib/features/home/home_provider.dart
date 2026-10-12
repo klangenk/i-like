@@ -121,6 +121,18 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
   });
 });
 
+// How many ratings use each tag
+final tagUsageProvider = Provider<Map<String, int>>((ref) {
+  final ratings = ref.watch(ratingsProvider).valueOrNull ?? const <Rating>[];
+  final counts = <String, int>{};
+  for (final rating in ratings) {
+    for (final tag in rating.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty)) {
+      counts[tag] = (counts[tag] ?? 0) + 1;
+    }
+  }
+  return counts;
+});
+
 // All unique tags from ratings
 final allTagsProvider = Provider<AsyncValue<List<String>>>((ref) {
   final ratingsAsync = ref.watch(ratingsProvider);

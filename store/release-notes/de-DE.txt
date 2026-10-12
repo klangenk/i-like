@@ -1,2 +1,3 @@
-• Geteilte Links von Shops mit Bot-Schutz (z. B. Thalia) liefern jetzt Titel und Bild
-• Lässt sich ein Link gar nicht auslesen, sagt die App es – mit einem Knopf, um ihn zu googeln
+• Eigene Kategorien behalten ihre Groß- und Kleinschreibung
+• Neuer Knopf zum Übernehmen einer eigenen Kategorie
+• Eigene Kategorien werden bei neuen Bewertungen zuerst vorgeschlagen
