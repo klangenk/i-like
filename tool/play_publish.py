@@ -186,6 +186,8 @@ def main():
     ap.add_argument("--package", default=PACKAGE)
     ap.add_argument("--status", action="store_true", help="show tracks and listings, change nothing")
     ap.add_argument("--bundle", type=Path, help="AAB to upload")
+    ap.add_argument("--version-code", type=int,
+                    help="put an already uploaded build on --track instead of uploading one")
     ap.add_argument("--track", default="internal", help="internal, alpha, beta or production")
     ap.add_argument("--listings", action="store_true", help="update texts from store/listings")
     ap.add_argument("--images", action="store_true", help="replace graphics from store/listings/*/images")
@@ -211,8 +213,9 @@ def main():
             return
 
         langs = sorted(p for p in (STORE / "listings").iterdir() if p.is_dir())
-        if args.bundle:
-            version_code = play.upload_bundle(args.bundle)
+        if args.bundle or args.version_code:
+            # A build already on another track (e.g. internal) can't be uploaded again
+            version_code = args.version_code or play.upload_bundle(args.bundle)
             notes = {
                 p.stem: p.read_text(encoding="utf-8").strip()
                 for p in sorted((STORE / "release-notes").glob("*.txt"))
