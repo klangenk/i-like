@@ -25,6 +25,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -35,6 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -65,6 +67,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(searchQueryProvider.notifier).state = '';
     }
     ref.read(searchExpandedProvider.notifier).state = !expanded;
+  }
+
+  void _showCategory(String tag) {
+    ref.read(selectedTagFilterProvider.notifier).state = tag;
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
   Widget _grid(List<Rating> ratings, EdgeInsets padding) {
@@ -117,6 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -236,7 +244,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ];
                 }
-                if (!grouped) {
+                // A filtered list is one category already; sections would only
+                // repeat the other categories of the same items.
+                if (!grouped || tagFilter != null) {
                   return [_grid(ratings, const EdgeInsets.fromLTRB(20, 18, 20, 112))];
                 }
                 final sections = groupByTag(ratings);
@@ -250,6 +260,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ? l10n.noCategory
                               : localizedTagName(section.tag!, l10n),
                           count: section.ratings.length,
+                          onTap: section.tag == null ? null : () => _showCategory(section.tag!),
                         ),
                       ),
                     ),
@@ -284,28 +295,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _SectionHeader extends StatelessWidget {
   final String title;
   final int count;
+  final VoidCallback? onTap;
 
-  const _SectionHeader({required this.title, required this.count});
+  const _SectionHeader({required this.title, required this.count, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       header: true,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Flexible(child: Text(title, style: Theme.of(context).textTheme.headlineSmall)),
-          const SizedBox(width: 8),
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.muted(context),
-            ),
+      button: onTap != null,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(child: Text(title, style: Theme.of(context).textTheme.headlineSmall)),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.muted(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (onTap != null)
+                Icon(Icons.chevron_right_rounded, color: AppColors.muted(context)),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

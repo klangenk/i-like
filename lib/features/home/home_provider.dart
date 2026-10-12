@@ -38,15 +38,22 @@ final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest)
 // Show the list in one section per category
 final groupByTagProvider = StateProvider<bool>((ref) => false);
 
-/// Splits already sorted ratings into sections by their first category.
+/// Splits already sorted ratings into one section per category; a rating
+/// with several categories appears in each of them, like in the filter.
 /// `url` only says where a rating came from, so it never forms a section of
 /// its own; ratings without a category end up in a last section (tag null).
 /// Biggest sections come first, the order inside a section is kept.
 List<({String? tag, List<Rating> ratings})> groupByTag(List<Rating> ratings) {
   final groups = <String?, List<Rating>>{};
   for (final r in ratings) {
-    final tags = r.tags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty && t != 'url');
-    groups.putIfAbsent(tags.firstOrNull, () => []).add(r);
+    final tags = r.tags
+        .split(',')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty && t != 'url')
+        .toSet();
+    for (final tag in tags.isEmpty ? <String?>{null} : tags) {
+      groups.putIfAbsent(tag, () => []).add(r);
+    }
   }
   final sections =
       [

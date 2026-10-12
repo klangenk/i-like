@@ -1,1 +1,2 @@
-• On the detail page: "Search the web" opens a Google search for the title and maker
+• Grouped list: items appear in each of their categories
+• Tap a category heading to see only that category

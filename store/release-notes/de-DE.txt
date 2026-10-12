@@ -1,1 +1,2 @@
-• Auf der Detailseite: „Im Web suchen" öffnet eine Google-Suche nach Titel und Hersteller
+• Gruppierte Liste: Einträge erscheinen in jeder ihrer Kategorien
+• Tippe auf eine Kategorie-Überschrift, um nur diese Kategorie zu sehen
