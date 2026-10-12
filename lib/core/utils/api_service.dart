@@ -515,6 +515,48 @@ out body;
     );
   }
 
+  // --- Board Game Barcodes (GameUPC) ---
+
+  /// GameUPC maps board game barcodes to BoardGameGeek entries. Its public
+  /// test server and key are what the docs hand out; production needs a key
+  /// by email (https://gameupc.com).
+  static const _gameUpcBase = 'https://api.gameupc.com/test';
+  static const _gameUpcKey = 'test_test_test_test_test';
+
+  static Future<LookupInfo?> lookupGameUpc(String barcode) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_gameUpcBase/upc/$barcode'),
+        headers: const {'x-api-key': _gameUpcKey, 'User-Agent': 'ILike/1.0 (de.langenk.ilike)'},
+      );
+      if (response.statusCode != 200) return null;
+      return parseGameUpc(json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>);
+    } catch (_) {}
+    return null;
+  }
+
+  /// The crowd-sourced data is noisy (a pen's EAN maps to the game "Twitch"),
+  /// so only trust a human-verified match, or one where the product name, the
+  /// search term and the top BoardGameGeek hit all agree.
+  static LookupInfo? parseGameUpc(Map<String, dynamic> data) {
+    final hits = (data['bgg_info'] as List<dynamic>? ?? const []).cast<Map<String, dynamic>>();
+    if (hits.isEmpty) return null;
+    final game = hits.first;
+    final name = game['name'] as String? ?? '';
+    String norm(Object? s) => '${s ?? ''}'.trim().toLowerCase();
+    final verified = data['bgg_info_status'] == 'verified';
+    final agrees = norm(data['name']) == norm(name) && norm(data['searched_for']) == norm(name);
+    if (name.isEmpty || !(verified || agrees)) return null;
+    return (
+      title: name,
+      imageUrl: game['image_url'] as String? ?? '',
+      tags: ['game'],
+      sourceUrl: game['page_url'] as String? ?? '',
+      creator: '',
+      year: yearFrom(game['published']),
+    );
+  }
+
   // --- General Barcode Lookup (UPC Item DB) ---
 
   /// Look up any barcode via UPC Item DB (free trial, no key needed)

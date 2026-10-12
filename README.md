@@ -12,7 +12,7 @@ A cross-platform Flutter app for rating anything — products, books, movies, se
 - Swipe-to-delete with confirmation
 
 ### Quick Add
-- **Barcode scanning** — automatically looks up products (OpenFoodFacts) and books (Open Library) by ISBN
+- **Barcode scanning** — automatically looks up products (OpenFoodFacts), books (Open Library) by ISBN and board games (GameUPC)
 - **Share target** — share URLs from any app (browser, Amazon, Netflix, etc.) to create a rating
   - Resolves shortened URLs (amzn.eu, bit.ly, etc.)
   - Extracts metadata (title, image) from the shared page

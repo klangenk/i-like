@@ -332,6 +332,29 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
       }
       return;
     }
+
+    // Board games UPC Item DB doesn't know (e.g. German editions)
+    final game = await ApiService.lookupGameUpc(barcode);
+    if (game != null && context.mounted) {
+      // Wikipedia knows the designer when it has the same game
+      final wiki = await _tryBoardGameLookup(game.title);
+      if (context.mounted) {
+        Navigator.pop(context); // dismiss loading
+        context.push(
+          '/add',
+          extra: PrefillData(
+            title: game.title,
+            imageUrl: game.imageUrl,
+            tags: game.tags,
+            sourceUrl: game.sourceUrl,
+            barcode: barcode,
+            creator: wiki?.title == game.title ? wiki!.creator : '',
+            year: game.year,
+          ),
+        );
+      }
+      return;
+    }
   }
 
   if (context.mounted) {

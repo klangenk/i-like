@@ -1,0 +1,34 @@
+{
+  "upc": "4260370820264",
+  "name": "Terraforming Mars",
+  "searched_for": "Terraforming Mars",
+  "bgg_info_status": "choose_from_bgg_info_or_search",
+  "bgg_info": [
+    {
+      "id": 167791,
+      "name": "Terraforming Mars",
+      "published": "2016",
+      "thumbnail_url": "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__small/img/BTxqxgYay5tHJfVoJ2NF5g43_gA=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg",
+      "image_url": "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__original/img/thIqWDnH9utKuoKVEUqveDixprI=/0x0/filters:format(jpeg)/pic3536616.jpg",
+      "page_url": "https://boardgamegeek.com/boardgame/167791",
+      "data_url": "https://api.geekdo.com/xmlapi2/thing?id=167791",
+      "update_url": "https://api.gameupc.com/test/upc/4260370820264/bgg_id/167791",
+      "version_status": "choose_from_versions",
+      "confidence": 62
+    },
+    {
+      "id": 247030,
+      "name": "Terraforming Mars: Prelude",
+      "published": "2018",
+      "thumbnail_url": "https://cf.geekdo-images.com/2qrpbgsKEcvu5RLXpb6fgw__small/img/D5ierThzC9UcVe3mYB9n0-j5q5w=/fit-in/200x150/filters:strip_icc()/pic4137234.jpg",
+      "image_url": "https://cf.geekdo-images.com/2qrpbgsKEcvu5RLXpb6fgw__original/img/aJDspE-4X4Qyn9ViaBrXd-P7IJw=/0x0/filters:format(jpeg)/pic4137234.jpg",
+      "page_url": "https://boardgamegeek.com/boardgame/247030",
+      "data_url": "https://api.geekdo.com/xmlapi2/thing?id=247030",
+      "update_url": "https://api.gameupc.com/test/upc/4260370820264/bgg_id/247030",
+      "version_status": "choose_from_versions",
+      "confidence": 11
+    }
+  ],
+  "stage": "test",
+  "status": "ok"
+}

@@ -1,0 +1,34 @@
+{
+  "upc": "4006381333931",
+  "name": "Twitch",
+  "searched_for": "Tail Feathers: Twitch",
+  "bgg_info_status": "choose_from_bgg_info_or_search",
+  "bgg_info": [
+    {
+      "id": 207,
+      "name": "Twitch",
+      "published": "1998",
+      "thumbnail_url": "https://cf.geekdo-images.com/ydehPE2iH1zwbyy73M9cqg__small/img/pV2FW-o2qAyM70Pzp_Z8GhrvwtA=/fit-in/200x150/filters:strip_icc()/pic149668.jpg",
+      "image_url": "https://cf.geekdo-images.com/ydehPE2iH1zwbyy73M9cqg__original/img/uyL2orBcTb6oNMnSkgIUPetrkLY=/0x0/filters:format(jpeg)/pic149668.jpg",
+      "page_url": "https://boardgamegeek.com/boardgame/207",
+      "data_url": "https://api.geekdo.com/xmlapi2/thing?id=207",
+      "update_url": "https://api.gameupc.com/test/upc/4006381333931/bgg_id/207",
+      "version_status": "choose_from_versions",
+      "confidence": 62
+    },
+    {
+      "id": 301512,
+      "name": "Tail Feathers: Twitch",
+      "published": "2015",
+      "thumbnail_url": "https://cf.geekdo-images.com/dHIV3saaLcqAiE5udJJDUQ__small/img/IlthQp25OI-vQe0zLmQfJIDtGQA=/fit-in/200x150/filters:strip_icc()/pic5247082.png",
+      "image_url": "https://cf.geekdo-images.com/dHIV3saaLcqAiE5udJJDUQ__original/img/V9HVtxjyX3ylu3sEYuNnNvSRjCY=/0x0/filters:format(png)/pic5247082.png",
+      "page_url": "https://boardgamegeek.com/boardgame/301512",
+      "data_url": "https://api.geekdo.com/xmlapi2/thing?id=301512",
+      "update_url": "https://api.gameupc.com/test/upc/4006381333931/bgg_id/301512",
+      "version_status": "verified",
+      "confidence": 18
+    }
+  ],
+  "stage": "test",
+  "status": "ok"
+}
