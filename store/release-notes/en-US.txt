@@ -1,2 +1,2 @@
-• Shared shop links bring more accurate titles and the brand (e.g. REWE, Lidl)
-• Pages behind bot protection are recognised more reliably
+• New welcome screen: shows how to add things – scan, share from any app, photo
+• One-time tip that you can share links from any app with I Like

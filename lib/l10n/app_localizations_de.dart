@@ -99,7 +99,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fromUrl => 'Von Link';
 
   @override
-  String get fromUrlSubtitle => 'Details werden automatisch geladen';
+  String get fromUrlSubtitle => 'Link einfügen – oder in jeder App teilen';
 
   @override
   String get searchMovieSeries => 'Film & Serie';
@@ -316,10 +316,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get exportCsv => 'CSV exportieren';
 
   @override
-  String get onboardingSubtitle =>
-      'Scanne einen Barcode, suche nach einem Film, Buch oder Ort – oder füge alles manuell hinzu.';
-
-  @override
   String get getStarted => 'Los geht\'s';
 
   @override
@@ -471,6 +467,38 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get searchLinkOnline => 'Link googeln';
+
+  @override
+  String get welcomeTitle => 'Willkommen bei I Like';
+
+  @override
+  String get welcomeSubtitle =>
+      'Halte fest, was dir gefällt – und was nicht. Von Nope bis Liebe, privat auf deinem Handy.';
+
+  @override
+  String get welcomeScanTitle => 'Scannen';
+
+  @override
+  String get welcomeScanText =>
+      'Barcode auf Büchern, Lebensmitteln oder Kosmetik – Titel und Bild kommen automatisch.';
+
+  @override
+  String get welcomeShareTitle => 'Aus jeder App teilen';
+
+  @override
+  String get welcomeShareText =>
+      'Im Browser, bei Amazon, Thalia & Co. auf „Teilen\" tippen und I Like wählen.';
+
+  @override
+  String get welcomeManualTitle => 'Foto oder selbst eintragen';
+
+  @override
+  String get welcomeManualText =>
+      'Fotografiere es – die App schlägt einen Titel vor. Oder tipp ihn einfach ein.';
+
+  @override
+  String get shareTip =>
+      'Tipp: In jeder App „Teilen\" → I Like, und du kannst es sofort bewerten.';
 
   @override
   String get webSearch => 'Im Web suchen';

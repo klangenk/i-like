@@ -14,6 +14,7 @@ import 'home_provider.dart';
 import 'widgets/level_filter.dart';
 import 'widgets/rating_card.dart';
 import 'widgets/sort_sheet.dart';
+import 'widgets/welcome.dart';
 import '../../shared/widgets/empty_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -103,10 +104,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = AppLocalizations.of(context)!;
     final query = ref.watch(searchQueryProvider);
     final searchExpanded = ref.watch(searchExpandedProvider);
-    final levelFilter = ref.watch(levelFilterProvider);
     final tagFilter = ref.watch(selectedTagFilterProvider);
-    final narrowed = levelFilter != null || tagFilter != null;
     final allRatings = ref.watch(ratingsProvider).valueOrNull ?? const [];
+    final showShareTip = allRatings.isNotEmpty && !ref.watch(shareTipDismissedProvider);
     final ratingsAsync = ref.watch(filteredRatingsProvider);
     final grouped = ref.watch(groupByTagProvider);
     final loved = allRatings
@@ -189,6 +189,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
                 sliver: SliverToBoxAdapter(child: LevelFilter()),
               ),
+            if (showShareTip)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                sliver: SliverToBoxAdapter(child: ShareTip(onDismiss: () => dismissShareTip(ref))),
+              ),
             if (allRatings.isNotEmpty && tagFilter != null)
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -208,8 +213,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ...ratingsAsync.when(
               data: (ratings) {
+                if (ratings.isEmpty && allRatings.isEmpty && query.isEmpty) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: Welcome(onGetStarted: () => showQuickAddSheet(context)),
+                    ),
+                  ];
+                }
                 if (ratings.isEmpty) {
-                  final filtering = query.isNotEmpty || narrowed;
                   return [
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -217,29 +228,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: query.isNotEmpty
                             ? Icons.search_off_rounded
                             : Icons.favorite_border_rounded,
-                        title: query.isNotEmpty
-                            ? l10n.noResults
-                            : narrowed
-                            ? l10n.nothingInLevel
-                            : l10n.noRatingsYet,
+                        title: query.isNotEmpty ? l10n.noResults : l10n.nothingInLevel,
                         subtitle: query.isNotEmpty
                             ? l10n.tryDifferentSearch
-                            : narrowed
-                            ? l10n.nothingInLevelSubtitle
-                            : l10n.onboardingSubtitle,
-                        action: filtering
-                            ? null
-                            : FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: AppColors.raspberry,
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size(0, 56),
-                                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                                ),
-                                icon: const Icon(Icons.add_rounded),
-                                label: Text(l10n.getStarted),
-                                onPressed: () => showQuickAddSheet(context),
-                              ),
+                            : l10n.nothingInLevelSubtitle,
                       ),
                     ),
                   ];

@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @fromUrlSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Details load automatically'**
+  /// **'Paste a link – or share it from any app'**
   String get fromUrlSubtitle;
 
   /// No description provided for @searchMovieSeries.
@@ -674,12 +674,6 @@ abstract class AppLocalizations {
   /// **'Export CSV'**
   String get exportCsv;
 
-  /// No description provided for @onboardingSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan a barcode, search for a movie, book, or place — or add anything manually.'**
-  String get onboardingSubtitle;
-
   /// No description provided for @getStarted.
   ///
   /// In en, this message translates to:
@@ -937,6 +931,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search link on Google'**
   String get searchLinkOnline;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to I Like'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep track of what you like – and what you don\'t. From Nope to Love, privately on your phone.'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @welcomeScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get welcomeScanTitle;
+
+  /// No description provided for @welcomeScanText.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcodes on books, food or cosmetics – title and picture come in automatically.'**
+  String get welcomeScanText;
+
+  /// No description provided for @welcomeShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share from any app'**
+  String get welcomeShareTitle;
+
+  /// No description provided for @welcomeShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'In your browser, on Amazon & co., tap \"Share\" and pick I Like.'**
+  String get welcomeShareText;
+
+  /// No description provided for @welcomeManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo or type it in'**
+  String get welcomeManualTitle;
+
+  /// No description provided for @welcomeManualText.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo – the app suggests a title. Or just type it.'**
+  String get welcomeManualText;
+
+  /// No description provided for @shareTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: In any app, tap \"Share\" → I Like to rate it right away.'**
+  String get shareTip;
 
   /// No description provided for @webSearch.
   ///

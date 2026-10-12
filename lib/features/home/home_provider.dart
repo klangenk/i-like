@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/ratings_dao.dart';
 import '../../core/theme/rating_level.dart';
+import '../settings/settings_provider.dart';
 
 enum SortOption { newest, oldest, highest, lowest, az, za }
 
@@ -31,6 +32,18 @@ final selectedTagFilterProvider = StateProvider<String?>((ref) => null);
 
 // Word-level filter (null = all levels)
 final levelFilterProvider = StateProvider<RatingLevel?>((ref) => null);
+
+// The one-time tip that links can be shared into the app
+const _shareTipKey = 'share_tip_dismissed';
+
+final shareTipDismissedProvider = StateProvider<bool>((ref) {
+  return ref.watch(sharedPreferencesProvider).getBool(_shareTipKey) ?? false;
+});
+
+void dismissShareTip(WidgetRef ref) {
+  ref.read(sharedPreferencesProvider).setBool(_shareTipKey, true);
+  ref.read(shareTipDismissedProvider.notifier).state = true;
+}
 
 // Sort option
 final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.newest);

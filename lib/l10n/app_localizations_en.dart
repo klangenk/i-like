@@ -99,7 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fromUrl => 'From link';
 
   @override
-  String get fromUrlSubtitle => 'Details load automatically';
+  String get fromUrlSubtitle => 'Paste a link – or share it from any app';
 
   @override
   String get searchMovieSeries => 'Movie & series';
@@ -316,10 +316,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportCsv => 'Export CSV';
 
   @override
-  String get onboardingSubtitle =>
-      'Scan a barcode, search for a movie, book, or place — or add anything manually.';
-
-  @override
   String get getStarted => 'Get started';
 
   @override
@@ -471,6 +467,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchLinkOnline => 'Search link on Google';
+
+  @override
+  String get welcomeTitle => 'Welcome to I Like';
+
+  @override
+  String get welcomeSubtitle =>
+      'Keep track of what you like – and what you don\'t. From Nope to Love, privately on your phone.';
+
+  @override
+  String get welcomeScanTitle => 'Scan';
+
+  @override
+  String get welcomeScanText =>
+      'Barcodes on books, food or cosmetics – title and picture come in automatically.';
+
+  @override
+  String get welcomeShareTitle => 'Share from any app';
+
+  @override
+  String get welcomeShareText =>
+      'In your browser, on Amazon & co., tap \"Share\" and pick I Like.';
+
+  @override
+  String get welcomeManualTitle => 'Photo or type it in';
+
+  @override
+  String get welcomeManualText =>
+      'Take a photo – the app suggests a title. Or just type it.';
+
+  @override
+  String get shareTip =>
+      'Tip: In any app, tap \"Share\" → I Like to rate it right away.';
 
   @override
   String get webSearch => 'Search the web';

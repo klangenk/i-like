@@ -1,2 +1,2 @@
-• Geteilte Shop-Links liefern genauere Titel und die Marke (z. B. REWE, Lidl)
-• Seiten mit Bot-Schutz werden zuverlässiger erkannt
+• Neuer Willkommensbildschirm: zeigt, wie du etwas hinzufügst – Scannen, aus jeder App teilen, Foto
+• Einmaliger Tipp, dass du Links aus jeder App mit I Like teilen kannst
