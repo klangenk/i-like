@@ -142,6 +142,12 @@ class _ILikeAppState extends State<ILikeApp> {
       notifier.setTitle(metaTitle);
     } else if (sharedTitle == null && metaTitle.isNotEmpty) {
       notifier.setTitle(metaTitle);
+    } else if (sharedTitle == null) {
+      // The page could not be read (e.g. a shop's bot check). Drop the domain
+      // placeholder so the screen can say so and offer a web search instead.
+      final placeholder = extractDomain(rawUrl) ?? rawUrl;
+      if (container.read(addRatingProvider).title == placeholder) notifier.setTitle('');
+      notifier.markLinkUnreadable();
     }
 
     // Update image

@@ -1,2 +1,2 @@
-• Unbekannter Barcode? Die App sagt es jetzt – mit einem Knopf, um den Barcode zu googeln
-• Kosmetik und Haushaltsartikel per Barcode (Open Beauty Facts, Open Products Facts)
+• Geteilte Links von Shops mit Bot-Schutz (z. B. Thalia) liefern jetzt Titel und Bild
+• Lässt sich ein Link gar nicht auslesen, sagt die App es – mit einem Knopf, um ihn zu googeln

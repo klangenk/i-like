@@ -14,6 +14,9 @@ class PrefillData {
   /// A scanned [barcode] that no lookup service knew.
   final bool notFound;
 
+  /// The page behind [sourceUrl] could not be read (blocked or empty).
+  final bool linkUnreadable;
+
   const PrefillData({
     this.title = '',
     this.imageUrl = '',
@@ -24,6 +27,7 @@ class PrefillData {
     this.creator = '',
     this.year = '',
     this.notFound = false,
+    this.linkUnreadable = false,
   });
 }
 
@@ -43,6 +47,9 @@ class AddRatingState {
   final String year;
   final bool isLoading;
 
+  /// Set when a shared link's page could not be read after the screen opened.
+  final bool linkUnreadable;
+
   const AddRatingState({
     this.title = '',
     this.score = 0,
@@ -55,6 +62,7 @@ class AddRatingState {
     this.creator = '',
     this.year = '',
     this.isLoading = false,
+    this.linkUnreadable = false,
   });
 
   AddRatingState copyWith({
@@ -69,6 +77,7 @@ class AddRatingState {
     String? creator,
     String? year,
     bool? isLoading,
+    bool? linkUnreadable,
   }) {
     return AddRatingState(
       title: title ?? this.title,
@@ -82,6 +91,7 @@ class AddRatingState {
       creator: creator ?? this.creator,
       year: year ?? this.year,
       isLoading: isLoading ?? this.isLoading,
+      linkUnreadable: linkUnreadable ?? this.linkUnreadable,
     );
   }
 }
@@ -100,6 +110,7 @@ class AddRatingNotifier extends StateNotifier<AddRatingState> {
   void setYear(String year) => state = state.copyWith(year: year);
   void setBarcode(String barcode) => state = state.copyWith(barcode: barcode);
   void setLoading(bool loading) => state = state.copyWith(isLoading: loading);
+  void markLinkUnreadable() => state = state.copyWith(linkUnreadable: true);
 
   void addTag(String tag) {
     if (!state.tags.contains(tag) && tag.isNotEmpty) {

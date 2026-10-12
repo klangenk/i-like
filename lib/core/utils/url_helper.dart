@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:any_link_preview/any_link_preview.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 /// Shortened URL domains that need resolving
@@ -167,7 +168,7 @@ String? extractTitleFromSharedText(String text) {
   before = before
       .replaceAll(
         RegExp(
-          r'^(Angebot:\s*|Schau dir das an:?\s*|Check this out:?\s*|'
+          r'^(Angebot:\s*|Schau dir das an:?\s*|Schau mal( hier)?[,:!]?\s*|Check this out:?\s*|'
           r'Hast du schon\s+|Ich habe .* gefunden:?\s*|'
           r'I found this:?\s*|Look at this:?\s*)',
           caseSensitive: false,
@@ -215,6 +216,23 @@ String? extractTitleFromSharedText(String text) {
       )
       .trim();
 
+  // "mein Artikel auf thalia.de" says where, not what: no title.
+  before = before
+      .replaceAll(
+        RegExp(
+          r'\s*(auf|bei|von|on|at|from)\s+(www\.)?[\w-]+(\.[\w-]+)+[:!.]?\s*$',
+          caseSensitive: false,
+        ),
+        '',
+      )
+      .trim();
+  if (RegExp(
+    r'^(mein(en)?|meine|my|dieses?|this)\s+(artikel|produkt|fund|item|product|find)$',
+    caseSensitive: false,
+  ).hasMatch(before)) {
+    return null;
+  }
+
   return before.isEmpty ? null : before;
 }
 
@@ -229,6 +247,66 @@ typedef UrlMetadata = ({String? title, String? description, String? imageUrl, St
 
 /// Fetch metadata (title, description, image) from a URL
 Future<UrlMetadata> fetchUrlMetadata(String url) async {
+  final metadata = await _fetchUrlMetadata(url);
+  final title = metadata.title?.trim() ?? '';
+  if (title.isNotEmpty && !isBlockPageTitle(title)) return metadata;
+  // A bot check (or nothing) instead of the page: ask a link-preview service,
+  // whose servers shops let through. Its answer may be null too.
+  return await _fetchMicrolinkMetadata(url) ??
+      (title: null, description: null, imageUrl: null, creator: null);
+}
+
+/// Title and image via Microlink (microlink.io), only for pages the app
+/// cannot read itself. The free tier needs no key.
+Future<UrlMetadata?> _fetchMicrolinkMetadata(String url) async {
+  try {
+    final response = await http
+        .get(Uri.https('api.microlink.io', '/', {'url': url}))
+        .timeout(const Duration(seconds: 12));
+    if (response.statusCode != 200) return null;
+    final body = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    if (body['status'] != 'success') return null;
+    final data = body['data'] as Map<String, dynamic>? ?? const {};
+    final title = cleanShopTitle(data['title'] as String? ?? '');
+    if (title.isEmpty || isBlockPageTitle(title)) return null;
+    final image = data['image'];
+    return (
+      title: title,
+      description: data['description'] as String?,
+      imageUrl: image is Map ? image['url'] as String? : null,
+      creator: null,
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+/// "Legami Gelstift kaufen" -> "Legami Gelstift": shop titles end in a call to buy.
+String cleanShopTitle(String title) => title
+    .replaceAll(RegExp(r'\s+(online\s+)?(kaufen|bestellen|buy online|buy)\s*$', caseSensitive: false), '')
+    .trim();
+
+/// Titles of bot-protection and error pages (Cloudflare, Akamai, captchas, …)
+/// that shops show instead of the product to automated requests.
+bool isBlockPageTitle(String? title) {
+  if (title == null) return false;
+  return RegExp(
+    r'^\s*(sicherheits-?check|security check|just a moment|einen moment|attention required|'
+    r'access denied|zugriff verweigert|robot check|are you a (human|robot)|captcha|'
+    r'pardon our interruption|request blocked|403 forbidden|forbidden|bitte warten)',
+    caseSensitive: false,
+  ).hasMatch(title);
+}
+
+/// What to search for when a shop page cannot be read: the address without
+/// query and tracking parameters, which search engines index under its title.
+String linkSearchQuery(String url) {
+  final uri = Uri.tryParse(url);
+  if (uri == null || uri.host.isEmpty) return url;
+  return '${uri.host.replaceFirst(RegExp(r'^www\.'), '')}${uri.path}';
+}
+
+Future<UrlMetadata> _fetchUrlMetadata(String url) async {
   // Resolve shortened URLs first
   final resolvedUrl = await resolveUrl(url);
   final host = Uri.tryParse(resolvedUrl)?.host.toLowerCase() ?? '';

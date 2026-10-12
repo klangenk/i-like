@@ -375,7 +375,7 @@ void _showUrlDialog(BuildContext context) {
               );
               final resolved = await resolveUrl(url);
               final metadata = await fetchUrlMetadata(resolved);
-              final title = metadata.title ?? extractDomain(resolved) ?? resolved;
+              final title = metadata.title ?? '';
               if (context.mounted) {
                 Navigator.pop(context); // dismiss loading
                 context.push(
@@ -384,6 +384,7 @@ void _showUrlDialog(BuildContext context) {
                     title: title,
                     imageUrl: metadata.imageUrl ?? '',
                     sourceUrl: resolved,
+                    linkUnreadable: title.isEmpty,
                     tags: tagsFromUrl(
                       resolved,
                       title: metadata.title,

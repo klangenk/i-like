@@ -44,6 +44,7 @@ Wenn du bestimmte Funktionen nutzt, werden Anfragen an folgende externe Dienste 
 | ISBN-Lookup (wenn Open Library das Buch nicht kennt), inkl. Cover | [Deutsche Nationalbibliothek](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |
 | Brettspielsuche (inkl. Bilder) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
 | Details zu einem Link (Titel, Bild) | Die jeweils aufgerufene Website, z. B. Amazon | Abhängig von der Website |
+| Details zu einem Link, wenn die Website die App nicht lädt (z. B. wegen eines Bot-Schutzes): der Link wird an einen Vorschau-Dienst geschickt | [Microlink](https://microlink.io) | [microlink.io/privacy](https://microlink.io/privacy) |
 | „Im Web suchen" auf der Detailseite (öffnet deinen Browser mit dem Titel als Suchbegriff) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |
 
 Alle Anfragen erfolgen nur dann, wenn du die entsprechende Funktion aktiv verwendest.
@@ -52,7 +53,7 @@ Alle Anfragen erfolgen nur dann, wenn du die entsprechende Funktion aktiv verwen
 
 ## 5. Geteilte Inhalte empfangen
 
-Die App kann Text und URLs empfangen, die du aus anderen Apps heraus teilst (z. B. „Teilen" in einem Browser). Diese Inhalte werden nur lokal verarbeitet und nicht an Dritte weitergeleitet.
+Die App kann Text und URLs empfangen, die du aus anderen Apps heraus teilst (z. B. „Teilen" in einem Browser). Der geteilte Text wird nur lokal verarbeitet. Enthält er einen Link, ruft die App diese Seite ab, um Titel und Bild zu übernehmen; lässt die Seite das nicht zu, wird nur der Link an Microlink geschickt (siehe Abschnitt 4).
 
 ---
 

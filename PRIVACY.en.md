@@ -44,6 +44,7 @@ When you use certain features, requests are sent to the following external servi
 | ISBN lookup (when Open Library doesn't know the book), incl. cover | [German National Library (DNB)](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |
 | Board game search (incl. images) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
 | Details for a link (title, image) | The website you open, e.g. Amazon | Depends on the website |
+| Details for a link when the website blocks the app (e.g. bot protection): the link is sent to a preview service | [Microlink](https://microlink.io) | [microlink.io/privacy](https://microlink.io/privacy) |
 | "Search the web" on the detail page (opens your browser with the title as the search term) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |
 
 Requests are only made when you actively use the corresponding feature.
@@ -52,7 +53,7 @@ Requests are only made when you actively use the corresponding feature.
 
 ## 5. Receiving shared content
 
-The app can receive text and URLs that you share from other apps (e.g. "Share" in a browser). This content is processed locally only and is not passed on to third parties.
+The app can receive text and URLs that you share from other apps (e.g. "Share" in a browser). The shared text is processed locally only. If it contains a link, the app loads that page to take over title and image; if the page does not allow this, only the link is sent to Microlink (see section 4).
 
 ---
 

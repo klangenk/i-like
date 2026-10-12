@@ -246,7 +246,26 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                   ),
                   if ((widget.prefill?.notFound ?? false) && state.title.trim().isEmpty) ...[
                     const SizedBox(height: 10),
-                    _BarcodeNotFound(barcode: widget.prefill!.barcode),
+                    _LookupFailedNote(
+                      message: l10n.barcodeNotFound(widget.prefill!.barcode),
+                      searchLabel: l10n.searchBarcodeOnline,
+                      searchUrl: webSearchUrl(widget.prefill!.barcode, ''),
+                    ),
+                  ],
+                  if (((widget.prefill?.linkUnreadable ?? false) || state.linkUnreadable) &&
+                      state.title.trim().isEmpty &&
+                      state.sourceUrl.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _LookupFailedNote(
+                      message: l10n.linkUnreadable(
+                        (extractDomain(state.sourceUrl) ?? state.sourceUrl).replaceFirst(
+                          RegExp(r'^www\.'),
+                          '',
+                        ),
+                      ),
+                      searchLabel: l10n.searchLinkOnline,
+                      searchUrl: webSearchUrl(linkSearchQuery(state.sourceUrl), ''),
+                    ),
                   ],
                   if (_analyzing || !(_insights?.isEmpty ?? true)) ...[
                     const SizedBox(height: 10),
@@ -394,16 +413,21 @@ class _PhotoSlot extends StatelessWidget {
 
 /// "Suggestions from the photo": tap a title candidate to use it, tap a
 /// category to add it.
-/// Shown after a scan that no service knew: says so and offers a web search
-/// for the number, which usually finds the product.
-class _BarcodeNotFound extends StatelessWidget {
-  final String barcode;
+/// Shown when a barcode or link lookup found nothing: says so and offers a
+/// web search, which usually finds the product.
+class _LookupFailedNote extends StatelessWidget {
+  final String message;
+  final String searchLabel;
+  final String searchUrl;
 
-  const _BarcodeNotFound({required this.barcode});
+  const _LookupFailedNote({
+    required this.message,
+    required this.searchLabel,
+    required this.searchUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 6),
@@ -422,20 +446,15 @@ class _BarcodeNotFound extends StatelessWidget {
                 child: Icon(Icons.search_off_rounded, size: 18, color: scheme.onSurfaceVariant),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.barcodeNotFound(barcode),
-                  style: const TextStyle(fontSize: 15, height: 1.35),
-                ),
-              ),
+              Expanded(child: Text(message, style: const TextStyle(fontSize: 15, height: 1.35))),
             ],
           ),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
-              onPressed: () => openUrl(webSearchUrl(barcode, '')),
+              onPressed: () => openUrl(searchUrl),
               icon: const Icon(Icons.north_east_rounded, size: 16),
-              label: Text(l10n.searchBarcodeOnline),
+              label: Text(searchLabel),
             ),
           ),
         ],

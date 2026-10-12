@@ -926,6 +926,18 @@ abstract class AppLocalizations {
   /// **'Search barcode on Google'**
   String get searchBarcodeOnline;
 
+  /// No description provided for @linkUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'{site} can\'t be read automatically. Just enter the title yourself.'**
+  String linkUnreadable(String site);
+
+  /// No description provided for @searchLinkOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Search link on Google'**
+  String get searchLinkOnline;
+
   /// No description provided for @webSearch.
   ///
   /// In en, this message translates to:

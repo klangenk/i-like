@@ -465,6 +465,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchBarcodeOnline => 'Search barcode on Google';
 
   @override
+  String linkUnreadable(String site) {
+    return '$site can\'t be read automatically. Just enter the title yourself.';
+  }
+
+  @override
+  String get searchLinkOnline => 'Search link on Google';
+
+  @override
   String get webSearch => 'Search the web';
 
   @override
