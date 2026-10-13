@@ -209,7 +209,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           label: Text(l10n.toTryCount(toTryCount)),
                           selected: toTryOnly,
                           showCheckmark: false,
-                          onSelected: (v) => ref.read(toTryOnlyProvider.notifier).state = v,
+                          onSelected: (v) {
+                            ref.read(toTryOnlyProvider.notifier).state = v;
+                            if (v) ref.read(levelFilterProvider.notifier).state = null;
+                          },
                         ),
                       if (tagFilter != null)
                         InputChip(

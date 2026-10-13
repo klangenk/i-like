@@ -159,7 +159,8 @@ final filteredRatingsProvider = Provider<AsyncValue<List<Rating>>>((ref) {
     // Once the last thing to try is rated, its chip is gone: show everything
     if (toTryOnly && ratings.any(isToTry)) filtered = filtered.where(isToTry).toList();
 
-    if (level != null) {
+    // Things to try have no level yet, so a level filter would hide them all
+    if (level != null && !(toTryOnly && ratings.any(isToTry))) {
       filtered = filtered.where((r) => RatingLevel.fromScore(r.score) == level).toList();
     }
 

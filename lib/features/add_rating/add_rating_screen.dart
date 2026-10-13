@@ -70,6 +70,9 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
 
   /// Set once the rating is stored, so [dispose] keeps the picked photo.
   bool _saved = false;
+
+  /// True while a save runs, so repeated taps don't insert the entry twice.
+  bool _saving = false;
   String _pickedPath = '';
 
   /// On-device suggestions (title candidates, categories) for the picked photo.
@@ -135,6 +138,9 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseGiveRating)));
       return;
     }
+
+    if (_saving) return;
+    setState(() => _saving = true);
 
     final localImagePath = state.localImagePath.isNotEmpty
         ? state.localImagePath
@@ -212,14 +218,22 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
-                        onPressed: () => _saveRating(toTry: true),
+                        onPressed: _saving ? null : () => _saveRating(toTry: true),
                         icon: const Icon(Icons.bookmark_border_rounded),
                         label: Text(l10n.saveToTry),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: FilledButton(onPressed: _saveRating, child: Text(l10n.save)),
+                      child: FilledButton(
+                        onPressed: _saving ? null : _saveRating,
+                        child: _saving
+                            ? const SizedBox.square(
+                                dimension: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2.5),
+                              )
+                            : Text(l10n.save),
+                      ),
                     ),
                   ],
                 ),

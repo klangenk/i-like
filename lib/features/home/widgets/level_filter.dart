@@ -14,11 +14,12 @@ class LevelFilter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final selected = ref.watch(levelFilterProvider);
+    final toTryOnly = ref.watch(toTryOnlyProvider);
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget segment({required RatingLevel? level, required String label, required Color dot}) {
-      final isSelected = selected == level;
+      final isSelected = selected == level && !(level == null && toTryOnly);
       return Expanded(
         child: Semantics(
           button: true,
@@ -30,6 +31,8 @@ class LevelFilter extends ConsumerWidget {
             onTap: () {
               HapticFeedback.selectionClick();
               ref.read(levelFilterProvider.notifier).state = level;
+              // A level and "to try" exclude each other
+              ref.read(toTryOnlyProvider.notifier).state = false;
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
