@@ -1297,6 +1297,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reading photo …'**
   String get analyzingPhoto;
+
+  /// No description provided for @listsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists'**
+  String get listsTitle;
+
+  /// No description provided for @listsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No lists yet'**
+  String get listsEmptyTitle;
+
+  /// No description provided for @listsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping, gift ideas, places for the holiday: collect whatever you like.'**
+  String get listsEmptySubtitle;
+
+  /// No description provided for @listShoppingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get listShoppingName;
+
+  /// No description provided for @listGiftsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift ideas'**
+  String get listGiftsName;
+
+  /// No description provided for @listOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own list'**
+  String get listOwn;
+
+  /// No description provided for @newList.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get newList;
+
+  /// No description provided for @editList.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit list'**
+  String get editList;
+
+  /// No description provided for @listName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get listName;
+
+  /// No description provided for @listCheckable.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick off entries'**
+  String get listCheckable;
+
+  /// No description provided for @listCheckableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For shopping and to-dos'**
+  String get listCheckableHint;
+
+  /// No description provided for @listOpenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{open} of {total} open'**
+  String listOpenCount(int open, int total);
+
+  /// No description provided for @listEntryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Empty} =1{1 entry} other{{count} entries}}'**
+  String listEntryCount(int count);
+
+  /// No description provided for @listEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this list yet.'**
+  String get listEmpty;
+
+  /// No description provided for @listAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add something …'**
+  String get listAddHint;
+
+  /// No description provided for @listDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get listDone;
+
+  /// No description provided for @listClearDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get listClearDone;
+
+  /// No description provided for @deleteList.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete list'**
+  String get deleteList;
+
+  /// No description provided for @deleteListConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\" and everything on it?'**
+  String deleteListConfirm(String name);
+
+  /// No description provided for @listEntryRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed \"{label}\"'**
+  String listEntryRemoved(String label);
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @addToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get addToList;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @addAsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Add \"{text}\" as text'**
+  String addAsText(String text);
+
+  /// No description provided for @listEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add things you\'ve rated, or just a few words.'**
+  String get listEmptyHint;
 }
 
 class _AppLocalizationsDelegate

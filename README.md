@@ -30,6 +30,7 @@ Available on Google Play as `de.langenk.ilike`.
 - Search across titles, makers, categories and notes
 - Your balance: how your ratings are spread across the levels
 - Share a rating as an image card
+- **Lists** such as a shopping list or gift ideas: add rated items from their page or by searching within a list, plus plain text entries; tick off, share as text
 
 ### Your data
 - Ratings and photos are stored only on the device
@@ -86,6 +87,7 @@ lib/
 │   ├── add_rating/     # Add screen, quick-add sheet, barcode scanner
 │   ├── detail/         # Rating detail, inline edit, share card
 │   ├── home/           # Grid, filters, sorting, grouping, search, welcome
+│   ├── lists/          # Lists overview, list screen, rating picker, add-to-list sheet
 │   └── settings/       # Backup, export/import, privacy policy
 ├── shared/widgets/     # Level badge, rating image, photo picker, …
 ├── l10n/               # ARB files & generated localizations

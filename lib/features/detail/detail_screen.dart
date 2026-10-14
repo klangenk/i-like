@@ -13,6 +13,8 @@ import '../../shared/widgets/photo_picker.dart';
 import '../../shared/widgets/rating_image.dart';
 import '../../shared/widgets/round_icon_button.dart';
 import '../home/home_provider.dart';
+import '../lists/add_to_list_sheet.dart';
+import '../lists/lists_provider.dart';
 import 'detail_provider.dart';
 import 'share_card.dart';
 import '../add_rating/widgets/level_picker.dart';
@@ -278,6 +280,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                           const Spacer(),
                           if (!_isEditing) ...[
                             RoundIconButton(
+                              icon: Icons.playlist_add_rounded,
+                              tooltip: l10n.addToList,
+                              background: scheme.surface,
+                              onPressed: () => showAddToListSheet(context, rating),
+                            ),
+                            const SizedBox(width: 8),
+                            RoundIconButton(
                               icon: Icons.ios_share_rounded,
                               tooltip: l10n.share,
                               background: scheme.surface,
@@ -355,6 +364,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     ],
                     const SizedBox(height: 8),
                     Text(meta, style: TextStyle(fontSize: 15, color: scheme.onSurfaceVariant)),
+                    _OnLists(ratingId: rating.id),
                   ],
                   const SizedBox(height: 20),
 
@@ -527,6 +537,37 @@ class _InfoRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Chips for the lists this rating is on; each opens its list.
+class _OnLists extends ConsumerWidget {
+  final int ratingId;
+
+  const _OnLists({required this.ratingId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ids = ref.watch(listIdsForRatingProvider(ratingId)).valueOrNull ?? const <int>{};
+    final lists = (ref.watch(listsProvider).valueOrNull ?? const [])
+        .where((s) => ids.contains(s.list.id))
+        .toList();
+    if (lists.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final s in lists)
+            ActionChip(
+              avatar: const Icon(Icons.checklist_rounded, size: 18),
+              label: Text(s.list.name),
+              onPressed: () => context.push('/lists/${s.list.id}'),
+            ),
+        ],
       ),
     );
   }

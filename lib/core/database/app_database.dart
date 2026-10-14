@@ -39,7 +39,41 @@ class Ratings extends Table {
       dateTime().named('updated_at').withDefault(currentDateAndTime)();
 }
 
-/// Main Drift database. A single [Ratings] table is the only persistent store.
+/// User-made lists such as a shopping list or gift ideas. Lists say what the
+/// user wants to do with things; tags on [Ratings] say what they are.
+@DataClassName('RatingList')
+class RatingLists extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  /// Whether entries are ticked off (shopping) or just collected (gift ideas).
+  BoolColumn get checkable => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt =>
+      dateTime().named('created_at').withDefault(currentDateAndTime)();
+}
+
+/// One line on a [RatingLists] list: free text, or a link to a rating.
+class ListEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get listId => integer()
+      .named('list_id')
+      .references(RatingLists, #id, onDelete: KeyAction.cascade)();
+  /// The linked rating, if any. Set to null when the rating is deleted; the
+  /// entry then lives on with its [label].
+  IntColumn get ratingId => integer()
+      .named('rating_id')
+      .nullable()
+      .references(Ratings, #id, onDelete: KeyAction.setNull)();
+  /// What the entry says. For a linked rating, its title when it was added.
+  TextColumn get label => text().withLength(min: 1, max: 500)();
+  BoolColumn get checked => boolean().withDefault(const Constant(false))();
+  /// Order within the list, ascending. New entries go to the end.
+  IntColumn get position => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt =>
+      dateTime().named('created_at').withDefault(currentDateAndTime)();
+}
+
+/// Main Drift database. [Ratings] holds everything the user rated;
+/// [RatingLists] and [ListEntries] hold their lists.
 ///
 /// ## Adding a new column (example)
 /// 1. Add the column to [Ratings].
@@ -57,7 +91,7 @@ class Ratings extends Table {
 /// 1. Define the table class and add it to the `@DriftDatabase(tables: […])`.
 /// 2. Bump [schemaVersion].
 /// 3. In `onUpgrade`: `await m.createTable(yourNewTable);`
-@DriftDatabase(tables: [Ratings])
+@DriftDatabase(tables: [Ratings, RatingLists, ListEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -65,7 +99,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -83,6 +117,10 @@ class AppDatabase extends _$AppDatabase {
         if (from < 3) {
           await m.addColumn(ratings, ratings.creator);
           await m.addColumn(ratings, ratings.year);
+        }
+        if (from < 4) {
+          await m.createTable(ratingLists);
+          await m.createTable(listEntries);
         }
       },
       /// Runs before the database is used on every app start.

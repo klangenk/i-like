@@ -30,12 +30,13 @@ Release signing reads `android/key.properties` (gitignored). Without that file, 
 
 The structure is feature-first: `lib/core/` (database, router, theme, utils, backup), `lib/features/<feature>/` (screen + Riverpod provider) and `lib/shared/widgets/`.
 
-**Data model.** There is one Drift table, `Ratings` (`lib/core/database/app_database.dart`), accessed through `RatingsDao`. Things to know:
+**Data model.** Drift tables in `lib/core/database/app_database.dart`: `Ratings` (via `RatingsDao`) plus `RatingLists` / `ListEntries` (via `ListsDao`, schema v4). Things to know:
 - `score` is a real that holds integers 1–5. `0` means unrated, which is the "to try" (Later) list: it is excluded from counts and averages and sorted last.
 - `tags` is a single comma-separated string. Built-in tags are stored as English keys (`product`, `book`, `movie`, `food`, …) and shown through `localizedTagName` in `lib/core/utils/tag_l10n.dart`. Unknown tags are user-created custom tags and keep their case.
 - `localImagePath` is a downloaded copy of `imageUrl` (`lib/core/utils/image_store.dart`). Display code should prefer it because remote URLs go stale.
 - Schema changes: add the column, bump `schemaVersion` and add an `if (from < N)` step in `onUpgrade`. The doc comment in `app_database.dart` describes this, and existing users' databases depend on it.
-- The JSON export/import format (`features/settings/export_import_service.dart`) is versioned (`version: 1`). Keep it compatible.
+- A list entry links to a rating (`ratingId`, set null when the rating is deleted) or is free text; `label` always holds the text. Lists say what to do with things (shopping, gifts); tags say what they are. Lists are filled mainly from existing ratings (`features/lists/`: rating picker sheet, "add to list" sheet on the detail page).
+- The JSON export/import format (`features/settings/export_import_service.dart`) is versioned (`version: 1`). Keep it compatible. It does not include lists yet.
 
 **Rating levels.** `RatingLevel` (`lib/core/theme/rating_level.dart`) maps score 1–5 onto Nope / Naja / Okay / Gut / Liebe and holds the colours for each level. Always go through this enum and never through raw stars or numbers in the UI.
 

@@ -670,4 +670,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analyzingPhoto => 'Reading photo …';
+
+  @override
+  String get listsTitle => 'Lists';
+
+  @override
+  String get listsEmptyTitle => 'No lists yet';
+
+  @override
+  String get listsEmptySubtitle =>
+      'Shopping, gift ideas, places for the holiday: collect whatever you like.';
+
+  @override
+  String get listShoppingName => 'Shopping list';
+
+  @override
+  String get listGiftsName => 'Gift ideas';
+
+  @override
+  String get listOwn => 'Your own list';
+
+  @override
+  String get newList => 'New list';
+
+  @override
+  String get editList => 'Edit list';
+
+  @override
+  String get listName => 'Name';
+
+  @override
+  String get listCheckable => 'Tick off entries';
+
+  @override
+  String get listCheckableHint => 'For shopping and to-dos';
+
+  @override
+  String listOpenCount(int open, int total) {
+    return '$open of $total open';
+  }
+
+  @override
+  String listEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+      zero: 'Empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get listEmpty => 'Nothing on this list yet.';
+
+  @override
+  String get listAddHint => 'Add something …';
+
+  @override
+  String get listDone => 'Done';
+
+  @override
+  String get listClearDone => 'Remove';
+
+  @override
+  String get deleteList => 'Delete list';
+
+  @override
+  String deleteListConfirm(String name) {
+    return 'Delete \"$name\" and everything on it?';
+  }
+
+  @override
+  String listEntryRemoved(String label) {
+    return 'Removed \"$label\"';
+  }
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get addToList => 'Add to list';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String addAsText(String text) {
+    return 'Add \"$text\" as text';
+  }
+
+  @override
+  String get listEmptyHint => 'Add things you\'ve rated, or just a few words.';
 }

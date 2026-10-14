@@ -6,6 +6,8 @@ import '../../features/add_rating/add_rating_provider.dart';
 import '../../features/add_rating/map_screen.dart';
 import '../../features/add_rating/scanner_screen.dart';
 import '../../features/detail/detail_screen.dart';
+import '../../features/lists/list_screen.dart';
+import '../../features/lists/lists_screen.dart';
 import '../../features/settings/privacy_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
@@ -40,6 +42,17 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/map',
       builder: (context, state) => const MapScreen(),
+    ),
+    GoRoute(
+      path: '/lists',
+      builder: (context, state) => const ListsScreen(),
+    ),
+    GoRoute(
+      path: '/lists/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return ListScreen(listId: id);
+      },
     ),
     GoRoute(
       path: '/settings',

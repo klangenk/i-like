@@ -134,10 +134,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               sliver: SliverToBoxAdapter(
                 child: Row(
                   children: [
-                    Text(l10n.homeTitle, style: Theme.of(context).textTheme.headlineLarge),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.favorite_rounded, color: AppColors.heart, size: 28),
-                    const Spacer(),
+                    // Shrinks on narrow phones so the four buttons still fit
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(l10n.homeTitle, style: Theme.of(context).textTheme.headlineLarge),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.favorite_rounded, color: AppColors.heart, size: 28),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     RoundIconButton(
                       icon: searchExpanded ? Icons.close_rounded : Icons.search_rounded,
                       tooltip: searchExpanded ? l10n.close : l10n.search,
@@ -148,6 +160,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       icon: Icons.sort_rounded,
                       tooltip: l10n.sort,
                       onPressed: () => showSortSheet(context, ref),
+                    ),
+                    const SizedBox(width: 8),
+                    RoundIconButton(
+                      icon: Icons.checklist_rounded,
+                      tooltip: l10n.listsTitle,
+                      onPressed: () => context.push('/lists'),
                     ),
                     const SizedBox(width: 8),
                     RoundIconButton(

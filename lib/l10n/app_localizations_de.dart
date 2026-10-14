@@ -671,4 +671,98 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get analyzingPhoto => 'Foto wird gelesen …';
+
+  @override
+  String get listsTitle => 'Listen';
+
+  @override
+  String get listsEmptyTitle => 'Noch keine Listen';
+
+  @override
+  String get listsEmptySubtitle =>
+      'Einkauf, Geschenkideen, Orte für den Urlaub: Sammle, was du magst.';
+
+  @override
+  String get listShoppingName => 'Einkaufsliste';
+
+  @override
+  String get listGiftsName => 'Geschenkideen';
+
+  @override
+  String get listOwn => 'Eigene Liste';
+
+  @override
+  String get newList => 'Neue Liste';
+
+  @override
+  String get editList => 'Liste bearbeiten';
+
+  @override
+  String get listName => 'Name';
+
+  @override
+  String get listCheckable => 'Einträge abhaken';
+
+  @override
+  String get listCheckableHint => 'Für Einkauf und To-dos';
+
+  @override
+  String listOpenCount(int open, int total) {
+    return '$open von $total offen';
+  }
+
+  @override
+  String listEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge',
+      one: '1 Eintrag',
+      zero: 'Leer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get listEmpty => 'Noch nichts auf dieser Liste.';
+
+  @override
+  String get listAddHint => 'Etwas hinzufügen …';
+
+  @override
+  String get listDone => 'Erledigt';
+
+  @override
+  String get listClearDone => 'Entfernen';
+
+  @override
+  String get deleteList => 'Liste löschen';
+
+  @override
+  String deleteListConfirm(String name) {
+    return '„$name“ mit allen Einträgen löschen?';
+  }
+
+  @override
+  String listEntryRemoved(String label) {
+    return '„$label“ entfernt';
+  }
+
+  @override
+  String get undo => 'Rückgängig';
+
+  @override
+  String get addToList => 'Zu Liste hinzufügen';
+
+  @override
+  String get done => 'Fertig';
+
+  @override
+  String addAsText(String text) {
+    return '„$text“ als Text hinzufügen';
+  }
+
+  @override
+  String get listEmptyHint =>
+      'Füge Dinge hinzu, die du bewertet hast, oder einfach ein paar Worte.';
 }
