@@ -32,6 +32,19 @@ class RatingsDao {
   Future<bool> updateRating(Rating entry) =>
       db.update(db.ratings).replace(entry);
 
+  /// Sets the downloaded copy of [imageUrl] on rating [id], but only while
+  /// the rating still shows that URL without a local copy. Returns false if
+  /// the rating was deleted or its image changed in the meantime.
+  Future<bool> setDownloadedImage(int id, String imageUrl, String localPath) async {
+    final rows = await (db.update(db.ratings)
+          ..where((t) =>
+              t.id.equals(id) &
+              t.imageUrl.equals(imageUrl) &
+              t.localImagePath.equals('')))
+        .write(RatingsCompanion(localImagePath: Value(localPath)));
+    return rows > 0;
+  }
+
   Future<int> deleteRating(int id) =>
       (db.delete(db.ratings)..where((t) => t.id.equals(id))).go();
 
