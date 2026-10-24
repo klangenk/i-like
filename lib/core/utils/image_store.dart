@@ -3,20 +3,36 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+import '../database/ratings_dao.dart';
+
+/// Downloads [imageUrl] and attaches the copy to rating [id] once it's there.
+/// Not awaited by the save, so a slow image server doesn't hold it up. If the
+/// rating was deleted or got another image meanwhile, the copy is dropped.
+Future<void> storeImageInBackground(RatingsDao dao, int id, String imageUrl) async {
+  final path = await ImageStore.downloadAndStore(imageUrl);
+  if (path == null) return;
+  try {
+    if (await dao.setDownloadedImage(id, imageUrl, path)) return;
+  } catch (_) {}
+  await ImageStore.delete(path);
+}
+
 /// Keeps rating images in the app's documents directory: downloaded remote
 /// images (so they survive stale URLs) and the user's own photos.
 class ImageStore {
+  static const _timeout = Duration(seconds: 20);
+
   /// Downloads [imageUrl] and saves it under
   /// `<documents>/rating_images/<timestamp>.<ext>`.
   ///
   /// Returns the local file path on success, or `null` if the download fails
-  /// (network error, non-200 response, empty URL). Callers should store the
+  /// (network error, timeout, non-200 response, empty URL). Callers should store the
   /// returned path in the database and fall back to the remote [imageUrl] if
   /// the path is null or empty.
   static Future<String?> downloadAndStore(String imageUrl) async {
     if (imageUrl.isEmpty) return null;
     try {
-      final response = await http.get(Uri.parse(imageUrl));
+      final response = await http.get(Uri.parse(imageUrl)).timeout(_timeout);
       if (response.statusCode != 200) return null;
 
       final dir = await getApplicationDocumentsDirectory();

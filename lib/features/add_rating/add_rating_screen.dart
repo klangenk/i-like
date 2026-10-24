@@ -142,14 +142,11 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
     if (_saving) return;
     setState(() => _saving = true);
 
-    final localImagePath = state.localImagePath.isNotEmpty
-        ? state.localImagePath
-        : await ImageStore.downloadAndStore(state.imageUrl);
     _saved = true;
 
     final dao = ref.read(ratingsDaoProvider);
     final prefs = ref.read(sharedPreferencesProvider);
-    await dao.insertRating(
+    final id = await dao.insertRating(
       RatingsCompanion(
         title: Value(state.title),
         score: Value(toTry ? 0 : state.score),
@@ -160,9 +157,14 @@ class _AddRatingScreenState extends ConsumerState<AddRatingScreen> {
         barcode: Value(state.barcode),
         creator: Value(state.creator.trim()),
         year: Value(tagsHaveYear(state.tags) ? state.year.trim() : ''),
-        localImagePath: Value(localImagePath ?? ''),
+        localImagePath: Value(state.localImagePath),
       ),
     );
+    // The remote image is copied afterwards, so saving doesn't wait for the
+    // download; until then the entry shows the URL.
+    if (state.localImagePath.isEmpty && state.imageUrl.isNotEmpty) {
+      storeImageInBackground(dao, id, state.imageUrl);
+    }
 
     if (mounted) {
       context.pop();
