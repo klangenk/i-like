@@ -15,6 +15,9 @@ Usage examples:
   # ...and publish it
   python tool/play_publish.py --bundle ... --track internal --listings --images --commit
 
+  # Promote a tested build to production (only when the owner asked for it)
+  python tool/play_publish.py --version-code 17 --track production --commit --yes-production
+
 Store content lives in store/:
   store/listings/<lang>/title.txt, short_description.txt, full_description.txt
   store/listings/<lang>/images/icon.png, featureGraphic.png, phoneScreenshots/*.png
@@ -194,12 +197,14 @@ def main():
     ap.add_argument("--draft", action="store_true",
                     help="create the release as a draft (needed for a first release beyond internal testing)")
     ap.add_argument("--commit", action="store_true", help="publish; without it the edit is only validated")
+    ap.add_argument("--yes-production", action="store_true",
+                    help="allow --commit on the production track (only when the owner asked for a production release)")
     args = ap.parse_args()
 
     if not args.key or not Path(args.key).is_file():
         sys.exit("Service-account key not found: pass --key or set PLAY_SERVICE_ACCOUNT_JSON")
-    if args.track == "production" and args.commit:
-        sys.exit("Production releases are done by hand in Play Console.")
+    if args.track == "production" and args.commit and not args.yes_production:
+        sys.exit("Production commits need --yes-production (only when the owner asked for a production release).")
 
     play = Play(args.key, args.package)
     play.open()

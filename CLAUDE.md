@@ -23,6 +23,7 @@ Release signing reads `android/key.properties` (gitignored). Without that file, 
 ### Releasing to Google Play
 - Bump `version:` in `pubspec.yaml` (`1.0.N+build`, and increment both parts). Then update `store/release-notes/{de-DE,en-US}.txt`.
 - `tool/play_publish.py` uses the Android Publisher API. It needs `google-auth` and a service-account key from `--key` or `$PLAY_SERVICE_ACCOUNT_JSON`. Without `--commit`, it validates the edit and then discards it. `--status` shows the current state on Play.
+- Usual flow: upload to `--track internal --commit`, then promote with `--version-code N --track alpha --commit`. Production commits also need `--yes-production`. Use it only when the owner explicitly asks for a production release in that conversation.
 - Store listings and images live in `store/listings/<lang>/`. To regenerate screenshots, render them with `test/store_shots_test.dart` (`--update-goldens --dart-define=STORE_SHOTS=true --dart-define=LANG=de|en`, skipped in normal runs) and then run `python tool/store_screenshots.py`. The docstring in that script has the full steps.
 - Commit messages follow the pattern "Do X, do Y, release 1.0.N".
 
