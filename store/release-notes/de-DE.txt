@@ -1,5 +1,2 @@
-• Schon bewertet? Beim Scannen zeigt dir die App sofort dein Urteil
-• Neue Liste „Zum Probieren“: merken und später bewerten
-• Bewertungen als Bildkarte teilen
-• Optional: Sicherung in deinem Google-Konto (Einstellungen)
-• Sortierung, Gruppierung und Kategorie-Filter bleiben gespeichert
+• Neu: Listen – Einkaufsliste, Geschenkideen und mehr, direkt aus deinen Bewertungen
+• Neue Einträge werden sofort gespeichert, das Bild lädt im Hintergrund
