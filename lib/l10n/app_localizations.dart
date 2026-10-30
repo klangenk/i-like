@@ -338,6 +338,12 @@ abstract class AppLocalizations {
   /// **'Find it on Wikipedia or BoardGameGeek'**
   String get searchBoardGameSubtitleBgg;
 
+  /// No description provided for @openOnBgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on BoardGameGeek'**
+  String get openOnBgg;
+
   /// No description provided for @searchBoardGames.
   ///
   /// In en, this message translates to:

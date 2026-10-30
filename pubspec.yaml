@@ -75,6 +75,7 @@ flutter:
   assets:
     - PRIVACY.md
     - PRIVACY.en.md
+    - assets/bgg/
 
   fonts:
     - family: Schibsted Grotesk

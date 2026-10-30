@@ -635,13 +635,58 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
                                 overflow: TextOverflow.ellipsis,
                               )
                             : null,
+                        trailing: result['source'] == 'bgg'
+                            ? IconButton(
+                                icon: const Icon(Icons.open_in_new, size: 20),
+                                tooltip: l10n.openOnBgg,
+                                onPressed: () => openUrl(result['url'] as String),
+                              )
+                            : null,
                         onTap: () => _selectResult(result),
                         dense: true,
                       );
                     },
                   ),
                 ),
+              if (!_loading && _results.any((r) => r['source'] == 'bgg')) const _PoweredByBgg(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// BGG's API terms require the "Powered by BGG" logo, linked to BGG, wherever
+/// its data is shown. The official file goes in
+/// assets/bgg/powered_by_bgg.png; until it's there, the credit is text.
+class _PoweredByBgg extends StatelessWidget {
+  const _PoweredByBgg();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Semantics(
+        link: true,
+        label: 'Powered by BGG',
+        child: InkWell(
+          onTap: () => openUrl('https://boardgamegeek.com'),
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Image.asset(
+              'assets/bgg/powered_by_bgg.png',
+              height: 28,
+              excludeFromSemantics: true,
+              // BGG's mark, so the fallback isn't translated.
+              errorBuilder: (context, _, _) => Text(
+                'Powered by BGG',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ),
         ),
       ),

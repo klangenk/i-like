@@ -20,7 +20,7 @@ flutter build appbundle --release --dart-define=BGG_TOKEN=$BGG_TOKEN   # -> buil
 
 Release signing reads `android/key.properties` (gitignored). Without that file, release builds fall back to debug signing.
 
-The BoardGameGeek token (how to register: boardgamegeek.com/using_the_xml_api) is never committed. It is passed with `--dart-define=BGG_TOKEN=…`; builds without it search board games on Wikipedia only.
+The BoardGameGeek token (how to register: boardgamegeek.com/using_the_xml_api) is never committed. It is passed with `--dart-define=BGG_TOKEN=…`; builds without it search board games on Wikipedia only. BGG's terms require the "Powered by BGG" logo wherever its results show: the official file belongs in `assets/bgg/powered_by_bgg.png`, and without it the search dialog shows a text credit.
 
 ### Releasing to Google Play
 - Bump `version:` in `pubspec.yaml` (`1.0.N+build`, and increment both parts). Then update `store/release-notes/{de-DE,en-US}.txt`.

@@ -130,6 +130,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Über Wikipedia oder BoardGameGeek finden';
 
   @override
+  String get openOnBgg => 'Auf BoardGameGeek öffnen';
+
+  @override
   String get searchBoardGames => 'Brettspiele suchen';
 
   @override
