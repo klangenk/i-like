@@ -15,10 +15,12 @@ flutter analyze
 flutter test                                                # all tests
 flutter test test/shared_link_test.dart                     # one file
 flutter test --plain-name "some test name"                  # one test
-flutter build appbundle --release                           # -> build/app/outputs/bundle/release/app-release.aab
+flutter build appbundle --release --dart-define=BGG_TOKEN=$BGG_TOKEN   # -> build/app/outputs/bundle/release/app-release.aab
 ```
 
 Release signing reads `android/key.properties` (gitignored). Without that file, release builds fall back to debug signing.
+
+The BoardGameGeek token (how to register: boardgamegeek.com/using_the_xml_api) is never committed. It is passed with `--dart-define=BGG_TOKEN=…`; builds without it search board games on Wikipedia only.
 
 ### Releasing to Google Play
 - Bump `version:` in `pubspec.yaml` (`1.0.N+build`, and increment both parts). Then update `store/release-notes/{de-DE,en-US}.txt`.
@@ -47,10 +49,10 @@ The structure is feature-first: `lib/core/` (database, router, theme, utils, bac
 - Android share intent, handled in `main.dart`. It navigates right away with what it has, then resolves the URL and fetches metadata in the background, and pushes updates into the notifier.
 - Quick Settings tile / shortcut over the MethodChannel `de.langenk.ilike/shortcuts` (`QuickAddTileService.kt`, `MainActivity.kt`), which opens `quick_add_sheet.dart`.
 - Barcode scanner. An already-rated barcode shows `known_barcode_sheet.dart` first.
-- Book and board-game searches inside the quick-add sheet. `map_screen.dart` (the `/map` route) and the TMDB, Nominatim and Overpass calls in `api_service.dart` are still in the code, but nothing in the UI reaches them any more.
+- Book and board-game searches inside the quick-add sheet. Board games come from Wikipedia and BoardGameGeek together (`searchBoardGames`), with exact title matches first. `map_screen.dart` (the `/map` route) and the TMDB, Nominatim and Overpass calls in `api_service.dart` are still in the code, but nothing in the UI reaches them any more.
 - Photo: on-device ML Kit OCR and labelling (`photo_insights.dart`) suggest a title and category.
 
-**Lookups.** `lib/core/utils/api_service.dart` is static calls to free APIs: Open Library, DNB (German ISBNs, parsed from XML), Open Food/Beauty/Products Facts, Wikipedia (board games), plus the unused TMDB, Nominatim and Overpass calls. `lib/core/utils/url_helper.dart` covers link handling: resolving short URLs, scraping metadata including JSON-LD, falling back to Microlink for pages behind bot checks, pulling titles out of app share text (Amazon, Netflix) and guessing tags from URLs. `barcode_helper.dart` classifies EAN/ISBN/magazine codes. Most unit tests cover these parsers and use fixtures in `test/fixtures/`.
+**Lookups.** `lib/core/utils/api_service.dart` is static calls to free APIs: Open Library, DNB (German ISBNs, parsed from XML), Open Food/Beauty/Products Facts, Wikipedia and BoardGameGeek (board games; BGG needs `BGG_TOKEN`), plus the unused TMDB, Nominatim and Overpass calls. Every request sends `ApiService.userAgent`, which carries a contact URL, because Wikimedia throttles generic User-Agents. `lib/core/utils/url_helper.dart` covers link handling: resolving short URLs, scraping metadata including JSON-LD, falling back to Microlink for pages behind bot checks, pulling titles out of app share text (Amazon, Netflix) and guessing tags from URLs. `barcode_helper.dart` classifies EAN/ISBN/magazine codes. Most unit tests cover these parsers and use fixtures in `test/fixtures/`.
 
 **Backup.** `lib/core/backup/backup_service.dart` is opt-in and Android-only. While it is on, it mirrors the database and photos (up to 20 MB) into `files/ilike_backup/`, the only path the Auto Backup rules include (`android/app/src/main/res/xml/*backup*`). On a fresh install, `restoreIfNeeded` runs *before* the database opens and rewrites the photo paths.
 

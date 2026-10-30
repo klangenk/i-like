@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -16,6 +17,13 @@ String yearFrom(Object? value) =>
     RegExp(r'\b(1[5-9]\d\d|20\d\d)\b').firstMatch('${value ?? ''}')?.group(1) ?? '';
 
 class ApiService {
+  /// Sent with every API request. Wikimedia and Open Library throttle clients
+  /// whose User-Agent has no way to reach the developer, so it names the app's
+  /// store page.
+  static const userAgent =
+      'ILikeApp/1.0 (https://play.google.com/store/apps/details?id=de.langenk.ilike)';
+  static const _headers = {'User-Agent': userAgent};
+
   static const _openLibraryBase = 'https://openlibrary.org';
   static const _tmdbBase = 'https://api.themoviedb.org/3';
   static const _nominatimBase = 'https://nominatim.openstreetmap.org';
@@ -26,6 +34,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$_openLibraryBase/api/books?bibkeys=ISBN:$isbn&format=json&jscmd=data'),
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -52,13 +61,14 @@ class ApiService {
           'recordSchema': 'oai_dc',
           'maximumRecords': '1',
         }),
+        headers: _headers,
       );
       if (response.statusCode != 200) return null;
       final info = parseDnbRecord(utf8.decode(response.bodyBytes));
       if (info == null) return null;
 
       final cover = 'https://portal.dnb.de/opac/mvb/cover?isbn=$isbn';
-      final hasCover = (await http.head(Uri.parse(cover))).statusCode == 200;
+      final hasCover = (await http.head(Uri.parse(cover), headers: _headers)).statusCode == 200;
       return (
         title: info.title,
         imageUrl: hasCover ? cover : '',
@@ -116,6 +126,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$_openLibraryBase/search.json?q=${Uri.encodeComponent(query)}&limit=10'),
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -161,7 +172,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.https(host, '/api/v0/product/$barcode.json'),
-        headers: const {'User-Agent': 'ILike/1.0 (de.langenk.ilike)'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -237,7 +248,7 @@ class ApiService {
         Uri.parse(
           '$_nominatimBase/search?q=${Uri.encodeComponent(query)}&format=json&limit=10&addressdetails=1',
         ),
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List<dynamic>;
@@ -334,7 +345,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$_nominatimBase/reverse?lat=$lat&lon=$lon&format=json&addressdetails=1'),
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         return json.decode(response.body) as Map<String, dynamic>;
@@ -364,7 +375,7 @@ out body;
       final response = await http.post(
         Uri.parse('https://overpass-api.de/api/interpreter'),
         body: {'data': query},
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -387,16 +398,44 @@ out body;
     return (tags['amenity'] ?? tags['shop'] ?? tags['tourism'] ?? tags['leisure'] ?? '') as String;
   }
 
-  // --- Board Games (via Wikipedia) ---
+  // --- Board Games (Wikipedia + BoardGameGeek) ---
 
-  /// Search board games via Wikipedia. Restricting to articles that use the
-  /// "Infobox game" template filters out designers, lists and other noise;
-  /// falls back to a plain search when nothing matches.
+  /// Search board games on Wikipedia and BoardGameGeek. Restricting Wikipedia
+  /// to articles that use the "Infobox game" template filters out designers,
+  /// lists and other noise; BGG knows the many games without an article.
+  /// Falls back to a plain Wikipedia search when neither finds anything.
   static Future<List<Map<String, dynamic>>> searchBoardGames(String query) async {
-    final games = await _searchWikipedia('$query hastemplate:"Infobox game"');
+    final (wikipedia, bgg) = await (
+      _searchWikipedia('$query hastemplate:"Infobox game"'),
+      _searchBgg(query),
+    ).wait;
+    final games = mergeBoardGameResults(query, wikipedia, bgg);
     if (games.isNotEmpty) return games;
     return _searchWikipedia('$query board game');
   }
+
+  /// Wikipedia hits, then BGG hits for games Wikipedia didn't return.
+  /// Exact title matches move to the top, so "Flip 7" from BGG beats
+  /// Wikipedia's "Uno Flip!".
+  static List<Map<String, dynamic>> mergeBoardGameResults(
+    String query,
+    List<Map<String, dynamic>> wikipedia,
+    List<Map<String, dynamic>> bgg,
+  ) {
+    final seen = {for (final r in wikipedia) _gameKey(r['title'] as String? ?? '')};
+    final merged = [
+      ...wikipedia,
+      for (final r in bgg)
+        if (seen.add(_gameKey(r['title'] as String? ?? ''))) r,
+    ];
+    final wanted = _gameKey(query);
+    bool exact(Map<String, dynamic> r) => _gameKey(r['title'] as String? ?? '') == wanted;
+    return [...merged.where(exact), ...merged.where((r) => !exact(r))];
+  }
+
+  /// "Azul (board game)" and "azul" both become "azul".
+  static String _gameKey(String title) =>
+      cleanGameTitle(title).toLowerCase().replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), '');
 
   /// One request returns titles, a short intro and a thumbnail per hit, so
   /// the result list can show images without extra lookups.
@@ -410,7 +449,7 @@ out body;
           '&prop=pageimages|extracts&piprop=thumbnail&pithumbsize=600&pilicense=any'
           '&exintro=1&explaintext=1&exsentences=2&exlimit=max',
         ),
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -447,7 +486,7 @@ out body;
           '&prop=pageimages|revisions&pithumbsize=600&pilicense=any'
           '&rvprop=content&rvslots=main&rvsection=0',
         ),
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -515,6 +554,145 @@ out body;
     );
   }
 
+  /// Prefill for a board game search result. BGG results already carry
+  /// everything; Wikipedia results need the article's infobox for designer
+  /// and year, with the list thumbnail as the fallback image.
+  static Future<LookupInfo> boardGameInfo(Map<String, dynamic> result) async {
+    if (result['source'] == 'bgg') {
+      return (
+        title: result['title'] as String,
+        imageUrl: result['fullImage'] as String,
+        tags: const ['game'],
+        sourceUrl: result['url'] as String,
+        creator: result['designer'] as String,
+        year: result['year'] as String,
+      );
+    }
+    final pageTitle = result['title'] as String? ?? '';
+    final listImage = result['image'] as String? ?? '';
+    final details = pageTitle.isEmpty ? null : await getBoardGameDetails(pageTitle);
+    return extractBoardGameInfo({
+      'name': pageTitle,
+      ...?details,
+      if ((details?['image'] as String? ?? '').isEmpty) 'image': listImage,
+    });
+  }
+
+  // --- BoardGameGeek ---
+
+  /// BGG's XML API only answers registered apps. The token is passed at
+  /// build time (`--dart-define=BGG_TOKEN=…`); without it, BGG is skipped.
+  static const _bggToken = String.fromEnvironment('BGG_TOKEN');
+
+  static bool get hasBgg => _bggToken.isNotEmpty;
+
+  static Future<List<Map<String, dynamic>>> _searchBgg(String query) async {
+    if (!hasBgg) return [];
+    final headers = {..._headers, 'Authorization': 'Bearer $_bggToken'};
+    try {
+      final search = await http.get(
+        Uri.https('boardgamegeek.com', '/xmlapi2/search', {'query': query, 'type': 'boardgame'}),
+        headers: headers,
+      );
+      if (search.statusCode != 200) return [];
+      final ids = parseBggSearch(query, utf8.decode(search.bodyBytes)).take(10).toList();
+      if (ids.isEmpty) return [];
+      // Search hits have no images; one /thing request fetches them for all ids.
+      final things = await http.get(
+        Uri.https('boardgamegeek.com', '/xmlapi2/thing', {'id': ids.join(',')}),
+        headers: headers,
+      );
+      if (things.statusCode != 200) return [];
+      final games = parseBggThings(utf8.decode(things.bodyBytes));
+      return games
+        ..sort((a, b) => ids.indexOf(a['id'] as String).compareTo(ids.indexOf(b['id'] as String)));
+    } catch (_) {}
+    return [];
+  }
+
+  /// Ids from a BGG search, exact name matches first, then names starting
+  /// with the query, then the rest. Expansions are dropped: `type=boardgame`
+  /// still returns them.
+  static List<String> parseBggSearch(String query, String xml) {
+    final wanted = _gameKey(query);
+    int rank(String name) {
+      final key = _gameKey(name);
+      return key == wanted ? 0 : (key.startsWith(wanted) ? 1 : 2);
+    }
+
+    final hits = <({String id, int rank, int index})>[];
+    for (final m in RegExp(
+      r'<item type="boardgame" id="(\d+)">([\s\S]*?)</item>',
+    ).allMatches(xml)) {
+      final name = RegExp(r'<name [^>]*value="([^"]*)"').firstMatch(m.group(2)!)?.group(1);
+      if (name == null || hits.any((h) => h.id == m.group(1))) continue;
+      hits.add((id: m.group(1)!, rank: rank(_unescapeXml(name)), index: hits.length));
+    }
+    // BGG's own order breaks ties (List.sort isn't stable).
+    hits.sort((a, b) => a.rank != b.rank ? a.rank - b.rank : a.index - b.index);
+    return [for (final h in hits) h.id];
+  }
+
+  /// Search results from a BGG `/thing` response, in the shape the search
+  /// dialog uses (`title`, `snippet`, `image`) plus the prefill fields.
+  static List<Map<String, dynamic>> parseBggThings(String xml) => [
+    for (final m in RegExp(r'<item type="boardgame" id="(\d+)">([\s\S]*?)</item>').allMatches(xml))
+      _bggThing(m.group(1)!, m.group(2)!),
+  ];
+
+  static Map<String, dynamic> _bggThing(String id, String item) {
+    String? tag(String name) => RegExp('<$name>([^<]*)</$name>').firstMatch(item)?.group(1)?.trim();
+    List<String> values(String pattern) => [
+      for (final m in RegExp(pattern).allMatches(item)) _unescapeXml(m.group(1)!),
+    ];
+
+    final title = values(r'<name type="primary"[^>]*value="([^"]*)"').firstOrNull ?? '';
+    final image = _unescapeXml(tag('image') ?? '');
+    final thumbnail = _unescapeXml(tag('thumbnail') ?? '');
+    // Line breaks come as &#10;, and HTML entities are escaped once more
+    // (&amp;mdash;). The first paragraph is enough for the result list.
+    final description = _unescapeXml(
+      _unescapeXml(tag('description') ?? ''),
+    ).split('\n').first.trim();
+    final designers = values(
+      r'<link type="boardgamedesigner"[^>]*value="([^"]*)"',
+    ).where((d) => d != '(Uncredited)');
+    return {
+      'source': 'bgg',
+      'id': id,
+      'title': title,
+      'snippet': description,
+      'image': thumbnail.isNotEmpty ? thumbnail : image,
+      'fullImage': image.isNotEmpty ? image : thumbnail,
+      'designer': designers.take(2).join(', '),
+      'year': yearFrom(RegExp(r'<yearpublished value="(\d+)"').firstMatch(item)?.group(1)),
+      'url': 'https://boardgamegeek.com/boardgame/$id',
+    };
+  }
+
+  static String _unescapeXml(String s) => s
+      .replaceAllMapped(
+        RegExp(r'&#(x[0-9a-fA-F]+|\d+);'),
+        (m) => String.fromCharCode(
+          m.group(1)!.startsWith('x')
+              ? int.parse(m.group(1)!.substring(1), radix: 16)
+              : int.parse(m.group(1)!),
+        ),
+      )
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&apos;', "'")
+      .replaceAll('&rsquo;', '’')
+      .replaceAll('&lsquo;', '‘')
+      .replaceAll('&rdquo;', '”')
+      .replaceAll('&ldquo;', '“')
+      .replaceAll('&mdash;', '—')
+      .replaceAll('&ndash;', '–')
+      .replaceAll('&hellip;', '…')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&');
+
   // --- General Barcode Lookup (UPC Item DB) ---
 
   /// Look up any barcode via UPC Item DB (free trial, no key needed)
@@ -522,7 +700,7 @@ out body;
     try {
       final response = await http.get(
         Uri.parse('https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode'),
-        headers: {'User-Agent': 'ILikeApp/1.0'},
+        headers: _headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;

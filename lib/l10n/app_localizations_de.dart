@@ -126,6 +126,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchBoardGameSubtitle => 'Über Wikipedia finden';
 
   @override
+  String get searchBoardGameSubtitleBgg =>
+      'Über Wikipedia oder BoardGameGeek finden';
+
+  @override
   String get searchBoardGames => 'Brettspiele suchen';
 
   @override

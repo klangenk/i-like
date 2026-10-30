@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hand-written in the shape of a BGG xmlapi2 /search?type=boardgame response. -->
+<items total="5" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+	<item type="boardgame" id="300001">
+		<name type="primary" value="Flip 7: With a Vengeance"/>
+		<yearpublished value="2025" />
+	</item>
+	<item type="boardgameexpansion" id="300002">
+		<name type="primary" value="Flip 7: Promo Cards"/>
+		<yearpublished value="2025" />
+	</item>
+	<item type="boardgame" id="300003">
+		<name type="primary" value="Backflip 7"/>
+	</item>
+	<item type="boardgame" id="300004">
+		<name type="primary" value="Flip 7"/>
+		<yearpublished value="2024" />
+	</item>
+	<item type="boardgame" id="300004">
+		<name type="alternate" value="Flip Seven"/>
+		<yearpublished value="2024" />
+	</item>
+</items>

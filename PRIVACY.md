@@ -43,6 +43,7 @@ Wenn du bestimmte Funktionen nutzt, werden Anfragen an folgende externe Dienste 
 | Buchsuche & ISBN-Lookup | [Open Library (Internet Archive)](https://openlibrary.org) | [archive.org/about/terms.php](https://archive.org/about/terms.php) |
 | ISBN-Lookup (wenn Open Library das Buch nicht kennt), inkl. Cover | [Deutsche Nationalbibliothek](https://www.dnb.de) | [dnb.de/datenschutz](https://www.dnb.de/datenschutz) |
 | Brettspielsuche (inkl. Bilder) | [Wikipedia API](https://www.mediawiki.org/wiki/API) | [wikimedia.org/wiki/Privacy_policy](https://foundation.wikimedia.org/wiki/Privacy_policy) |
+| Brettspielsuche (inkl. Bilder) | [BoardGameGeek](https://boardgamegeek.com) | [boardgamegeek.com/privacy](https://boardgamegeek.com/privacy) |
 | Details zu einem Link (Titel, Bild) | Die jeweils aufgerufene Website, z. B. Amazon | Abhängig von der Website |
 | Details zu einem Link, wenn die Website die App nicht lädt (z. B. wegen eines Bot-Schutzes): der Link wird an einen Vorschau-Dienst geschickt | [Microlink](https://microlink.io) | [microlink.io/privacy](https://microlink.io/privacy) |
 | „Im Web suchen" auf der Detailseite (öffnet deinen Browser mit dem Titel als Suchbegriff) | [Google](https://www.google.com) | [policies.google.com/privacy](https://policies.google.com/privacy) |

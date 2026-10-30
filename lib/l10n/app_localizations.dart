@@ -332,6 +332,12 @@ abstract class AppLocalizations {
   /// **'Find it on Wikipedia'**
   String get searchBoardGameSubtitle;
 
+  /// No description provided for @searchBoardGameSubtitleBgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Find it on Wikipedia or BoardGameGeek'**
+  String get searchBoardGameSubtitleBgg;
+
   /// No description provided for @searchBoardGames.
   ///
   /// In en, this message translates to:

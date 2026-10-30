@@ -123,7 +123,9 @@ class _QuickAddSheetContent extends ConsumerWidget {
               _SourceTile(
                 icon: Icons.casino_outlined,
                 title: l10n.searchBoardGame,
-                subtitle: l10n.searchBoardGameSubtitle,
+                subtitle: ApiService.hasBgg
+                    ? l10n.searchBoardGameSubtitleBgg
+                    : l10n.searchBoardGameSubtitle,
                 onTap: () {
                   Navigator.pop(context);
                   _showApiSearchDialog(parentContext, 'boardgame', '');
@@ -343,16 +345,12 @@ Future<void> handleBarcode(BuildContext context, String barcode) async {
   }
 }
 
-/// Try to find a board game on Wikipedia by title and fetch its image
+/// Try to find a board game on Wikipedia or BGG by title and fetch its image
 Future<LookupInfo?> _tryBoardGameLookup(String title) async {
   try {
     final results = await ApiService.searchBoardGames(title);
-    if (results.isEmpty) return null;
-    final pageTitle = results.first['title'] as String? ?? '';
-    if (pageTitle.isEmpty) return null;
-    final details = await ApiService.getBoardGameDetails(pageTitle);
-    if (details == null) return null;
-    final info = ApiService.extractBoardGameInfo(details);
+    if (results.isEmpty || (results.first['title'] as String? ?? '').isEmpty) return null;
+    final info = await ApiService.boardGameInfo(results.first);
     if (info.imageUrl.isEmpty) return null;
     return info;
   } catch (_) {
@@ -498,17 +496,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
   Future<void> _selectResult(Map<String, dynamic> result) async {
     if (widget.type == 'boardgame') {
       Navigator.pop(context);
-      final pageTitle = result['title'] as String? ?? '';
-      final listImage = result['image'] as String? ?? '';
-      // Details add designer and year; the list thumbnail is the fallback image.
-      final details = pageTitle.isEmpty ? null : await ApiService.getBoardGameDetails(pageTitle);
-      widget.onSelected(
-        ApiService.extractBoardGameInfo({
-          'name': pageTitle,
-          ...?details,
-          if ((details?['image'] as String? ?? '').isEmpty) 'image': listImage,
-        }),
-      );
+      widget.onSelected(await ApiService.boardGameInfo(result));
       return;
     }
 
@@ -522,7 +510,8 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
     Navigator.pop(context);
   }
 
-  /// Thumbnail for the result list: Wikipedia page image or Open Library cover.
+  /// Thumbnail for the result list: Wikipedia page image, BGG thumbnail or
+  /// Open Library cover.
   String? _resultImage(Map<String, dynamic> result) {
     switch (widget.type) {
       case 'boardgame':
@@ -570,7 +559,7 @@ class _ApiSearchDialogState extends State<_ApiSearchDialog> {
         final authors = result['author_name'] as List<dynamic>?;
         return authors?.join(', ');
       case 'boardgame':
-        // Wikipedia search results have a snippet
+        // Wikipedia and BGG results have a snippet
         final snippet = (result['snippet'] as String? ?? '')
             .replaceAll(RegExp(r'<[^>]*>'), '') // strip HTML
             .replaceAll('&quot;', '"')
